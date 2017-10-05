@@ -1,0 +1,65 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+
+    buildToolsVersion "26.0.1"
+
+    defaultConfig {
+        applicationId "com.gamesbykevin.chess"
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        //anything here?
+    }
+
+    lintOptions {
+
+        // If set to true, turns off analysis progress reporting by lint.
+        quiet false
+
+        // if set to true (default), stops the build if errors are found.
+        abortOnError false
+
+        // if true, only report errors.
+        ignoreWarnings false
+    }
+
+    aaptOptions {
+        cruncherEnabled = false
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    compile project(':androidframeworkv2-debug')
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.google.android.gms:play-services-games:11.0.4'
+    compile 'com.google.android.gms:play-services-plus:11.0.4'
+    compile 'com.google.firebase:firebase-crash:11.0.4'
+    compile 'com.android.support:support-v4:26.+'
+    compile 'com.android.support:animated-vector-drawable:26.+'
+    compile 'com.android.support:mediarouter-v7:26.+'
+    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support:support-v13:26.+'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
+}

@@ -1,0 +1,64 @@
+<resources>
+
+    <!-- name of our application -->
+    <string name="app_name" translatable="false">Chess</string>
+
+    <!-- keys for shared preferences -->
+    <string translatable="false" name="open_gl_zoom_file_key">com.gamesbykevin.chess.OPEN_GL_ZOOM_FILE_KEY</string>
+    <string translatable="false" name="timer_file_key">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
+    <string translatable="false" name="google_play_auto_login_file_key">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
+
+    <!-- button text -->
+    <string name="button_text_next">Continue</string>
+    <string name="button_text_rate">Rate</string>
+    <string name="button_text_more">More</string>
+    <string name="button_text_menu">Menu</string>
+    <string name="button_text_start">Start</string>
+    <string name="button_text_options">Options</string>
+    <string name="button_text_tutorial">Tutorial</string>
+    <string name="button_text_play">Play</string>
+    <string name="button_text_leaderboard">Leaderboard</string>
+    <string name="button_text_achievements">Achievements</string>
+
+    <!-- prompt to exit -->
+    <string name="exit_prompt">Press again to exit</string>
+
+    <!-- text on options page -->
+    <string name="text_in_game_options">Game Options</string>
+    <string name="vibrate_on">Vibrate: On</string>
+    <string name="vibrate_off">Vibrate: Off</string>
+    <string name="sound_on">Sound: On</string>
+    <string name="sound_off">Sound: Off</string>
+    <string name="zoom_on">Zoom: On</string>
+    <string name="zoom_off">Zoom: Off</string>
+    <string name="timer_on">Timer: On</string>
+    <string name="timer_off">Timer: Off</string>
+    <string name="google_play_auto_enabled">Google Play Auto: On</string>
+    <string name="google_play_auto_disabled">Google Play Auto: Off</string>
+
+    <!-- text on prompt save page -->
+    <string name="text_prompt_title">Save</string>
+    <string name="textViewPrompt">Save progress before exit?</string>
+    <string name="textViewPromptExtra">This will overwrite existing save.</string>
+    <string name="confirm_save">Yes</string>
+    <string name="confirm_exit">No</string>
+
+    <!-- text displayed -->
+    <string name="game_over_text">Game Over</string>
+
+    <!-- text to display in  the tutorial -->
+    <string name="tutorial_instructions_1">Tutorial Part 1 of 9\nSelect your image from the list</string>
+
+    <!-- ui messages for google play services -->
+    <string name="sign_in_other_error">There was an issue with sign-in, please try again later.</string>
+    <string name="sign_in_failed">Failed to sign in. Please check your network connection and try again.</string>
+    <string name="app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
+    <string name="license_failed">License check failed.</string>
+    <string name="unknown_error">Unknown error.</string>
+    <string name="UNKNOWN_ERROR">Unknown error.</string>
+    <string name="gamehelper_sign_in_failed">Failed to sign in. Please check your network connection and try again.</string>
+    <string name="gamehelper_app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
+    <string name="gamehelper_license_failed">License check failed.</string>
+    <string name="gamehelper_unknown_error">Unknown error.</string>
+
+</resources>

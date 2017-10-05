@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ActivityPage"
+    tools:context="com.gamesbykevin.chess.activity.OptionsActivity">
+
+    <include layout="@layout/layout_logo" />
+
+    <TableLayout style="@style/tableMenu">
+
+        <TableRow style="@style/rowMenu">
+            <ToggleButton
+                style="@style/buttonMenu"
+                android:id="@+id/toggleButtonVibrate"
+                android:textOn="@string/vibrate_on"
+                android:textOff="@string/vibrate_off"
+                android:onClick="onClickVibrate"
+                android:checked="true" />
+        </TableRow>
+
+        <TableRow style="@style/rowMenu">
+            <ToggleButton
+                style="@style/buttonMenu"
+                android:id="@+id/toggleButtonSound"
+                android:textOn="@string/sound_on"
+                android:textOff="@string/sound_off"
+                android:onClick="onClickSound"
+                android:checked="true" />
+        </TableRow>
+
+        <TableRow style="@style/rowMenu">
+            <ToggleButton
+                style="@style/buttonMenu"
+                android:id="@+id/toggleButtonZoom"
+                android:textOn="@string/zoom_on"
+                android:textOff="@string/zoom_off"
+                android:onClick="onClickZoom"
+                android:checked="true" />
+        </TableRow>
+
+        <TableRow style="@style/rowMenu">
+            <ToggleButton
+                style="@style/buttonMenu"
+                android:id="@+id/toggleButtonTimer"
+                android:textOn="@string/timer_on"
+                android:textOff="@string/timer_off"
+                android:onClick="onClickTimer"
+                android:checked="true" />
+        </TableRow>
+
+        <TableRow style="@style/rowMenu">
+            <ToggleButton
+                style="@style/buttonMenu"
+                android:id="@+id/toggleButtonGoogleLogin"
+                android:textOn="@string/google_play_auto_enabled"
+                android:textOff="@string/google_play_auto_disabled"
+                android:onClick="onClickGoogleLogin"
+                android:checked="true" />
+        </TableRow>
+
+
+    </TableLayout>
+
+    <include layout="@layout/layout_social_icons" />
+</LinearLayout>

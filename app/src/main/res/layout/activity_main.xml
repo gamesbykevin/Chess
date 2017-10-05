@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ActivityPage"
+    tools:context="com.gamesbykevin.jigsaw.activity.MainActivity">
+
+    <include layout="@layout/layout_logo" />
+
+    <TableLayout style="@style/tableMenu">
+        <TableRow style="@style/rowMenu">
+            <Button style="@style/buttonMenu" android:text="@string/button_text_start" android:onClick="onClickStart" />
+        </TableRow>
+        <TableRow style="@style/rowMenu">
+            <Button style="@style/buttonMenu" android:text="@string/button_text_options" android:onClick="onClickOptions" />
+        </TableRow>
+        <TableRow style="@style/rowMenu">
+            <Button style="@style/buttonMenu" android:text="@string/button_text_achievements" android:onClick="onClickAchievements" />
+        </TableRow>
+        <TableRow style="@style/rowMenu">
+            <Button style="@style/buttonMenu" android:text="@string/button_text_leaderboard" android:onClick="onClickLeaderboards" />
+        </TableRow>
+        <TableRow style="@style/rowMenu">
+            <!--suppress AndroidMissingOnClickHandler -->
+            <Button style="@style/buttonMenu" android:text="@string/button_text_rate" android:onClick="onClickRate" />
+        </TableRow>
+        <TableRow style="@style/rowMenu">
+            <Button style="@style/buttonMenu" android:text="@string/button_text_tutorial" android:onClick="onClickTutorial" />
+        </TableRow>
+        <TableRow style="@style/rowMenu">
+            <Button style="@style/buttonMenu" android:text="@string/button_text_more" android:onClick="onClickMore" />
+        </TableRow>
+    </TableLayout>
+
+    <include layout="@layout/layout_social_icons" />
+
+</LinearLayout>

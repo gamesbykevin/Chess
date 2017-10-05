@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- used by view pager -->
+    <item type="id" name="action_next" />
+    <item type="id" name="action_previous" />
+
+    <!-- package_name -->
+    <string name="package_name" translatable="false">com.gamesbykevin.chess</string>
+
+</resources>

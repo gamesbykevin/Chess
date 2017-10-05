@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ActivityPage"
+    android:id="@+id/layoutGame"
+    tools:context="com.gamesbykevin.chess.activity.GameActivity">
+
+    <!-- OpenGL Surface View container -->
+    <com.gamesbykevin.jigsaw.opengl.OpenGLSurfaceView
+        android:id="@+id/openGLView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- in game controls -->
+    <include layout="@layout/layout_game_controls" android:id="@+id/layoutGameControls" />
+
+    <!-- Game over layout(s) -->
+    <include layout="@layout/layout_game_over_default" android:id="@+id/layoutGameOver" />
+
+    <!-- Splash page layout -->
+    <include layout="@layout/activity_splash" android:id="@+id/layoutLoadingScreen" />
+</merge>
