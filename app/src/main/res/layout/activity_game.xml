@@ -7,7 +7,7 @@
     tools:context="com.gamesbykevin.chess.activity.GameActivity">
 
     <!-- OpenGL Surface View container -->
-    <com.gamesbykevin.jigsaw.opengl.OpenGLSurfaceView
+    <com.gamesbykevin.chess.opengl.OpenGLSurfaceView
         android:id="@+id/openGLView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

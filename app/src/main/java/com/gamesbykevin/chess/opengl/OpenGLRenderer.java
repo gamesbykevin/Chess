@@ -26,6 +26,8 @@ import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
  */
 public class OpenGLRenderer implements Renderer {
 
+    private ObjLoader obj;
+
     //the default starting zoom
     public static final float ZOOM_DEFAULT = 1.0f;
 
@@ -84,6 +86,8 @@ public class OpenGLRenderer implements Renderer {
     public static float LEFT = 0f, RIGHT = WIDTH, BOTTOM = HEIGHT, TOP = 0f;
 
     public OpenGLRenderer(Context activity) {
+
+        this.obj = new ObjLoader(activity);
 
         //create object for reference to textures
         this.textures = new Textures(activity);
@@ -274,6 +278,10 @@ public class OpenGLRenderer implements Renderer {
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_BLEND_SRC_ALPHA);
 
+
+        this.obj.draw();
+
+        /*
         //render our background
         setupBackground();
         getSquareBackground().render(mtrxProjectionAndView);
@@ -283,6 +291,7 @@ public class OpenGLRenderer implements Renderer {
 
         //render game elements
         getGame().render(mtrxProjectionAndView);
+        */
 
         if (DEBUG) {
 

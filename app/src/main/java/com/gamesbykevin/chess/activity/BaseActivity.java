@@ -27,7 +27,7 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
     protected static final String URL_TWITTER = "https://twitter.com/gamesbykevin";
     protected static final String URL_INSTAGRAM = "https://www.instagram.com/gamesbykevin";
     protected static final String URL_WEBSITE = "http://gamesbykevin.com";
-    protected static final String URL_RATE = "https://play.google.com/store/apps/details?id=com.gamesbykevin.jigsaw";
+    protected static final String URL_RATE = "https://play.google.com/store/apps/details?id=com.gamesbykevin.chess";
 
     //collection of music
     private static SparseArray<MediaPlayer> SOUND;

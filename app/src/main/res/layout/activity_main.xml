@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/ActivityPage"
-    tools:context="com.gamesbykevin.jigsaw.activity.MainActivity">
+    tools:context="com.gamesbykevin.chess.activity.MainActivity">
 
     <include layout="@layout/layout_logo" />
 
