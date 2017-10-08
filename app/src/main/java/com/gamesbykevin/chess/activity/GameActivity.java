@@ -51,12 +51,10 @@ public class GameActivity extends BaseActivity implements Disposable {
         Loading,
         Ready,
         GameOver,
-        Settings,
-        Prompt
     }
 
     //current screen we are on
-    private Screen screen = Screen.Loading;
+    private Screen screen = Screen.Ready;
 
     //keep track of game time
     private GameTimer timer;
@@ -281,7 +279,7 @@ public class GameActivity extends BaseActivity implements Disposable {
 
     @Override
     public void onBackPressed() {
-
+        super.onBackPressed();
     }
 
     public void onClickMenu(View view) {

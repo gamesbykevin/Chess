@@ -7,7 +7,6 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
-import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;

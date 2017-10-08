@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 
+import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -25,8 +26,6 @@ import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
  * Created by Kevin on 6/1/2017.
  */
 public class OpenGLRenderer implements Renderer {
-
-    private ObjLoader obj;
 
     //the default starting zoom
     public static final float ZOOM_DEFAULT = 1.0f;
@@ -85,9 +84,11 @@ public class OpenGLRenderer implements Renderer {
     //the zoom window screen
     public static float LEFT = 0f, RIGHT = WIDTH, BOTTOM = HEIGHT, TOP = 0f;
 
+    private Context context;
+
     public OpenGLRenderer(Context activity) {
 
-        this.obj = new ObjLoader(activity);
+        this.context = activity;
 
         //create object for reference to textures
         this.textures = new Textures(activity);
@@ -231,8 +232,7 @@ public class OpenGLRenderer implements Renderer {
         GLES20.glViewport(0, 0, (int)screenWidth, (int)screenHeight);
 
         //clear our matrices
-        for(int i = 0; i < mtrxProjectionAndView.length; i++)
-        {
+        for(int i = 0; i < mtrxProjectionAndView.length; i++) {
             mtrxProjection[i] = 0.0f;
             mtrxView[i] = 0.0f;
             mtrxProjectionAndView[i] = 0.0f;
@@ -275,11 +275,9 @@ public class OpenGLRenderer implements Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         //support transparency
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_BLEND_SRC_ALPHA);
+        //GLES20.glEnable(GLES20.GL_BLEND);
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_BLEND_SRC_ALPHA);
 
-
-        this.obj.draw();
 
         /*
         //render our background
