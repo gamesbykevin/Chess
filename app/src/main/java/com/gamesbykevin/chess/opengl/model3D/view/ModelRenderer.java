@@ -15,7 +15,7 @@ import com.gamesbykevin.chess.opengl.model3D.model.Object3DBuilder;
 import com.gamesbykevin.chess.opengl.model3D.model.Object3DData;
 import com.gamesbykevin.chess.opengl.model3D.model.Object3DImpl;
 import com.gamesbykevin.chess.opengl.model3D.services.SceneLoader;
-import com.gamesbykevin.chess.opengl.model3D.util.GLUtil;
+import com.gamesbykevin.chess.opengl.util.GLUtil;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;

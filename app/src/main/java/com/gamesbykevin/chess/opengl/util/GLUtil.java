@@ -1,4 +1,4 @@
-package com.gamesbykevin.chess.opengl.model3D.util;
+package com.gamesbykevin.chess.opengl.util;
 
 import java.io.InputStream;
 
