@@ -75,10 +75,10 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
         this(activity, null);
     }
 
-    public OpenGLSurfaceView(Context activity, AttributeSet attrs) {
+    public OpenGLSurfaceView(Context context, AttributeSet attrs) {
 
         //call parent constructor
-        super(activity, attrs);
+        super(context, attrs);
 
         //create an OpenGL ES 1.0 context.
         setEGLContextClientVersion(OPEN_GL_VERSION);
@@ -87,7 +87,7 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
         setPreserveEGLContextOnPause(true);
 
         //create a new instance of our renderer
-        this.openGlRenderer = new OpenGLRenderer(activity);
+        this.openGlRenderer = new OpenGLRenderer(context);
 
         //set the renderer for drawing on the gl surface view
         setRenderer(getOpenGlRenderer());

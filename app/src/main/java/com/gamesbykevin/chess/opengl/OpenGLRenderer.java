@@ -5,7 +5,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 
-import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -86,12 +85,12 @@ public class OpenGLRenderer implements Renderer {
 
     private Context context;
 
-    public OpenGLRenderer(Context activity) {
+    public OpenGLRenderer(Context context) {
 
-        this.context = activity;
+        this.context = context;
 
         //create object for reference to textures
-        this.textures = new Textures(activity);
+        this.textures = new Textures(context);
 
         //flag the textures loaded as false
         LOADED = false;

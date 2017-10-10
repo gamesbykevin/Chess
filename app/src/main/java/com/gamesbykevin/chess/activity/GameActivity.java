@@ -229,6 +229,7 @@ public class GameActivity extends BaseActivity implements Disposable {
 
             //resume the game view
             glSurfaceView.onResume();
+
         }
 
         //determine what screen(s) are displayed
