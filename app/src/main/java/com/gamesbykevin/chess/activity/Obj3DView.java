@@ -14,46 +14,61 @@ import min3d.vos.Light;
 
 public class Obj3DView extends RendererActivity {
 
-    private Object3dContainer rook3d, rook2;
+    private Object3dContainer rook3d, rook3d_other, board;
+
+    private Light myLight;
+
+    private float xVel = 0;
 
     @Override
     public void initScene()
     {
-        scene.lights().add(new Light());
-        //Light myLight = new Light();
-        //myLight.position.setZ(200);
-        //scene.lights().add(myLight);
+        //scene.lights().add(new Light());
+        myLight = new Light();
+        myLight.position.setZ(200f);
+        scene.lights().add(myLight);
 
-        IParser myParser = Parser.createParser(Parser.Type.OBJ, getResources(), getString(R.string.package_name) + ":raw/chess_obj", true);
+        IParser myParser = Parser.createParser(Parser.Type.OBJ, getResources(), getString(R.string.package_name) + ":raw/rook_obj", true);
         myParser.parse();
         rook3d = myParser.getParsedObject();
-        rook3d.position().x = rook3d.position().y = rook3d.position().z = 0;
-        rook3d.scale().x = rook3d.scale().y = rook3d.scale().z = 2.0f;
-        // Depending on the model you will need to change the scale faceObject3D.scale().x = faceObject3D.scale().y = faceObject3D.scale().z = 0.009f;        scene.addChild(faceObject3D);
+        rook3d.position().x = rook3d.position().y = rook3d.position().z = 0f;
+        rook3d.scale().x = rook3d.scale().y = rook3d.scale().z = .5f;
+        rook3d.position().x = -.95f;
+        rook3d.position().y = -.6f;
+        rook3d.position().z = .35f;
+        rook3d.rotation().x = 45f;
 
         scene.addChild(rook3d);
 
+        IParser myParser1 = Parser.createParser(Parser.Type.OBJ, getResources(), getString(R.string.package_name) + ":raw/rook_obj", true);
+        myParser1.parse();
+        rook3d_other = myParser1.getParsedObject();
+        rook3d_other.position().x = rook3d_other.position().y = rook3d_other.position().z = 0f;
+        rook3d_other.scale().x = rook3d_other.scale().y = rook3d_other.scale().z = .5f;
+        rook3d_other.position().x = .75f;
+        rook3d_other.position().y = -.6f;
+        rook3d_other.position().z = .35f;
+        rook3d_other.rotation().x = 45f;
 
-        IParser myParser2 = Parser.createParser(Parser.Type.OBJ, getResources(), getString(R.string.package_name) + ":raw/chess_obj", true);
+        scene.addChild(rook3d_other);
+
+        IParser myParser2 = Parser.createParser(Parser.Type.OBJ, getResources(), getString(R.string.package_name) + ":raw/board_obj", true);
         myParser2.parse();
-        rook2 = myParser2.getParsedObject();
-        rook2.position().x = .5f;
-        rook2.position().y = .5f;
-        rook2.position().z = .5f;
-        rook2.scale().x = 2.0f;
-        rook2.scale().y = 2.0f;
-        rook2.scale().z = 2.0f;
+        board = myParser2.getParsedObject();
+        board.position().x = board.position().y = 0; board.position().z = -.5f;
+        board.scale().x = board.scale().y = board.scale().z = .25f;
+        board.rotation().x = 45f;
+        //board.rotation().y += 10f;
 
-        scene.addChild(rook2);
+        scene.addChild(board);
     }
 
     @Override
     public void updateScene() {
-        rook3d.rotation().x += 0.5;
-        rook3d.rotation().z += .01;
+        //rook3d.rotation().x += 0.5;
+        //rook3d.rotation().z += .01;
         //rook3d.rotation().y += .5;
 
-        rook2.rotation().z += .01;
+        //rook2.rotation().z += .01;
     }
-
 }

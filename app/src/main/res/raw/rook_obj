@@ -1,6 +1,6 @@
 # Blender v2.79 (sub 0) OBJ File: 'chess.blend'
 # www.blender.org
-mtllib chess.mtl
+mtllib rook.mtl
 o Plane
 v 0 0 0
 v 0 0 0
