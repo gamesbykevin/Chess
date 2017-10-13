@@ -4,9 +4,9 @@
     <string name="app_name" translatable="false">Chess</string>
 
     <!-- keys for shared preferences -->
-    <string translatable="false" name="open_gl_zoom_file_key">com.gamesbykevin.chess.OPEN_GL_ZOOM_FILE_KEY</string>
-    <string translatable="false" name="timer_file_key">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
-    <string translatable="false" name="google_play_auto_login_file_key">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
+    <string name="open_gl_zoom_file_key" translatable="false">com.gamesbykevin.chess.OPEN_GL_ZOOM_FILE_KEY</string>
+    <string name="timer_file_key" translatable="false">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
+    <string name="google_play_auto_login_file_key" translatable="false">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
 
     <!-- button text -->
     <string name="button_text_next">Continue</string>
