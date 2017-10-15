@@ -3,6 +3,7 @@ package com.gamesbykevin.chess.activity;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 
 import com.gamesbykevin.chess.R;
@@ -27,7 +28,14 @@ public class TestActivity extends Activity {
         // Add mSurface to your root view
         addContentView(surface, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT));
 
-        renderer = new BasicRenderer(this);
+        renderer = new BasicRenderer(this, surface);
         surface.setSurfaceRenderer(renderer);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean val = super.onTouchEvent(event);
+        renderer.onTouchEvent(event);
+        return val;
     }
 }

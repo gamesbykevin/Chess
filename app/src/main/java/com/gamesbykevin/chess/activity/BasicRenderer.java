@@ -4,32 +4,40 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.gamesbykevin.chess.R;
 
 import org.rajawali3d.Object3D;
+import org.rajawali3d.cameras.ArcballCamera;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
 import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.methods.DiffuseMethod;
 import org.rajawali3d.materials.textures.ATexture;
 import org.rajawali3d.materials.textures.Texture;
+import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Kevin on 10/12/2017.
  */
-
 public class BasicRenderer extends Renderer {
 
     private static final float COORD_Y = -.4f;
-    private static final float COORD_Z = .2f;
+    private static final float COORD_Z = .0f;
 
     private int fingers = 0;
 
     private PointF previous;
+
+    private ArcballCamera camera;
+
+    private float angle = 0f;
 
     public enum Type {
         Pawn(R.raw.pawn_obj, -.65,      COORD_Y, COORD_Z),
@@ -57,15 +65,18 @@ public class BasicRenderer extends Renderer {
 
     private Context context;
 
+    private View view;
+
     private DirectionalLight mDirectionalLight;
 
     private Sphere mEarthSphere;
 
     private Object3D mObject, board;
 
-    public BasicRenderer(Context context) {
+    public BasicRenderer(Context context, View view) {
         super(context);
         this.context = context;
+        this.view = view;
         setFrameRate(60);
     }
 
@@ -91,56 +102,78 @@ public class BasicRenderer extends Renderer {
 
         addBoard();
 
+        //create arc camera
+        this.camera = new ArcballCamera(context, view, board);
+
+
         try {
 
-            for (Type type : Type.values()) {
-                Object3D obj = null;
+            Object3D obj = null;
+            //addPiece(obj, Type.King, 0, 0, 0);
 
+            for (Type type : Type.values()) {
                 addPiece(obj, type, type.x, type.y, type.z);
             }
+
+            camera.setPosition(0,0,3); //optional
+            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), camera);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
     public void onTouchEvent(MotionEvent event){
-        
-        switch (event.getAction()) {
+
+        final float x = event.getX(0);
+        final float y = event.getY(0);
+
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
                 fingers--;
+                getCurrentCamera().setPosition(0,0,3); //optional
                 break;
 
             case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
                 fingers++;
+
+                if (previous == null)
+                    previous = new PointF();
+
+                previous.x = x;
+                previous.y = y;
                 break;
 
             case MotionEvent.ACTION_MOVE:
 
+                final float xd = previous.x - x;
+                final float yd = previous.y - y;
+
+                Vector3 s = getCurrentCamera().getPosition();
+
+                final float touchTurn = xd / 200f;
+                final float touchTurnUp = yd / 200f;
+
                 if (fingers == 1) {
-                    final float x = event.getX(0);
-                    final float y = event.getY(0);
 
-                    if (previous == null)
-                        previous = new PointF(x, y);
+                    s.x += (touchTurn * 2);
 
-                    final float xDiff = previous.x - x;
-                    final float yDiff = previous.y - y;
+                    if (touchTurnUp != 0)
+                        s.z += (touchTurnUp * 2);
 
-                    if (xDiff <= -5) {
-                        getCurrentCamera().rotate(Vector3.Axis.X, 5);
-                    } else if (xDiff >= 5) {
-                        getCurrentCamera().rotate(Vector3.Axis.X, -5);
-                    } else if (yDiff <= -5) {
-                        getCurrentCamera().rotate(Vector3.Axis.Y, 5);
-                    } else if (yDiff >= 5) {
-                        getCurrentCamera().rotate(Vector3.Axis.Y, -5);
-                    }
+                    //getCurrentCamera().setPosition(s);
 
-                    final double distance = Math.sqrt(Math.pow(previous.x - x, 2) - Math.pow(previous.y - y, 2));
+                } else if (fingers == 2) {
+
                 }
+
+                //final double distance = Math.sqrt(Math.pow(previous.x - x, 2) - Math.pow(previous.y - y, 2));
+
+                previous.x = x;
+                previous.y = y;
                 break;
         }
     }
@@ -158,6 +191,24 @@ public class BasicRenderer extends Renderer {
         //mObject.rotate(Vector3.Axis.X, 1.5);
 
         //board.rotate(Vector3.Axis.X, -1);
+        ArrayList<Object3D> children = getCurrentScene().getChildrenCopy();
+
+
+        for (Object3D child : children) {
+            //child.rotate(Vector3.Axis.Y, 1);
+        }
+
+        /*
+        for (Object3D child : children) {
+            child.rotateAround(
+                //new Vector3(child.getX(), child.getY(), child.getZ()),
+                    new Vector3(child.getX(), 0, 0),
+                    //new Vector3(0, child.getY(), 0),
+                    //new Vector3(0, 0, child.getZ()),
+                1
+            );
+        }
+        */
     }
 
     private void addPiece(Object3D obj, Type type, float x, float y, float z) throws Exception {
@@ -169,10 +220,12 @@ public class BasicRenderer extends Renderer {
         obj.setX(x);
         obj.setY(y);
         obj.setZ(z);
+        obj.rotate(Vector3.Axis.Y, 55);
         obj.rotate(Vector3.Axis.X, -45);
-        //obj.setMaterial(material);
         obj.setScale(.05);
-        //mObject.setDoubleSided(true);
+
+        //obj.setMaterial(material);
+        //obj.setDoubleSided(true);
         getCurrentScene().addChild(obj);
     }
 
