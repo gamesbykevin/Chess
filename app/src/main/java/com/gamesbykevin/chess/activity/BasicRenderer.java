@@ -2,31 +2,32 @@ package com.gamesbykevin.chess.activity;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.players.Human;
+import com.gamesbykevin.chess.players.Player;
+import com.gamesbykevin.chess.players.PlayerHelper;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.ArcballCamera;
+import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
 import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.methods.DiffuseMethod;
-import org.rajawali3d.materials.textures.ATexture;
 import org.rajawali3d.materials.textures.Texture;
-import org.rajawali3d.math.Quaternion;
 import org.rajawali3d.math.vector.Vector3;
-import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.Renderer;
-
-import java.util.ArrayList;
+import org.rajawali3d.util.ObjectColorPicker;
+import org.rajawali3d.util.OnObjectPickedListener;
 
 /**
  * Created by Kevin on 10/12/2017.
  */
-public class BasicRenderer extends Renderer {
+public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     private static final float COORD_Y = -.4f;
     private static final float COORD_Z = .0f;
@@ -35,33 +36,11 @@ public class BasicRenderer extends Renderer {
 
     private PointF previous;
 
-    private ArcballCamera camera;
+    private TestArcballCamera camera;
+
+    private Camera cameraOld;
 
     private float angle = 0f;
-
-    public enum Type {
-        Pawn(R.raw.pawn_obj, -.65,      COORD_Y, COORD_Z),
-        Bishop(R.raw.bishop_obj, -.45,  COORD_Y, COORD_Z),
-        Knight(R.raw.knight_obj, -.25,  COORD_Y, COORD_Z),
-        Rook(R.raw.rook_obj, -.05,      COORD_Y, COORD_Z),
-        Queen(R.raw.queen_obj, .15,     COORD_Y, COORD_Z),
-        King(R.raw.king_obj, .35,       COORD_Y, COORD_Z);
-
-        private final int resId;
-
-        private final float x, y, z;
-
-        private Type(int resId, double x, double y, double z) {
-            this(resId, (float)x, (float)y, (float)z);
-        }
-
-        private Type(int resId, float x, float y, float z) {
-            this.resId = resId;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-    }
 
     private Context context;
 
@@ -69,9 +48,16 @@ public class BasicRenderer extends Renderer {
 
     private DirectionalLight mDirectionalLight;
 
-    private Sphere mEarthSphere;
+    private Object3D board;
 
-    private Object3D mObject, board;
+    private Material materialWhite, materialBlack;
+
+    private Player player1, player2;
+
+    //private RayPicker rayPicker;
+    private ObjectColorPicker rayPicker;
+
+    private boolean init = false;
 
     public BasicRenderer(Context context, View view) {
         super(context);
@@ -83,57 +69,87 @@ public class BasicRenderer extends Renderer {
     @Override
     public void initScene() {
 
+        init = false;
+
+        this.rayPicker = new ObjectColorPicker(this);
+        this.rayPicker.setOnObjectPickedListener(this);
+
         mDirectionalLight = new DirectionalLight(1f, 15f, 1f);
         mDirectionalLight.setColor(1.0f, 1.0f, 1.0f);
-        mDirectionalLight.setPower(2);
+        mDirectionalLight.setPower(1);
         getCurrentScene().addLight(mDirectionalLight);
 
-        Material material = new Material();
+        try {
 
-        try{
-            material.enableLighting(true);
-            material.setDiffuseMethod(new DiffuseMethod.Lambert());
-            material.setColorInfluence(0);
-            Texture texture = new Texture("ChessPiece", R.drawable.marble1);
-            material.addTexture(texture);
+            materialWhite = new Material();
+            materialWhite.enableLighting(true);
+            materialWhite.setDiffuseMethod(new DiffuseMethod.Lambert());
+            materialWhite.setColorInfluence(0);
+            materialWhite.addTexture(new Texture("chessPieceWhite", R.drawable.white));
+
+            materialBlack = new Material();
+            materialBlack.enableLighting(true);
+            materialBlack.setDiffuseMethod(new DiffuseMethod.Lambert());
+            materialBlack.setColorInfluence(0);
+            materialBlack.addTexture(new Texture("chessPieceBlack", R.drawable.black));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         addBoard();
 
-        //create arc camera
-        this.camera = new ArcballCamera(context, view, board);
-
+        //create the player
+        player1 = new Human();
+        player2 = new Human();
 
         try {
 
-            Object3D obj = null;
-            //addPiece(obj, Type.King, 0, 0, 0);
-
-            for (Type type : Type.values()) {
-                addPiece(obj, type, type.x, type.y, type.z);
-            }
-
-            camera.setPosition(0,0,3); //optional
-            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), camera);
+            //reset the pieces on the board
+            PlayerHelper.reset(player2, this, materialBlack, false);
+            PlayerHelper.reset(player1, this, materialWhite, true);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        for (Piece piece : player1.getPieces()) {
+            this.rayPicker.registerObject(piece.getObj());
+        }
+
+        for (Piece piece : player2.getPieces()) {
+            this.rayPicker.registerObject(piece.getObj());
+        }
+
+        //board.rotate(Vector3.Axis.X, -45);
+
+        cameraOld = getCurrentCamera();
+
+        //create arc ball camera
+        assignCamera(board);
+
+        //this.camera.rotate(Vector3.Axis.X, 15);
+        //this.camera.rotateAround(new Vector3(0, 0, 0), 45);
+
+        init = true;
     }
 
     @Override
     public void onTouchEvent(MotionEvent event){
 
+        if (!init)
+            return;
+
         final float x = event.getX(0);
         final float y = event.getY(0);
+
+        rayPicker.getObjectAt(event.getRawX(), event.getRawY());
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 fingers--;
-                getCurrentCamera().setPosition(0,0,3); //optional
+                //getCurrentCamera().setPosition(0,0,3); //optional
                 break;
 
             case MotionEvent.ACTION_DOWN:
@@ -164,7 +180,7 @@ public class BasicRenderer extends Renderer {
                     if (touchTurnUp != 0)
                         s.z += (touchTurnUp * 2);
 
-                    //getCurrentCamera().setPosition(s);
+                    getCurrentCamera().setPosition(s);
 
                 } else if (fingers == 2) {
 
@@ -178,6 +194,60 @@ public class BasicRenderer extends Renderer {
         }
     }
 
+    public void resetCamera() {
+        Vector3 position = getCurrentCamera().getPosition();
+
+        cameraOld.setPosition(position);
+
+        //switch camera
+        getCurrentScene().replaceAndSwitchCamera(camera, cameraOld);
+    }
+
+    private void assignCamera(Object3D obj) {
+
+        this.camera = new TestArcballCamera(context, view);
+        this.camera.setTarget(obj);
+        this.camera.setPosition(2, 2, 1);
+        getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), this.camera);
+    }
+
+    @Override
+    public void onNoObjectPicked() {
+        //System.out.println("Nothing selected!!!!!!!");
+    }
+
+    @Override
+    public void onObjectPicked(Object3D object3D) {
+
+        if (object3D == null)
+            return;
+
+        //assignCamera(object3D);
+
+        /*
+        boolean found = false;
+
+        for (Piece piece : player1.getPieces()) {
+
+            if (piece.getObj().equals(object3D)) {
+                found = true;
+                System.out.println("Piece found: " + piece.getType() + " - " + piece.getCol() + ", " + piece.getRow());
+                break;
+            }
+        }
+
+        if (!found) {
+            for (Piece piece : player2.getPieces()) {
+                if (piece.getObj().equals(object3D)) {
+                    found = true;
+                    System.out.println("Piece found: " + piece.getType() + " - " + piece.getCol() + ", " + piece.getRow());
+                    break;
+                }
+            }
+        }
+        */
+    }
+
     @Override
     public void onOffsetsChanged(float x, float y, float z, float w, int i, int j) {
 
@@ -186,58 +256,17 @@ public class BasicRenderer extends Renderer {
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
         super.onRender(elapsedTime, deltaTime);
-        //mEarthSphere.rotate(Vector3.Axis.Y, 1.0);
-        //mObject.rotate(Vector3.Axis.Y, 1.0);
-        //mObject.rotate(Vector3.Axis.X, 1.5);
-
-        //board.rotate(Vector3.Axis.X, -1);
-        ArrayList<Object3D> children = getCurrentScene().getChildrenCopy();
-
-
-        for (Object3D child : children) {
-            //child.rotate(Vector3.Axis.Y, 1);
-        }
-
-        /*
-        for (Object3D child : children) {
-            child.rotateAround(
-                //new Vector3(child.getX(), child.getY(), child.getZ()),
-                    new Vector3(child.getX(), 0, 0),
-                    //new Vector3(0, child.getY(), 0),
-                    //new Vector3(0, 0, child.getZ()),
-                1
-            );
-        }
-        */
-    }
-
-    private void addPiece(Object3D obj, Type type, float x, float y, float z) throws Exception {
-
-        LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, type.resId);
-        objParser.parse();
-
-        obj = objParser.getParsedObject();
-        obj.setX(x);
-        obj.setY(y);
-        obj.setZ(z);
-        obj.rotate(Vector3.Axis.Y, 55);
-        obj.rotate(Vector3.Axis.X, -45);
-        obj.setScale(.05);
-
-        //obj.setMaterial(material);
-        //obj.setDoubleSided(true);
-        getCurrentScene().addChild(obj);
     }
 
     private void addBoard() {
+
         try {
+
             LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, R.raw.board_obj);
             objParser.parse();
 
             board = objParser.getParsedObject();
-            board.setZ(-.5);
             board.setScale(.2);
-            board.rotate(Vector3.Axis.X, -45);
             getCurrentScene().addChild(board);
 
         } catch (Exception e) {

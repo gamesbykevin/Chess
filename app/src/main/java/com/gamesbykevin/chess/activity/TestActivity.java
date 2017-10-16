@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.gamesbykevin.chess.R;
@@ -14,7 +15,7 @@ import org.rajawali3d.view.SurfaceView;
 
 public class TestActivity extends Activity {
 
-    Renderer renderer;
+    BasicRenderer renderer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,5 +38,9 @@ public class TestActivity extends Activity {
         boolean val = super.onTouchEvent(event);
         renderer.onTouchEvent(event);
         return val;
+    }
+
+    public void onClickResetCamera(View view) {
+        renderer.resetCamera();
     }
 }
