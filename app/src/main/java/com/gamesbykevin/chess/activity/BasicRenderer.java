@@ -21,6 +21,7 @@ import org.rajawali3d.materials.methods.DiffuseMethod;
 import org.rajawali3d.materials.textures.Texture;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.renderer.Renderer;
+import org.rajawali3d.util.GLU;
 import org.rajawali3d.util.ObjectColorPicker;
 import org.rajawali3d.util.OnObjectPickedListener;
 
@@ -38,8 +39,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     private TestArcballCamera camera;
 
-    private Camera cameraOld;
-
     private float angle = 0f;
 
     private Context context;
@@ -50,7 +49,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     private Object3D board;
 
-    private Material materialWhite, materialBlack;
+    //the current selected piece
+    private Piece selected;
+
+    private Material materialWhite, materialBlack, materialHighlight;
 
     private Player player1, player2;
 
@@ -58,6 +60,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     private ObjectColorPicker rayPicker;
 
     private boolean init = false;
+
+    private boolean rotate = false;
 
     public BasicRenderer(Context context, View view) {
         super(context);
@@ -93,6 +97,12 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             materialBlack.setColorInfluence(0);
             materialBlack.addTexture(new Texture("chessPieceBlack", R.drawable.black));
 
+            materialHighlight = new Material();
+            materialHighlight.enableLighting(true);
+            materialHighlight.setDiffuseMethod(new DiffuseMethod.Lambert());
+            materialHighlight.setColorInfluence(0);
+            materialHighlight.addTexture(new Texture("chessPieceHighlighted", R.drawable.highlighted));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,10 +133,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //board.rotate(Vector3.Axis.X, -45);
 
-        cameraOld = getCurrentCamera();
-
-        //create arc ball camera
-        assignCamera(board);
+        //create arc ball camera to rotate around the board
+        setupCamera(board);
 
         //this.camera.rotate(Vector3.Axis.X, 15);
         //this.camera.rotateAround(new Vector3(0, 0, 0), 45);
@@ -143,13 +151,21 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         final float x = event.getX(0);
         final float y = event.getY(0);
 
-        rayPicker.getObjectAt(event.getRawX(), event.getRawY());
-
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 fingers--;
-                //getCurrentCamera().setPosition(0,0,3); //optional
+
+                /*
+                if (selected == null) {
+                    rayPicker.getObjectAt(event.getRawX(), event.getRawY());
+                } else {
+                    final double z = selected.getObj().getZ();
+                    selected.getObj().setScreenCoordinates(x, y, getViewportWidth(), getViewportHeight(), getCurrentCamera().getZ());
+                    selected.getObj().setZ(z);
+                }
+                */
+                rayPicker.getObjectAt(event.getRawX(), event.getRawY());
                 break;
 
             case MotionEvent.ACTION_DOWN:
@@ -165,6 +181,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
             case MotionEvent.ACTION_MOVE:
 
+                /*
                 final float xd = previous.x - x;
                 final float yd = previous.y - y;
 
@@ -180,35 +197,43 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
                     if (touchTurnUp != 0)
                         s.z += (touchTurnUp * 2);
 
-                    getCurrentCamera().setPosition(s);
+                    //getCurrentCamera().setPosition(s);
 
                 } else if (fingers == 2) {
 
                 }
 
                 //final double distance = Math.sqrt(Math.pow(previous.x - x, 2) - Math.pow(previous.y - y, 2));
-
+                */
                 previous.x = x;
                 previous.y = y;
                 break;
         }
     }
 
-    public void resetCamera() {
-        Vector3 position = getCurrentCamera().getPosition();
+    public void enableRotateCamera(boolean enabled) {
 
-        cameraOld.setPosition(position);
+        this.rotate = enabled;
 
-        //switch camera
-        getCurrentScene().replaceAndSwitchCamera(camera, cameraOld);
+        if (this.rotate) {
+            camera.addListeners();
+            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), camera);
+        } else {
+            camera.removeListeners();
+            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), camera);
+        }
     }
 
-    private void assignCamera(Object3D obj) {
+    public void resetCamera() {
+        setupCamera(board);
+    }
 
-        this.camera = new TestArcballCamera(context, view);
-        this.camera.setTarget(obj);
-        this.camera.setPosition(2, 2, 1);
-        getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), this.camera);
+    private void setupCamera(Object3D obj) {
+
+        this.camera = new TestArcballCamera(context, view, obj);
+        this.camera.setPosition(2, 2, 2);
+
+        enableRotateCamera(rotate);
     }
 
     @Override
@@ -222,14 +247,19 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (object3D == null)
             return;
 
+        //if we previously have a selected piece remove the texture
+        if (selected != null)
+            selected.getObj().setMaterial(selected.getMaterial());
+
         //assignCamera(object3D);
 
-        /*
         boolean found = false;
 
         for (Piece piece : player1.getPieces()) {
 
             if (piece.getObj().equals(object3D)) {
+                selected = piece;
+                object3D.setMaterial(materialHighlight);
                 found = true;
                 System.out.println("Piece found: " + piece.getType() + " - " + piece.getCol() + ", " + piece.getRow());
                 break;
@@ -239,13 +269,14 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (!found) {
             for (Piece piece : player2.getPieces()) {
                 if (piece.getObj().equals(object3D)) {
+                    selected = piece;
+                    object3D.setMaterial(materialHighlight);
                     found = true;
                     System.out.println("Piece found: " + piece.getType() + " - " + piece.getCol() + ", " + piece.getRow());
                     break;
                 }
             }
         }
-        */
     }
 
     @Override

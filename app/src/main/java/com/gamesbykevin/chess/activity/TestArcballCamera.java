@@ -20,7 +20,6 @@ import org.rajawali3d.math.vector.Vector3;
 /**
  * Created by Kevin on 10/15/2017.
  */
-
 public class TestArcballCamera extends ArcballCamera {
 
     private Context mContext;                       //camera context
@@ -49,13 +48,17 @@ public class TestArcballCamera extends ArcballCamera {
     private Vector3 yAxis;
     private Vector3 zAxis;
 
-    /**constructor with no target*/
+    /**
+     * constructor with no target
+     */
     public TestArcballCamera(Context context, View view) {
         this(context, view, (Object3D) null);
     }
 
-    /**default arcballCamera constructor. sets the principal camera components and
-     * adds the camera main listeners*/
+    /**
+     * default arcballCamera constructor. sets the principal camera components and
+     * adds the camera main listeners
+     */
     public TestArcballCamera(Context context, View view, Object3D target) {
         super(context,view,target);
         this.mContext = context;
@@ -66,7 +69,7 @@ public class TestArcballCamera extends ArcballCamera {
     }
 
     /**initializes de camera components*/
-    private void initialize() {
+    public void initialize() {
         this.mStartFOV = this.mFieldOfView;
         this.mLookAtEnabled = true;
         this.setLookAt(0.0D, 0.0D, 0.0D);
@@ -99,7 +102,6 @@ public class TestArcballCamera extends ArcballCamera {
         } else {
             out.setAll((double)x, (double)y, Math.sqrt((double)(1.0F - lengthSquared)));
         }
-
     }
 
     /**with the given x and y coordinates returns a 2D vector with x,y screen coordinates*/
@@ -219,8 +221,15 @@ public class TestArcballCamera extends ArcballCamera {
         }
     }
 
+    public void removeListeners() {
+        TestArcballCamera.this.mGestureListener = null;
+        TestArcballCamera.this.mScaleDetector = null;
+        TestArcballCamera.this.mDetector = null;
+        TestArcballCamera.this.mView.setOnTouchListener(null);
+    }
+
     /** adds the basic listeners to the camera*/
-    private void addListeners() {
+    public void addListeners() {
         //runs this on the ui thread
         ((Activity)this.mContext).runOnUiThread(new Runnable() {
             public void run() {
@@ -299,11 +308,11 @@ public class TestArcballCamera extends ArcballCamera {
                 TestArcballCamera.this.originalX=event2.getX();
                 TestArcballCamera.this.originalY=event2.getY();
 //                TestArcballCamera.this.startRotation(event2.getX(), event2.getY());
-                TestArcballCamera.this.startRotation(TestArcballCamera.this.mLastWidth/2, TestArcballCamera.this.mLastHeight/2); //0,0 es la esquina superior izquierda. Buscar centro camara en algun lugar
+                TestArcballCamera.this.startRotation(TestArcballCamera.this.mLastWidth / 2, TestArcballCamera.this.mLastHeight / 2); //0,0 es la esquina superior izquierda. Buscar centro camara en algun lugar
                 return false;
             } else {
-                float x =  (TestArcballCamera.this.mLastWidth/2) - (event2.getX() - TestArcballCamera.this.originalX);
-                float y = (TestArcballCamera.this.mLastHeight/2) - (event2.getY() - TestArcballCamera.this.originalY);
+                float x =  (TestArcballCamera.this.mLastWidth / 2) - (event2.getX() - TestArcballCamera.this.originalX);
+                float y = (TestArcballCamera.this.mLastHeight / 2) - (event2.getY() - TestArcballCamera.this.originalY);
                 TestArcballCamera.this.mIsRotating = true;
 //                TestArcballCamera.this.updateRotation(event2.getX(), event2.getY());
                 TestArcballCamera.this.updateRotation(x, y);

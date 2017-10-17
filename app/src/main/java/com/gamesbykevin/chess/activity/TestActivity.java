@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ToggleButton;
 
 import com.gamesbykevin.chess.R;
 
@@ -19,15 +20,13 @@ public class TestActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
-        final SurfaceView surface = new SurfaceView(this);
+        final SurfaceView surface = findViewById(R.id.mySurfaceView);
         surface.setFrameRate(60.0);
         surface.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
-
-        // Add mSurface to your root view
-        addContentView(surface, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT));
 
         renderer = new BasicRenderer(this, surface);
         surface.setSurfaceRenderer(renderer);
@@ -42,5 +41,15 @@ public class TestActivity extends Activity {
 
     public void onClickResetCamera(View view) {
         renderer.resetCamera();
+    }
+
+    public void onClickRotateCamera(View view) {
+        ToggleButton button2 = findViewById(R.id.buttonRotate);
+        renderer.enableRotateCamera(button2.isChecked());
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }

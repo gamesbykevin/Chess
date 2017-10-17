@@ -20,6 +20,8 @@ public class Piece extends Cell {
 
     private final Object3D obj;
 
+    private final Material material;
+
     private final Type type;
 
     public enum Type {
@@ -42,12 +44,18 @@ public class Piece extends Cell {
     }
 
     public Piece(Object3D obj, Type type, float col, float row) {
+
         this.obj = obj;
         this.type = type;
+        this.material = obj.getMaterial();
 
         //assign location
         super.setCol(col);
         super.setRow(row);
+    }
+
+    public Material getMaterial() {
+        return this.material;
     }
 
     public Object3D getObj() {
