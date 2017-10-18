@@ -1,27 +1,16 @@
 package com.gamesbykevin.chess.activity;
 
 import android.content.Context;
-import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.piece.Piece;
-import com.gamesbykevin.chess.players.Human;
-import com.gamesbykevin.chess.players.Player;
-import com.gamesbykevin.chess.players.PlayerHelper;
+import com.gamesbykevin.chess.players.Players;
 
 import org.rajawali3d.Object3D;
-import org.rajawali3d.cameras.ArcballCamera;
-import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
-import org.rajawali3d.materials.Material;
-import org.rajawali3d.materials.methods.DiffuseMethod;
-import org.rajawali3d.materials.textures.Texture;
-import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.renderer.Renderer;
-import org.rajawali3d.util.GLU;
 import org.rajawali3d.util.ObjectColorPicker;
 import org.rajawali3d.util.OnObjectPickedListener;
 
@@ -30,37 +19,25 @@ import org.rajawali3d.util.OnObjectPickedListener;
  */
 public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
-    private static final float COORD_Y = -.4f;
-    private static final float COORD_Z = .0f;
-
     private int fingers = 0;
 
-    private PointF previous;
-
     private TestArcballCamera camera;
-
-    private float angle = 0f;
 
     private Context context;
 
     private View view;
 
-    private DirectionalLight mDirectionalLight;
-
     private Object3D board;
 
-    //the current selected piece
-    private Piece selected;
-
-    private Material materialWhite, materialBlack, materialHighlight;
-
-    private Player player1, player2;
+    private Players players;
 
     //private RayPicker rayPicker;
-    private ObjectColorPicker rayPicker;
+    private ObjectColorPicker objectPicker;
 
+    //did we render our board at least once?
     private boolean init = false;
 
+    //are we rotating the board?
     private boolean rotate = false;
 
     public BasicRenderer(Context context, View view) {
@@ -73,142 +50,113 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     @Override
     public void initScene() {
 
+        //flag false until our first render
         init = false;
 
-        this.rayPicker = new ObjectColorPicker(this);
-        this.rayPicker.setOnObjectPickedListener(this);
+        //create our object picker to select the pieces
+        this.objectPicker = new ObjectColorPicker(this);
+        this.objectPicker.setOnObjectPickedListener(this);
 
-        mDirectionalLight = new DirectionalLight(1f, 15f, 1f);
-        mDirectionalLight.setColor(1.0f, 1.0f, 1.0f);
-        mDirectionalLight.setPower(1);
-        getCurrentScene().addLight(mDirectionalLight);
+        //create light so we can see the pieces
+        DirectionalLight light = new DirectionalLight(1f, 10f, 1f);
+        light.setColor(1.0f, 1.0f, 1.0f);
+        light.setPower(1);
+        getCurrentScene().addLight(light);
 
-        try {
-
-            materialWhite = new Material();
-            materialWhite.enableLighting(true);
-            materialWhite.setDiffuseMethod(new DiffuseMethod.Lambert());
-            materialWhite.setColorInfluence(0);
-            materialWhite.addTexture(new Texture("chessPieceWhite", R.drawable.white));
-
-            materialBlack = new Material();
-            materialBlack.enableLighting(true);
-            materialBlack.setDiffuseMethod(new DiffuseMethod.Lambert());
-            materialBlack.setColorInfluence(0);
-            materialBlack.addTexture(new Texture("chessPieceBlack", R.drawable.black));
-
-            materialHighlight = new Material();
-            materialHighlight.enableLighting(true);
-            materialHighlight.setDiffuseMethod(new DiffuseMethod.Lambert());
-            materialHighlight.setColorInfluence(0);
-            materialHighlight.addTexture(new Texture("chessPieceHighlighted", R.drawable.highlighted));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        //add the board to the scene
         addBoard();
 
-        //create the player
-        player1 = new Human();
-        player2 = new Human();
-
         try {
 
-            //reset the pieces on the board
-            PlayerHelper.reset(player2, this, materialBlack, false);
-            PlayerHelper.reset(player1, this, materialWhite, true);
+            //create the players and reset the pieces
+            this.players = new Players(Players.Mode.HumVsHum);
+            this.players.reset(this);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        for (Piece piece : player1.getPieces()) {
-            this.rayPicker.registerObject(piece.getObj());
-        }
-
-        for (Piece piece : player2.getPieces()) {
-            this.rayPicker.registerObject(piece.getObj());
-        }
-
-        //board.rotate(Vector3.Axis.X, -45);
 
         //create arc ball camera to rotate around the board
         setupCamera(board);
-
-        //this.camera.rotate(Vector3.Axis.X, 15);
-        //this.camera.rotateAround(new Vector3(0, 0, 0), 45);
-
-        init = true;
     }
+
+    @Override
+    public void onNoObjectPicked() {
+        //nothing selected
+        System.out.println("Nothing selected");
+    }
+
+    @Override
+    public void onObjectPicked(Object3D object3D) {
+
+        if (object3D == null)
+            return;
+
+        //select our chess piece
+        getPlayers().select(object3D);
+    }
+
 
     @Override
     public void onTouchEvent(MotionEvent event){
 
+        //if not started don't do anything
         if (!init)
             return;
 
-        final float x = event.getX(0);
-        final float y = event.getY(0);
+        final float x = event.getRawX();
+        final float y = event.getRawY();
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
+
+                //we can only select a piece if 1 finger is on the screen
+                if (fingers == 1) {
+
+                    if (getPlayers().getSelected() == null) {
+
+                        //if no piece selected, let's see if we selected a piece
+                        getObjectPicker().getObjectAt(x, y);
+
+                    } else {
+
+                        //if the player has a selected piece, let's try to place it
+                        getPlayers().place();
+
+                    }
+                }
+
+                //keep track of how many fingers we have touching the screen
                 fingers--;
 
-                /*
-                if (selected == null) {
-                    rayPicker.getObjectAt(event.getRawX(), event.getRawY());
-                } else {
-                    final double z = selected.getObj().getZ();
-                    selected.getObj().setScreenCoordinates(x, y, getViewportWidth(), getViewportHeight(), getCurrentCamera().getZ());
-                    selected.getObj().setZ(z);
-                }
-                */
-                rayPicker.getObjectAt(event.getRawX(), event.getRawY());
                 break;
 
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
+
+                //keep track of how many fingers we have touching the screen
                 fingers++;
-
-                if (previous == null)
-                    previous = new PointF();
-
-                previous.x = x;
-                previous.y = y;
                 break;
 
             case MotionEvent.ACTION_MOVE:
 
-                /*
-                final float xd = previous.x - x;
-                final float yd = previous.y - y;
+                //we can't move if more than 1 finger on the screen
+                if (fingers != 1)
+                    return;
 
-                Vector3 s = getCurrentCamera().getPosition();
-
-                final float touchTurn = xd / 200f;
-                final float touchTurnUp = yd / 200f;
-
-                if (fingers == 1) {
-
-                    s.x += (touchTurn * 2);
-
-                    if (touchTurnUp != 0)
-                        s.z += (touchTurnUp * 2);
-
-                    //getCurrentCamera().setPosition(s);
-
-                } else if (fingers == 2) {
-
-                }
-
-                //final double distance = Math.sqrt(Math.pow(previous.x - x, 2) - Math.pow(previous.y - y, 2));
-                */
-                previous.x = x;
-                previous.y = y;
+                //move our piece, if exists
+                getPlayers().move(this, event.getX(), event.getY());
                 break;
         }
+    }
+
+    public Players getPlayers() {
+        return this.players;
+    }
+
+    public ObjectColorPicker getObjectPicker() {
+        return this.objectPicker;
     }
 
     public void enableRotateCamera(boolean enabled) {
@@ -231,52 +179,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     private void setupCamera(Object3D obj) {
 
         this.camera = new TestArcballCamera(context, view, obj);
-        this.camera.setPosition(2, 2, 2);
+        this.camera.setPosition(2, 2, 1);
 
         enableRotateCamera(rotate);
-    }
-
-    @Override
-    public void onNoObjectPicked() {
-        //System.out.println("Nothing selected!!!!!!!");
-    }
-
-    @Override
-    public void onObjectPicked(Object3D object3D) {
-
-        if (object3D == null)
-            return;
-
-        //if we previously have a selected piece remove the texture
-        if (selected != null)
-            selected.getObj().setMaterial(selected.getMaterial());
-
-        //assignCamera(object3D);
-
-        boolean found = false;
-
-        for (Piece piece : player1.getPieces()) {
-
-            if (piece.getObj().equals(object3D)) {
-                selected = piece;
-                object3D.setMaterial(materialHighlight);
-                found = true;
-                System.out.println("Piece found: " + piece.getType() + " - " + piece.getCol() + ", " + piece.getRow());
-                break;
-            }
-        }
-
-        if (!found) {
-            for (Piece piece : player2.getPieces()) {
-                if (piece.getObj().equals(object3D)) {
-                    selected = piece;
-                    object3D.setMaterial(materialHighlight);
-                    found = true;
-                    System.out.println("Piece found: " + piece.getType() + " - " + piece.getCol() + ", " + piece.getRow());
-                    break;
-                }
-            }
-        }
     }
 
     @Override
@@ -287,6 +192,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
         super.onRender(elapsedTime, deltaTime);
+
+        //flag that the board has been initialized
+        init = true;
     }
 
     private void addBoard() {

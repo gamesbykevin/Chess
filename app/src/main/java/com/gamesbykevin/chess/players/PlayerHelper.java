@@ -14,83 +14,138 @@ import org.rajawali3d.renderer.Renderer;
  */
 public class PlayerHelper {
 
+    //default height for all pieces so they look like they are placed on the board
     private static final float Y = .075f;
-    private static final float Z = .1f;
 
-    public static void reset(Player player, Renderer renderer, Material material, boolean north) {
+    //size of a chess board
+    private static final int COLS = 8;
+    private static final int ROWS = 8;
+
+    //the west/east/north/south coordinates on the board
+    public static final float COORDINATE_MIN = -.7f;
+    public static final float COORDINATE_MAX = .7f;
+
+    //distance between each col/row
+    private static final float COORDINATE_INCREMENT = .2f;
+
+    public static void correctPiece(Piece piece) {
+
+        //keep the column in boundary
+        if (piece.getObj().getX() < COORDINATE_MIN)
+            piece.getObj().setX(getCoordinate(0));
+        if (piece.getObj().getX() > COORDINATE_MAX)
+            piece.getObj().setX(getCoordinate(COLS - 1));
+
+        //keep the row in boundary
+        if (piece.getObj().getZ() < COORDINATE_MIN)
+            piece.getObj().setZ(getCoordinate(0));
+        if (piece.getObj().getZ() > COORDINATE_MAX)
+            piece.getObj().setZ(getCoordinate(ROWS - 1));
+    }
+
+    public static int getRow(final double coordinate) {
+        return getRow((float)coordinate);
+    }
+
+    public static int getRow(final float coordinate) {
+
+        for (int i = 0; i < ROWS; i++) {
+            final float min = COORDINATE_MIN + (COORDINATE_INCREMENT * i) - .1f;
+            final float max = COORDINATE_MIN + (COORDINATE_INCREMENT * i) + .1f;
+
+            if (coordinate >= min && coordinate <= max)
+                return i;
+        }
+
+        return -1;
+    }
+
+    public static int getCol(final double coordinate) {
+        return getCol((float)coordinate);
+    }
+
+    public static int getCol(final float coordinate) {
+
+        for (int i = 0; i < COLS; i++) {
+            final float min = COORDINATE_MIN + (COORDINATE_INCREMENT * i) - .1f;
+            final float max = COORDINATE_MIN + (COORDINATE_INCREMENT * i) + .1f;
+
+            if (coordinate >= min && coordinate <= max)
+                return i;
+        }
+
+        return -1;
+    }
+
+    public static float getCoordinate(final int row_col) {
+        return COORDINATE_MIN + (COORDINATE_INCREMENT * row_col);
+    }
+
+    protected static void reset(Player player, Renderer renderer, Material material) {
 
         //remove all existing pieces
         player.getPieces().clear();
 
         final float row1, row2;
 
-        //if we are heading north
-        if (north) {
-
-            row1 = .5f;
-            row2 = .7f;
-
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.7f, Y, row1, 0, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.5f, Y, row1, 1, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.3f, Y, row1, 2, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.1f, Y, row1, 3, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.1f, Y, row1, 4, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.3f, Y, row1, 5, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.5f, Y, row1, 6, 6);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.7f, Y, row1, 7, 6);
-
-            addPiece(player, renderer, material, Piece.Type.Rook,   -.7f, Y, row2, 0, 7);
-            addPiece(player, renderer, material, Piece.Type.Knight, -.5f, Y, row2, 1, 7);
-            addPiece(player, renderer, material, Piece.Type.Bishop, -.3f, Y, row2, 2, 7);
-            addPiece(player, renderer, material, Piece.Type.Queen,  -.1f, Y, row2, 3, 7);
-            addPiece(player, renderer, material, Piece.Type.King,   0.1f, Y, row2, 4, 7);
-            addPiece(player, renderer, material, Piece.Type.Bishop, 0.3f, Y, row2, 5, 7);
-            addPiece(player, renderer, material, Piece.Type.Knight, 0.5f, Y, row2, 6, 7);
-            addPiece(player, renderer, material, Piece.Type.Rook,   0.7f, Y, row2, 7, 7);
-
+        //the rows will depend on the direction the player is targeting
+        if (player.hasDirection(Player.Direction.North)) {
+            row1 = COORDINATE_MAX - COORDINATE_INCREMENT;
+            row2 = COORDINATE_MAX;
         } else {
-
-            row1 = -.5f;
-            row2 = -.7f;
-
-            addPiece(player, renderer, material, Piece.Type.Rook,   -.7f, Y, row2, 0, 0);
-            addPiece(player, renderer, material, Piece.Type.Knight, -.5f, Y, row2, 1, 0);
-            addPiece(player, renderer, material, Piece.Type.Bishop, -.3f, Y, row2, 2, 0);
-            addPiece(player, renderer, material, Piece.Type.Queen,  -.1f, Y, row2, 3, 0);
-            addPiece(player, renderer, material, Piece.Type.King,   0.1f, Y, row2, 4, 0);
-            addPiece(player, renderer, material, Piece.Type.Bishop, 0.3f, Y, row2, 5, 0);
-            addPiece(player, renderer, material, Piece.Type.Knight, 0.5f, Y, row2, 6, 0);
-            addPiece(player, renderer, material, Piece.Type.Rook,   0.7f, Y, row2, 7, 0);
-
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.7f, Y, row1, 0, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.5f, Y, row1, 1, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.3f, Y, row1, 2, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, -.1f, Y, row1, 3, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.1f, Y, row1, 4, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.3f, Y, row1, 5, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.5f, Y, row1, 6, 1);
-            addPiece(player, renderer, material, Piece.Type.Pawn, 0.7f, Y, row1, 7, 1);
+            row1 = COORDINATE_MIN + COORDINATE_INCREMENT;
+            row2 = COORDINATE_MIN;
         }
 
+        //populate all the pieces for row 1
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(0), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(1), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(2), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(3), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(4), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(5), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(6), Y, row1);
+        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(7), Y, row1);
+
+        //populate all the pieces for row 2
+        addPiece(player, renderer, material, Piece.Type.Rook,   getCoordinate(0), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.Knight, getCoordinate(1), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.Bishop, getCoordinate(2), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.Queen,  getCoordinate(3), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.King,   getCoordinate(4), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.Bishop, getCoordinate(5), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.Knight, getCoordinate(6), Y, row2);
+        addPiece(player, renderer, material, Piece.Type.Rook,   getCoordinate(7), Y, row2);
     }
 
-    public static void addPiece(Player player, Renderer renderer, Material material, Piece.Type type, float x, float y, float z, float col, float row) {
+    private static void addPiece(Player player, Renderer renderer, Material material, Piece.Type type, float x, float y, float z) {
 
         try {
 
+            //parse our 3d model
             LoaderSTL stlParser = new LoaderSTL(renderer.getContext().getResources(), renderer.getTextureManager(), type.getResId());
             stlParser.parse();
+
+            //get our 3d object
             Object3D obj = stlParser.getParsedObject();
+
+            //rotate piece 90 degrees so it is standing up
             obj.rotate(Vector3.Axis.X, 90);
+
+            //assign the location
             obj.setPosition(x, y, z);
+
+            //our model is too large so we need to shrink it
             obj.setScale(.05);
+
+            //assign the texture to the model
             obj.setMaterial(material);
 
             //add to the scene
             renderer.getCurrentScene().addChild(obj);
 
             //add piece to the player
-            player.getPieces().add(new Piece(obj, type, col, row));
+            player.getPieces().add(new Piece(obj, type, getCol(x), getRow(z)));
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);

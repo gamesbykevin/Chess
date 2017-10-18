@@ -18,13 +18,15 @@ public class TestActivity extends Activity {
 
     BasicRenderer renderer;
 
+    SurfaceView surface;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
-        final SurfaceView surface = findViewById(R.id.mySurfaceView);
+        surface = findViewById(R.id.mySurfaceView);
         surface.setFrameRate(60.0);
         surface.setRenderMode(ISurface.RENDERMODE_WHEN_DIRTY);
 
@@ -41,6 +43,11 @@ public class TestActivity extends Activity {
 
     public void onClickResetCamera(View view) {
         renderer.resetCamera();
+
+        ToggleButton button2 = findViewById(R.id.buttonRotate);
+        button2.setChecked(true);
+
+        renderer.enableRotateCamera(button2.isChecked());
     }
 
     public void onClickRotateCamera(View view) {
@@ -50,6 +57,6 @@ public class TestActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        finish();
+        super.onBackPressed();
     }
 }
