@@ -142,8 +142,8 @@ public class Piece extends Cell {
 
         for (int i = 0; i < targets.size(); i++) {
 
-            double col = PlayerHelper.getCol(targets.get(i).getX());
-            double row = PlayerHelper.getRow(targets.get(i).getZ());
+            final int col = PlayerHelper.getCol(targets.get(i).getX());
+            final int row = PlayerHelper.getRow(targets.get(i).getZ());
 
             if (super.hasLocation(col, row))
                 return true;

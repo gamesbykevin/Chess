@@ -287,64 +287,61 @@ public class Players {
      */
     public void place(BasicRenderer renderer, Object3D object3D) {
 
-        //check if we selected a target
-        for (int i = 0; i < targets.size(); i++) {
-
-            //get the current 3d object
-            Object3D tmp = targets.get(i);
-
-            //if the object matches we know where to go
-            if (tmp.equals(object3D)) {
-
-                //move the piece accordingly
-                movePiece(renderer, object3D);
-
-                //exit the loop
-                break;
-            }
-        }
+        //did we capture a piece
+        boolean captured = false;
 
         //get the player based on the current turn
         Player opponent = (player1Turn) ? getPlayer2() : getPlayer1();
 
-        //check if we selected an opponent piece
+        //check if we selected an opponent piece to capture it
         for (int i = 0; i < opponent.getPieces().size(); i++) {
 
             Piece piece = opponent.getPieces().get(i);
 
             if (piece.getObj().equals(object3D)) {
 
-                //also make sure piece is part of the targets
+                //also make sure the current piece is part of the targets
                 if (piece.hasTarget(targets)) {
 
-                    //capture the piece
-                    capture(renderer, opponent, object3D);
-
                     //move the piece
+                    movePiece(renderer, piece.getObj());
+
+                    //remove from object picker
+                    renderer.getObjectPicker().unregisterObject(object3D);
+
+                    //remove from scene
+                    renderer.getCurrentScene().removeChild(object3D);
+
+                    //remove from our opponent
+                    opponent.getPieces().remove(i);
+
+                    //flag that we captured a piece
+                    captured = true;
+
+                    //exit the loop
+                    break;
+                }
+            }
+        }
+
+        //if no pieces were captured, check if we selected to move to a target
+        if (!captured) {
+
+            //check if we selected a target
+            for (int i = 0; i < targets.size(); i++) {
+
+                //get the current 3d object
+                Object3D tmp = targets.get(i);
+
+                //if the object matches we know where to go
+                if (tmp.equals(object3D)) {
+
+                    //move the piece accordingly
                     movePiece(renderer, object3D);
 
                     //exit the loop
                     break;
-
                 }
-            }
-        }
-    }
-
-    private void capture(BasicRenderer renderer, Player player, Object3D object3D) {
-
-        //remove from object picker
-        renderer.getObjectPicker().unregisterObject(object3D);
-
-        //remove from scene
-        renderer.getCurrentScene().removeChild(object3D);
-
-        //remove from the players pieces
-        for (int i = 0; i < player.getPieces().size(); i++) {
-
-            if (player.getPieces().get(i).getObj().equals(object3D)) {
-                player.getPieces().remove(i);
-                break;
             }
         }
     }
