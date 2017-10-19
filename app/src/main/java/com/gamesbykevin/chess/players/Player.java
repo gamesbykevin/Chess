@@ -2,6 +2,8 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.chess.piece.Piece;
 
+import org.rajawali3d.Object3D;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,24 @@ public abstract class Player {
 
     public boolean isHuman() {
         return this.human;
+    }
+
+    public Object3D getPiece(double col, double row) {
+
+        for (int i = 0; i < getPieces().size(); i++) {
+
+            Piece piece = getPieces().get(i);
+
+            if (piece.hasLocation(col, row))
+                return piece.getObj();
+        }
+
+        return null;
+    }
+
+    public boolean hasPiece(double col, double row) {
+
+        return (getPiece(col, row) != null);
     }
 
     public List<Piece> getPieces() {

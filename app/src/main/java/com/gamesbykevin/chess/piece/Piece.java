@@ -8,19 +8,23 @@ import com.gamesbykevin.chess.players.PlayerHelper;
 import org.rajawali3d.Object3D;
 import org.rajawali3d.materials.Material;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Kevin on 10/15/2017.
  */
 public class Piece extends Cell {
 
-    private final Object3D obj;
+    //list of valid moves by this piece
+    private List<Cell> moves;
 
-    private final Material material;
+    private final Object3D obj;
 
     private final Type type;
 
-    //is the piece in a valid place
-    private boolean valid = false;
+    //has this piece moved yet?
+    private boolean moved = false;
 
     public enum Type {
         Pawn(R.raw.pawn_stl),
@@ -41,38 +45,14 @@ public class Piece extends Cell {
         }
     }
 
-    //if moving this piece what is the current coordinates
-    private int moveCol, moveRow;
-
     public Piece(Object3D obj, Type type, float col, float row) {
 
         this.obj = obj;
         this.type = type;
-        this.material = obj.getMaterial();
 
         //assign location
         super.setCol(col);
         super.setRow(row);
-    }
-
-    public void setMoveCol(final int moveCol) {
-        this.moveCol = moveCol;
-    }
-
-    public void setMoveRow(final int moveRow) {
-        this.moveRow = moveRow;
-    }
-
-    public int getMoveCol() {
-        return this.moveCol;
-    }
-
-    public int getMoveRow() {
-        return this.moveRow;
-    }
-
-    public Material getMaterial() {
-        return this.material;
     }
 
     public Object3D getObj() {
@@ -83,34 +63,92 @@ public class Piece extends Cell {
         return this.type;
     }
 
-    public boolean checkValid(Player player, Player opponent) {
-
-        //figure out where we are
-        final int col = PlayerHelper.getCol(getObj().getX());
-        final int row = PlayerHelper.getRow(getObj().getZ());
-
-        boolean tmp = true;
-
-        for (int i = 0; i < player.getPieces().size(); i++) {
-
-            Piece piece = player.getPieces().get(i);
-
-            //don't check the current piece
-            if (piece.getCol() == getCol() && piece.getRow() == getRow())
-                continue;
-
-            if (piece.getCol() == col && piece.getRow() == row) {
-                tmp = false;
-                break;
-            }
-        }
-
-        this.valid = tmp;
-
-        return isValid();
+    public void setMoved(final boolean moved) {
+        this.moved = moved;
     }
 
-    public boolean isValid() {
-        return this.valid;
+    public boolean hasMoved() {
+        return this.moved;
+    }
+
+    public List<Cell> getMoves(Player player, Player opponent) {
+
+        if (this.moves == null)
+            this.moves = new ArrayList<>();
+
+        //clear any existing moves
+        this.moves.clear();
+
+        //the moves will depend on the chess piece type
+        switch (getType()) {
+
+            case Pawn:
+
+                if (player.hasDirection(Player.Direction.North)) {
+
+                    //pawn can move forward as long as there is no piece in front of it
+                    if (PlayerHelper.hasBounds(getCol(), getRow() - 1) && !player.hasPiece(getCol(), getRow() - 1) && !opponent.hasPiece(getCol(), getRow() - 1))
+                        moves.add(new Cell(getCol(), getRow() - 1));
+
+                    //if this is the first move the pawn can move 2 spaces
+                    if (PlayerHelper.hasBounds(getCol(), getRow() - 2) && !hasMoved() && !player.hasPiece(getCol(), getRow() - 2) && !opponent.hasPiece(getCol(), getRow() - 2))
+                        moves.add(new Cell(getCol(), getRow() - 2));
+
+                    //if there is an opponent piece diagonally we can capture
+                    if (opponent.hasPiece(getCol() - 1, getRow() - 1))
+                        moves.add(new Cell(getCol() - 1, getRow() - 1));
+                    if (opponent.hasPiece(getCol() + 1, getRow() - 1))
+                        moves.add(new Cell(getCol() + 1, getRow() - 1));
+
+                } else {
+
+                    //pawn can move forward as long as there is no piece in front of it
+                    if (PlayerHelper.hasBounds(getCol(), getRow() + 1) && !player.hasPiece(getCol(), getRow() + 1) && !opponent.hasPiece(getCol(), getRow() + 1))
+                        moves.add(new Cell(getCol(), getRow() + 1));
+
+                    //if this is the first move the pawn can move 2 spaces
+                    if (PlayerHelper.hasBounds(getCol(), getRow() + 2) && !hasMoved() && !player.hasPiece(getCol(), getRow() + 2) && !opponent.hasPiece(getCol(), getRow() + 2))
+                        moves.add(new Cell(getCol(), getRow() + 2));
+
+                    //if there is an opponent piece diagonally we can capture
+                    if (opponent.hasPiece(getCol() - 1, getRow() + 1))
+                        moves.add(new Cell(getCol() - 1, getRow() + 1));
+                    if (opponent.hasPiece(getCol() + 1, getRow() + 1))
+                        moves.add(new Cell(getCol() + 1, getRow() + 1));
+
+                }
+                break;
+
+            case Rook:
+                break;
+
+            case Queen:
+                break;
+
+            case King:
+                break;
+
+            case Bishop:
+                break;
+
+            case Knight:
+                break;
+        }
+
+        return moves;
+    }
+
+    public boolean hasTarget(List<Object3D> targets) {
+
+        for (int i = 0; i < targets.size(); i++) {
+
+            double col = PlayerHelper.getCol(targets.get(i).getX());
+            double row = PlayerHelper.getRow(targets.get(i).getZ());
+
+            if (super.hasLocation(col, row))
+                return true;
+        }
+
+        return false;
     }
 }

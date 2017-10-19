@@ -93,9 +93,17 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             return;
 
         //select our chess piece
-        getPlayers().select(object3D);
-    }
+        if (getPlayers().getSelected() == null) {
 
+            //set our selection
+            getPlayers().select(this, object3D);
+
+        } else {
+
+            //place at object (if possible)
+            getPlayers().place(this, object3D);
+        }
+    }
 
     @Override
     public void onTouchEvent(MotionEvent event){
@@ -114,17 +122,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
                 //we can only select a piece if 1 finger is on the screen
                 if (fingers == 1) {
 
-                    if (getPlayers().getSelected() == null) {
-
-                        //if no piece selected, let's see if we selected a piece
-                        getObjectPicker().getObjectAt(x, y);
-
-                    } else {
-
-                        //if the player has a selected piece, let's try to place it
-                        getPlayers().place();
-
-                    }
+                    //if no piece selected, let's see if we selected a piece
+                    getObjectPicker().getObjectAt(x, y);
                 }
 
                 //keep track of how many fingers we have touching the screen
@@ -146,7 +145,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
                     return;
 
                 //move our piece, if exists
-                getPlayers().move(this, event.getX(), event.getY());
+                //getPlayers().move(this, event.getX(), event.getY());
                 break;
         }
     }

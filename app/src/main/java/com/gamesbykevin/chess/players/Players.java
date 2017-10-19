@@ -1,5 +1,6 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.activity.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
@@ -9,7 +10,9 @@ import org.rajawali3d.Object3D;
 import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.methods.DiffuseMethod;
 import org.rajawali3d.materials.textures.Texture;
-import org.rajawali3d.renderer.Renderer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Kevin on 10/17/2017.
@@ -25,6 +28,16 @@ public class Players {
     private Material textureBlack;
     private Material textureHighlight;
     private Material textureInvalid;
+    private Material textureValid;
+
+    //our highlighted selection to place for all valid moves
+    private Object3D selection;
+
+    //where we want to move our chess piece to
+    private Object3D target;
+
+    //list of targets to choose from
+    private List<Object3D> targets;
 
     /**
      * These are the different kinds of game modes
@@ -48,6 +61,9 @@ public class Players {
 
         //assign the mode of game play
         this.mode = mode;
+
+        //create list of target destinations
+        this.targets = new ArrayList<>();
 
         //player 1 always starts first
         this.player1Turn = true;
@@ -88,17 +104,24 @@ public class Players {
         PlayerHelper.reset(getPlayer2(), renderer, getTextureBlack());
 
         //register all the chess pieces as click-able so we can select if needed for the humans
-        if (getPlayer1().isHuman()) {
-            for (Piece piece : getPlayer1().getPieces()) {
-                renderer.getObjectPicker().registerObject(piece.getObj());
-            }
+        for (Piece piece : getPlayer1().getPieces()) {
+            renderer.getObjectPicker().registerObject(piece.getObj());
         }
 
-        if (getPlayer2().isHuman()) {
-            for (Piece piece : getPlayer2().getPieces()) {
-                renderer.getObjectPicker().registerObject(piece.getObj());
-            }
+        for (Piece piece : getPlayer2().getPieces()) {
+            renderer.getObjectPicker().registerObject(piece.getObj());
         }
+
+        //load the valid texture
+        PlayerHelper.loadSelected(this, renderer, getTextureValid());
+    }
+
+    public void setSelection(final Object3D selection) {
+        this.selection = selection;
+    }
+
+    public Object3D getSelection() {
+        return this.selection;
     }
 
     private void createMaterials() {
@@ -129,6 +152,12 @@ public class Players {
             this.textureInvalid.setColorInfluence(0);
             this.textureInvalid.addTexture(new Texture("textureInvalid", R.drawable.invalid));
 
+            this.textureValid = new Material();
+            this.textureValid.enableLighting(true);
+            this.textureValid.setDiffuseMethod(new DiffuseMethod.Lambert());
+            this.textureValid.setColorInfluence(0);
+            this.textureValid.addTexture(new Texture("textureValid", R.drawable.valid));
+
         } catch (Exception e) {
             UtilityHelper.handleException(e);
         }
@@ -154,6 +183,10 @@ public class Players {
         return this.textureInvalid;
     }
 
+    public Material getTextureValid() {
+        return this.textureValid;
+    }
+
     public Player getPlayer1() {
         return this.player1;
     }
@@ -172,14 +205,14 @@ public class Players {
         if (getSelected() != null) {
 
             //restore the normal texture
-            getSelected().getObj().setMaterial(getSelected().getMaterial());
+            getSelected().getObj().setMaterial((player1Turn) ? getTextureWhite() : getTextureBlack());
 
             //we no longer have a selected piece
             this.selected = null;
         }
     }
 
-    public void select(Object3D object3D) {
+    public void select(BasicRenderer renderer, Object3D object3D) {
 
         //if we previously have a selected piece don't interact with anything else
         if (getSelected() != null)
@@ -211,81 +244,136 @@ public class Players {
                 }
             }
         }
+
+        //if we selected a piece we need to calculate the moves
+        if (found) {
+
+            //get list of valid moves
+            List<Cell> moves = getSelected().getMoves(player1Turn ? getPlayer1() : getPlayer2(), player1Turn ? getPlayer2() : getPlayer1());
+
+            //make sure moves exist for the chess piece
+            if (moves.isEmpty()) {
+
+                //if no moves, de-select the piece
+                deselect();
+
+            } else {
+
+                //add a target for every possible move
+                for (int i = 0; i < moves.size(); i++) {
+
+                    Object3D obj = getSelection().clone();
+
+                    //place at the correct location
+                    obj.setX(PlayerHelper.getCoordinate((int) moves.get(i).getCol()));
+                    obj.setY(PlayerHelper.Y + .01);
+                    obj.setZ(PlayerHelper.getCoordinate((int) moves.get(i).getRow()));
+
+                    //add to targets list
+                    this.targets.add(obj);
+
+                    //add child to scene
+                    renderer.getCurrentScene().addChild(obj);
+
+                    //register the object to be chosen
+                    renderer.getObjectPicker().registerObject(obj);
+                }
+            }
+        }
     }
 
     /**
      * Place our selected piece
      */
-    public void place() {
+    public void place(BasicRenderer renderer, Object3D object3D) {
 
-        //make sure we can place piece here
-        getSelected().checkValid(player1Turn ? getPlayer1() : getPlayer2(), player1Turn ? getPlayer2() : getPlayer1());
+        //check if we selected a target
+        for (int i = 0; i < targets.size(); i++) {
 
-        if (!getSelected().isValid())
-            return;
+            //get the current 3d object
+            Object3D tmp = targets.get(i);
 
-        //determine which location we are closest to
-        final int col = PlayerHelper.getCol(getSelected().getObj().getX());
-        final int row = PlayerHelper.getRow(getSelected().getObj().getZ());
+            //if the object matches we know where to go
+            if (tmp.equals(object3D)) {
 
-        //place piece in that position
-        getSelected().getObj().setX(PlayerHelper.getCoordinate(col));
-        getSelected().getObj().setZ(PlayerHelper.getCoordinate(row));
+                //move the piece accordingly
+                movePiece(renderer, object3D);
 
-        //update the location
-        getSelected().setCol(col);
-        getSelected().setRow(row);
+                //exit the loop
+                break;
+            }
+        }
 
-        //de select the piece
-        deselect();
+        //get the player based on the current turn
+        Player opponent = (player1Turn) ? getPlayer2() : getPlayer1();
 
-        //switch turns
-        player1Turn = !player1Turn;
+        //check if we selected an opponent piece
+        for (int i = 0; i < opponent.getPieces().size(); i++) {
 
-        if (player1Turn) {
+            Piece piece = opponent.getPieces().get(i);
 
-        } else {
+            if (piece.getObj().equals(object3D)) {
 
+                //also make sure piece is part of the targets
+                if (piece.hasTarget(targets)) {
+
+                    //capture the piece
+                    capture(renderer, opponent, object3D);
+
+                    //move the piece
+                    movePiece(renderer, object3D);
+
+                    //exit the loop
+                    break;
+
+                }
+            }
         }
     }
 
-    public void move(BasicRenderer renderer, final float x, final float y) {
+    private void capture(BasicRenderer renderer, Player player, Object3D object3D) {
 
-        //don't continue if we don't have a selected piece
-        if (getSelected() == null)
-            return;
+        //remove from object picker
+        renderer.getObjectPicker().unregisterObject(object3D);
 
-        final double y1 = getSelected().getObj().getY();
-        getSelected().getObj().setScreenCoordinates(x, y, renderer.getViewportWidth(), renderer.getViewportHeight(), renderer.getCurrentCamera().getZ());
-        getSelected().getObj().setZ(getSelected().getObj().getY());
-        getSelected().getObj().setY(y1);
+        //remove from scene
+        renderer.getCurrentScene().removeChild(object3D);
 
-        final int col = PlayerHelper.getCol(getSelected().getObj().getX());
-        final int row = PlayerHelper.getRow(getSelected().getObj().getZ());
+        //remove from the players pieces
+        for (int i = 0; i < player.getPieces().size(); i++) {
 
-        //keep piece in bounds
-        if (col == -1 || row == -1)
-            PlayerHelper.correctPiece(getSelected());
+            if (player.getPieces().get(i).getObj().equals(object3D)) {
+                player.getPieces().remove(i);
+                break;
+            }
+        }
+    }
 
-        //don't continue if we are at the same position
-        if (col == getSelected().getMoveCol() && row == getSelected().getMoveRow())
-            return;
+    private void movePiece(BasicRenderer renderer, Object3D object3D) {
 
-        //check if we are currently valid
-        boolean validPrevious = getSelected().isValid();
+        //place the selected piece at the position
+        getSelected().getObj().setPosition(object3D.getPosition());
 
-        boolean valid = true;
+        //update the location of the selection
+        getSelected().setCol(PlayerHelper.getCol(object3D.getX()));
+        getSelected().setRow(PlayerHelper.getRow(object3D.getZ()));
 
-        if (player1Turn) {
-            valid = getSelected().checkValid(getPlayer1(), getPlayer2());
-        } else {
-            valid = getSelected().checkValid(getPlayer2(), getPlayer1());
+        //flag the piece as moved
+        getSelected().setMoved(true);
+
+        //de-select the piece
+        deselect();
+
+        //remove all targets from the scene
+        for (int x = 0; x < targets.size(); x++) {
+            renderer.getObjectPicker().unregisterObject(targets.get(x));
+            renderer.getCurrentScene().removeChild(targets.get(x));
         }
 
-        //if our state hasn't changed no need to continue
-        if ((valid && validPrevious) || (!valid && !validPrevious))
-            return;
+        //clear list
+        targets.clear();
 
-        getSelected().getObj().setMaterial((valid) ? getTextureHighlight() : getTextureInvalid());
+        //switch turns
+        player1Turn = !player1Turn;
     }
 }

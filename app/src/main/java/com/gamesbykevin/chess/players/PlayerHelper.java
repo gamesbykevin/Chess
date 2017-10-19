@@ -1,5 +1,6 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -15,7 +16,7 @@ import org.rajawali3d.renderer.Renderer;
 public class PlayerHelper {
 
     //default height for all pieces so they look like they are placed on the board
-    private static final float Y = .075f;
+    public static final float Y = .075f;
 
     //size of a chess board
     private static final int COLS = 8;
@@ -41,6 +42,10 @@ public class PlayerHelper {
             piece.getObj().setZ(getCoordinate(0));
         if (piece.getObj().getZ() > COORDINATE_MAX)
             piece.getObj().setZ(getCoordinate(ROWS - 1));
+    }
+
+    public static boolean hasBounds(double col, double row) {
+        return (col >= 0 && col < COLS && row >= 0 && row < ROWS);
     }
 
     public static int getRow(final double coordinate) {
@@ -146,6 +151,33 @@ public class PlayerHelper {
 
             //add piece to the player
             player.getPieces().add(new Piece(obj, type, getCol(x), getRow(z)));
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
+    }
+
+    protected static void loadSelected(Players players, Renderer renderer, Material material) {
+
+        try {
+            //parse our 3d model
+            LoaderSTL stlParser = new LoaderSTL(renderer.getContext().getResources(), renderer.getTextureManager(), R.raw.valid_stl);
+            stlParser.parse();
+
+            //get our 3d object
+            Object3D obj = stlParser.getParsedObject();
+
+            //rotate piece 90 degrees so it is laying down
+            obj.rotate(Vector3.Axis.X, 90);
+
+            //our model is too large so we need to shrink it
+            obj.setScale(.1);
+
+            //set the texture material
+            obj.setMaterial(material);
+
+            //assign accordingly
+            players.setSelection(obj);
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
