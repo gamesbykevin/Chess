@@ -69,7 +69,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         try {
 
             //create the players and reset the pieces
-            this.players = new Players(Players.Mode.HumVsHum);
+            //this.players = new Players(Players.Mode.CpuVsCpu);
+            this.players = new Players(Players.Mode.HumVsCpu);
             this.players.reset(this);
 
         } catch (Exception e) {
@@ -112,40 +113,33 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (!init)
             return;
 
-        final float x = event.getRawX();
-        final float y = event.getRawY();
+        //if a chess piece is moving, we can't do anything
+        if (getPlayers().isMoving())
+            return;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
+
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
 
                 //we can only select a piece if 1 finger is on the screen
                 if (fingers == 1) {
 
-                    //if no piece selected, let's see if we selected a piece
-                    getObjectPicker().getObjectAt(x, y);
+                    //let's see if we selected a 3d model
+                    getObjectPicker().getObjectAt(event.getRawX(), event.getY());
                 }
 
                 //keep track of how many fingers we have touching the screen
                 fingers--;
-
                 break;
 
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-
                 //keep track of how many fingers we have touching the screen
                 fingers++;
                 break;
 
             case MotionEvent.ACTION_MOVE:
-
-                //we can't move if more than 1 finger on the screen
-                if (fingers != 1)
-                    return;
-
-                //move our piece, if exists
-                //getPlayers().move(this, event.getX(), event.getY());
                 break;
         }
     }
@@ -178,7 +172,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     private void setupCamera(Object3D obj) {
 
         this.camera = new TestArcballCamera(context, view, obj);
-        this.camera.setPosition(2, 2, 1);
+        this.camera.setPosition(1.6, 1.6, 0);
 
         enableRotateCamera(rotate);
     }
@@ -190,6 +184,11 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
+
+        //update the players if needed
+        getPlayers().update(this);
+
+        //call parent to render objects
         super.onRender(elapsedTime, deltaTime);
 
         //flag that the board has been initialized

@@ -29,6 +29,16 @@ public abstract class Player {
         this.pieces = new ArrayList<>();
     }
 
+    /**
+     * Players need to implement different logic upon update
+     */
+    public abstract void update(Players players);
+
+    /**
+     * In case we need to reset anything
+     */
+    public abstract void reset();
+
     public boolean hasDirection(final Direction direction) {
         return (this.direction == direction);
     }
@@ -37,17 +47,40 @@ public abstract class Player {
         return this.human;
     }
 
-    public Object3D getPiece(double col, double row) {
+    public Piece getPiece(double col, double row) {
 
-        for (int i = 0; i < getPieces().size(); i++) {
+        for (int i = 0; i < getPieceCount(); i++) {
 
-            Piece piece = getPieces().get(i);
+            Piece piece = getPiece(i, true);
 
-            if (piece.hasLocation(col, row))
-                return piece.getObj();
+            if (!piece.isCaptured() && piece.hasLocation(col, row))
+                return piece;
         }
 
         return null;
+    }
+
+    public Piece getPiece(int index, boolean ignore) {
+
+        Piece piece = getPieces().get(index);
+
+        if (ignore) {
+            return piece;
+        } else {
+            if (piece.isCaptured()) {
+                return null;
+            } else {
+                return piece;
+            }
+        }
+    }
+
+    public void removeAllPieces() {
+        getPieces().clear();
+    }
+
+    public void addPiece(Piece piece) {
+        getPieces().add(piece);
     }
 
     public boolean hasPiece(double col, double row) {
@@ -55,7 +88,36 @@ public abstract class Player {
         return (getPiece(col, row) != null);
     }
 
-    public List<Piece> getPieces() {
+    public int getPieceCount() {
+        return this.pieces.size();
+    }
+
+    private List<Piece> getPieces() {
         return this.pieces;
+    }
+
+    public int calculateScore() {
+
+        //keep track of our score
+        int score = 0;
+
+        //check
+        for (int index = 0; index < getPieceCount(); index++) {
+
+            Piece piece = getPiece(index, false);
+
+            //add each chess piece score to the total
+            if (piece != null) {
+
+                //add to the score based on the piece type
+                score += piece.getType().getScore();
+
+                //also add bonus score depending where the piece is located
+                score += Piece.BONUS_SCORE[(int)piece.getRow()][(int)piece.getCol()];
+            }
+        }
+
+        //return our calculated score
+        return score;
     }
 }

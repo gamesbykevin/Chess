@@ -33,11 +33,14 @@ public class Players {
     //our highlighted selection to place for all valid moves
     private Object3D selection;
 
-    //where we want to move our chess piece to
-    private Object3D target;
-
     //list of targets to choose from
     private List<Object3D> targets;
+
+    //list of valid moves
+    private List<Cell> moves;
+
+    //are we moving a chess piece?
+    public boolean moving = false;
 
     /**
      * These are the different kinds of game modes
@@ -66,7 +69,7 @@ public class Players {
         this.targets = new ArrayList<>();
 
         //player 1 always starts first
-        this.player1Turn = true;
+        setPlayer1Turn(true);
 
         switch (getMode()) {
 
@@ -95,7 +98,18 @@ public class Players {
         createMaterials();
     }
 
+    public boolean isPlayer1Turn() {
+        return this.player1Turn;
+    }
+
+    public void setPlayer1Turn(final boolean player1Turn) {
+        this.player1Turn = player1Turn;
+    }
+
     public void reset(BasicRenderer renderer) {
+
+        //load the valid texture and save
+        PlayerHelper.loadSelected(this, renderer, getTextureValid());
 
         //player 1 always moves north
         PlayerHelper.reset(getPlayer1(), renderer, getTextureWhite());
@@ -104,23 +118,28 @@ public class Players {
         PlayerHelper.reset(getPlayer2(), renderer, getTextureBlack());
 
         //register all the chess pieces as click-able so we can select if needed for the humans
-        for (Piece piece : getPlayer1().getPieces()) {
-            renderer.getObjectPicker().registerObject(piece.getObj());
+        for (int index = 0; index < getPlayer1().getPieceCount(); index++) {
+            renderer.getObjectPicker().registerObject(getPlayer1().getPiece(index, true).getObject3D());
         }
 
-        for (Piece piece : getPlayer2().getPieces()) {
-            renderer.getObjectPicker().registerObject(piece.getObj());
+        for (int index = 0; index < getPlayer2().getPieceCount(); index++) {
+            renderer.getObjectPicker().registerObject(getPlayer2().getPiece(index, true).getObject3D());
         }
-
-        //load the valid texture
-        PlayerHelper.loadSelected(this, renderer, getTextureValid());
     }
 
-    public void setSelection(final Object3D selection) {
+    public void setMoving(final boolean moving) {
+        this.moving = moving;
+    }
+
+    public boolean isMoving() {
+        return this.moving;
+    }
+
+    public void setBoardSelection(final Object3D selection) {
         this.selection = selection;
     }
 
-    public Object3D getSelection() {
+    public Object3D getBoardSelection() {
         return this.selection;
     }
 
@@ -199,13 +218,17 @@ public class Players {
         return this.selected;
     }
 
+    protected void setSelected(final Piece selected) {
+        this.selected = selected;
+    }
+
     private void deselect() {
 
         //make sure we have a selected piece
         if (getSelected() != null) {
 
             //restore the normal texture
-            getSelected().getObj().setMaterial((player1Turn) ? getTextureWhite() : getTextureBlack());
+            getSelected().getObject3D().setMaterial(isPlayer1Turn() ? getTextureWhite() : getTextureBlack());
 
             //we no longer have a selected piece
             this.selected = null;
@@ -221,22 +244,18 @@ public class Players {
         //have we found a piece?
         boolean found = false;
 
-        //if we haven't found a piece yet, and it is the current player's turn, and the player is human
-        if (!found && player1Turn && getPlayer1().isHuman()) {
-            for (Piece piece : player1.getPieces()) {
-                if (piece.getObj().equals(object3D)) {
-                    selected = piece;
-                    object3D.setMaterial(getTextureHighlight());
-                    found = true;
-                    break;
-                }
-            }
-        }
+        Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
+        Player opponent = isPlayer1Turn() ? getPlayer2() : getPlayer1();
 
         //if we haven't found a piece yet, and it is the current player's turn, and the player is human
-        if (!found && !player1Turn && getPlayer2().isHuman()) {
-            for (Piece piece : player2.getPieces()) {
-                if (piece.getObj().equals(object3D)) {
+        if (player.isHuman()) {
+
+            //check all the pieces
+            for (int index = 0; index < player.getPieceCount(); index++) {
+
+                Piece piece = player.getPiece(index, false);
+
+                if (piece != null && piece.getObject3D().equals(object3D)) {
                     selected = piece;
                     object3D.setMaterial(getTextureHighlight());
                     found = true;
@@ -249,10 +268,10 @@ public class Players {
         if (found) {
 
             //get list of valid moves
-            List<Cell> moves = getSelected().getMoves(player1Turn ? getPlayer1() : getPlayer2(), player1Turn ? getPlayer2() : getPlayer1());
+            this.moves = getSelected().getMoves(player, opponent);
 
             //make sure moves exist for the chess piece
-            if (moves.isEmpty()) {
+            if (this.moves.isEmpty()) {
 
                 //if no moves, de-select the piece
                 deselect();
@@ -260,13 +279,13 @@ public class Players {
             } else {
 
                 //add a target for every possible move
-                for (int i = 0; i < moves.size(); i++) {
+                for (int i = 0; i < this.moves.size(); i++) {
 
-                    Object3D obj = getSelection().clone();
+                    Object3D obj = getBoardSelection().clone();
 
                     //place at the correct location
                     obj.setX(PlayerHelper.getCoordinate((int) moves.get(i).getCol()));
-                    obj.setY(PlayerHelper.Y + .01);
+                    obj.setY(PlayerHelper.Y + .001);
                     obj.setZ(PlayerHelper.getCoordinate((int) moves.get(i).getRow()));
 
                     //add to targets list
@@ -287,79 +306,33 @@ public class Players {
      */
     public void place(BasicRenderer renderer, Object3D object3D) {
 
-        //did we capture a piece
-        boolean captured = false;
+        //get the location where this object is at
+        final int col = PlayerHelper.getCol(object3D.getX());
+        final int row = PlayerHelper.getRow(object3D.getZ());
 
-        //get the player based on the current turn
-        Player opponent = (player1Turn) ? getPlayer2() : getPlayer1();
+        //check if we selected a valid move
+        for (int i = 0; i < this.moves.size(); i++) {
 
-        //check if we selected an opponent piece to capture it
-        for (int i = 0; i < opponent.getPieces().size(); i++) {
+            //get the possible move
+            Cell cell = this.moves.get(i);
 
-            Piece piece = opponent.getPieces().get(i);
-
-            if (piece.getObj().equals(object3D)) {
-
-                //also make sure the current piece is part of the targets
-                if (piece.hasTarget(targets)) {
-
-                    //move the piece
-                    movePiece(renderer, piece.getObj());
-
-                    //remove from object picker
-                    renderer.getObjectPicker().unregisterObject(object3D);
-
-                    //remove from scene
-                    renderer.getCurrentScene().removeChild(object3D);
-
-                    //remove from our opponent
-                    opponent.getPieces().remove(i);
-
-                    //flag that we captured a piece
-                    captured = true;
-
-                    //exit the loop
-                    break;
-                }
-            }
-        }
-
-        //if no pieces were captured, check if we selected to move to a target
-        if (!captured) {
-
-            //check if we selected a target
-            for (int i = 0; i < targets.size(); i++) {
-
-                //get the current 3d object
-                Object3D tmp = targets.get(i);
-
-                //if the object matches we know where to go
-                if (tmp.equals(object3D)) {
-
-                    //move the piece accordingly
-                    movePiece(renderer, object3D);
-
-                    //exit the loop
-                    break;
-                }
-            }
+            //make sure we are making a valid move
+            if (col == (int)cell.getCol() && row == (int)cell.getRow())
+                movePiece(renderer, object3D);
         }
     }
 
     private void movePiece(BasicRenderer renderer, Object3D object3D) {
 
-        //place the selected piece at the position
-        getSelected().getObj().setPosition(object3D.getPosition());
-
-        //update the location of the selection
+        //update the location of the selection on the chess board
         getSelected().setCol(PlayerHelper.getCol(object3D.getX()));
         getSelected().setRow(PlayerHelper.getRow(object3D.getZ()));
 
+        //assign our destination
+        getSelected().setDestinationCoordinates((float)object3D.getX(), (float)object3D.getZ());
+
         //flag the piece as moved
         getSelected().setMoved(true);
-
-        //de-select the piece
-        deselect();
 
         //remove all targets from the scene
         for (int x = 0; x < targets.size(); x++) {
@@ -370,7 +343,81 @@ public class Players {
         //clear list
         targets.clear();
 
-        //switch turns
-        player1Turn = !player1Turn;
+        //flag that we are moving a piece
+        setMoving(true);
+    }
+
+    public void updatePiece(BasicRenderer renderer) {
+
+        if (getSelected() != null && !getSelected().hasDestination()) {
+
+            getSelected().move();
+
+            //if we have the destination, can we capture an opponent piece
+            if (getSelected().hasDestination()) {
+
+                //check if we captured an opponent piece during this move
+                Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
+                Player opponent = isPlayer1Turn() ? getPlayer2() : getPlayer1();
+
+                //check if we selected an opponent piece to capture it
+                for (int i = 0; i < opponent.getPieceCount(); i++) {
+
+                    //get the current chess piece
+                    Piece piece = opponent.getPiece(i, false);
+
+                    if (piece == null)
+                        continue;
+
+                    //if the opponents piece is at the same location, we can capture
+                    if ((int)piece.getCol() == (int)getSelected().getCol() &&
+                        (int)piece.getRow() == (int)getSelected().getRow()) {
+
+                        //remove from object picker
+                        renderer.getObjectPicker().unregisterObject(piece.getObject3D());
+
+                        //remove from scene
+                        renderer.getCurrentScene().removeChild(piece.getObject3D());
+
+                        //flag opponent piece captured
+                        piece.setCaptured(true);
+
+                        //no need to check any other pieces
+                        break;
+                    }
+                }
+
+                //we are no longer moving
+                setMoving(false);
+
+                //we are at our destination, de-select the chess piece
+                deselect();
+
+                //reset
+                player.reset();
+
+                //switch turns
+                setPlayer1Turn(!isPlayer1Turn());
+            }
+        }
+    }
+
+    public void update(BasicRenderer renderer) {
+
+        if (isMoving()) {
+
+            updatePiece(renderer);
+
+        } else {
+
+            //get the current player
+            Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
+            Player opponent = isPlayer1Turn() ? getPlayer2() : getPlayer1();
+
+            //if the player is not human, the ai will update
+            if (!player.isHuman()) {
+                player.update(this);
+            }
+        }
     }
 }
