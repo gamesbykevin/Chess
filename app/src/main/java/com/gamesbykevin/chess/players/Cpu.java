@@ -1,5 +1,7 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.chess.piece.Piece;
+
 /**
  * Created by Kevin on 10/17/2017.
  */
@@ -25,11 +27,11 @@ public class Cpu extends Player {
     @Override
     public void update(Players players) {
 
-        //store the current turn
-        boolean player1Turn = new Boolean(players.isPlayer1Turn());
-
         //did we calculate our move yet?
         if (!calculate) {
+
+            //store the current turn
+            boolean player1Turn = new Boolean(players.isPlayer1Turn());
 
             //flag calculate true
             calculate = true;
@@ -37,27 +39,30 @@ public class Cpu extends Player {
             //get the best move
             PlayerHelper.Move bestMove = PlayerHelper.getBestMove(players);
 
+            //get the piece for the move
+            Piece piece = getPiece(bestMove.sourceCol, bestMove.sourceRow);
+
             //make our best move
-            bestMove.piece.setCol(bestMove.destCol);
-            bestMove.piece.setRow(bestMove.destRow);
+            piece.setCol(bestMove.destCol);
+            piece.setRow(bestMove.destRow);
 
             //assign our destination coordinates
-            bestMove.piece.setDestinationCoordinates(
+            piece.setDestinationCoordinates(
                 PlayerHelper.getCoordinate(bestMove.destCol),
                 PlayerHelper.getCoordinate(bestMove.destRow)
             );
 
             //flag that we moved the piece at least once
-            bestMove.piece.setMoved(true);
+            piece.setMoved(true);
 
             //flag that the cpu is moving a piece
             players.setMoving(true);
 
             //also mark this as our selected piece
-            players.setSelected(bestMove.piece);
-        }
+            players.setSelected(piece);
 
-        //restore the correct player's turn
-        players.setPlayer1Turn(player1Turn);
+            //restore the correct player's turn
+            players.setPlayer1Turn(player1Turn);
+        }
     }
 }

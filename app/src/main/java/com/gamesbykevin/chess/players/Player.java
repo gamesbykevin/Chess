@@ -47,7 +47,7 @@ public abstract class Player {
         return this.human;
     }
 
-    public Piece getPiece(double col, double row) {
+    public Piece getPiece(int col, int row) {
 
         for (int i = 0; i < getPieceCount(); i++) {
 
@@ -83,7 +83,7 @@ public abstract class Player {
         getPieces().add(piece);
     }
 
-    public boolean hasPiece(double col, double row) {
+    public boolean hasPiece(int col, int row) {
 
         return (getPiece(col, row) != null);
     }

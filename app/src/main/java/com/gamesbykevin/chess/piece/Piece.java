@@ -10,8 +10,6 @@ import org.rajawali3d.Object3D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.gamesbykevin.chess.players.PlayerHelper.COLS;
-import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
 
 /**
@@ -155,7 +153,7 @@ public class Piece extends Cell {
                         moves.add(new Cell(startCol, startRow - 1));
 
                     //if this is the first move the pawn can move 2 spaces as long as nothing is in front of it
-                    if (PlayerHelper.hasBounds(startCol, startRow - 2) && !hasMoved() && !player.hasPiece(startCol, startRow - 2) && !opponent.hasPiece(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 1) && !opponent.hasPiece(startCol, startRow - 1))
+                    if (PlayerHelper.hasBounds(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 2) && !opponent.hasPiece(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 1) && !opponent.hasPiece(startCol, startRow - 1) && !hasMoved())
                         moves.add(new Cell(startCol, startRow - 2));
 
                     //if there is an opponent piece diagonally we can capture

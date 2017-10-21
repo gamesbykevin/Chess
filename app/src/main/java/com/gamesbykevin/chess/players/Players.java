@@ -288,6 +288,10 @@ public class Players {
                     obj.setY(PlayerHelper.Y + .001);
                     obj.setZ(PlayerHelper.getCoordinate((int) moves.get(i).getRow()));
 
+                    obj.setAlpha(0);
+
+                    //obj.setVisible(false);
+
                     //add to targets list
                     this.targets.add(obj);
 

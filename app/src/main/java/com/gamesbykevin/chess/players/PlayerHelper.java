@@ -211,8 +211,7 @@ public class PlayerHelper {
             executeMove(move, players);
 
             //calculate the score
-            //int tmpScore = -1 * negaMax(DEFAULT_DEPTH, players);
-            int tmpScore = negaMax(DEFAULT_DEPTH, players);
+            final int tmpScore = -1 * negaMax(DEFAULT_DEPTH, players);
 
             //undo the previous move
             undoMove(move, players);
@@ -227,6 +226,9 @@ public class PlayerHelper {
                 bestMove = move;
             }
         }
+
+        moves.clear();
+        moves = null;
 
         //return the best move
         return bestMove;
@@ -253,8 +255,7 @@ public class PlayerHelper {
             executeMove(currentMove, players);
 
             //calculate the score
-            //int tmpScore = -1 * negaMax(depth - 1, players);
-            int tmpScore = negaMax(depth - 1, players);
+            final int tmpScore = -1 * negaMax(depth - 1, players);
 
             //undo the move
             undoMove(currentMove, players);
@@ -263,6 +264,9 @@ public class PlayerHelper {
             if (tmpScore > bestScore)
                 bestScore = tmpScore;
         }
+
+        currentMoves.clear();
+        currentMoves = null;
 
         //return the best score we found
         return bestScore;
@@ -293,8 +297,6 @@ public class PlayerHelper {
                 tmp.sourceRow = (int)piece.getRow();
                 tmp.destCol = (int)move.getCol();
                 tmp.destRow = (int)move.getRow();
-                tmp.pieceCaptured = opponent.getPiece(tmp.destCol, tmp.destRow);
-                tmp.piece = piece;
 
                 //add the move to the list
                 options.add(tmp);
@@ -306,23 +308,46 @@ public class PlayerHelper {
 
     private static void executeMove(Move move, Players players) {
 
-        //place at the destination
-        move.piece.setCol(move.destCol);
-        move.piece.setRow(move.destRow);
+        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+
+        //get the player piece at the source location
+        Piece piece = player.getPiece(move.sourceCol, move.sourceRow);
+
+        //get the captured piece at the destination
+        Piece captured = opponent.getPiece(move.destCol, move.destRow);
+
+        //place at the destination (if it exists)
+        if (piece != null) {
+            piece.setCol(move.destCol);
+            piece.setRow(move.destRow);
+        }
 
         //flag the piece captured (if it exists)
-        if (move.pieceCaptured != null)
+        if (captured != null) {
+            move.pieceCaptured = captured;
             move.pieceCaptured.setCaptured(true);
+        }
 
-        //since made a move, switch turns
+        //since we made a move, switch turns
         players.setPlayer1Turn(!players.isPlayer1Turn());
     }
 
     private static void undoMove(Move move, Players players) {
 
-        //place back at the source
-        move.piece.setCol(move.sourceCol);
-        move.piece.setRow(move.sourceRow);
+        //let's try to get the piece at the destination location for player 1
+        Piece piece = players.getPlayer1().getPiece(move.destCol, move.destRow);
+        boolean player1Turn = true;
+
+        //if the piece doesn't exist it must be player 2
+        if (piece == null) {
+            piece = players.getPlayer2().getPiece(move.destCol, move.destRow);
+            player1Turn = false;
+        }
+
+        //move back to the source
+        piece.setCol(move.sourceCol);
+        piece.setRow(move.sourceRow);
 
         //flag the piece captured false (if it exists)
         if (move.pieceCaptured != null) {
@@ -331,8 +356,8 @@ public class PlayerHelper {
             move.pieceCaptured.setRow(move.destRow);
         }
 
-        //since we are to undo this move, switch turns
-        players.setPlayer1Turn(!players.isPlayer1Turn());
+        //assign the correct turn
+        players.setPlayer1Turn(player1Turn);
     }
 
     protected static class Move {
@@ -343,9 +368,6 @@ public class PlayerHelper {
 
         //the piece captured during the move (if exists)
         protected Piece pieceCaptured;
-
-        //piece involved in the move
-        protected Piece piece;
 
         protected Move() {
             //default constructor

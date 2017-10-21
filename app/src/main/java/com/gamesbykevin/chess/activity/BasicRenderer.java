@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.Players;
 
 import org.rajawali3d.Object3D;
@@ -115,6 +116,13 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //if a chess piece is moving, we can't do anything
         if (getPlayers().isMoving())
+            return;
+
+        //get the current player
+        Player player = players.isPlayer1Turn() ? getPlayers().getPlayer1() : getPlayers().getPlayer2();
+
+        //if the player isn't human, we can't select anything right now
+        if (!player.isHuman())
             return;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
