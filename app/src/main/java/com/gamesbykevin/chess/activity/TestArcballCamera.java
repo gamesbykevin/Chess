@@ -2,11 +2,14 @@ package com.gamesbykevin.chess.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.PointF;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
+import com.gamesbykevin.chess.base.Entity;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.ArcballCamera;
@@ -48,19 +51,35 @@ public class TestArcballCamera extends ArcballCamera {
     private Vector3 yAxis;
     private Vector3 zAxis;
 
+    //render object reference
+    private final BasicRenderer renderer;
+
+    //keep track when we touch down
+    private PointF location;
+
+    //how many fingers are touching the screen
+    private int fingers = 0;
+
+    /**
+     * When touching an object, the user should touch and release the screen in the same range<br>
+     * This is the maximum thresh-hold we are allowing for that event to occur
+     */
+    private static final float TOUCH_MAX = 5.0f;
+
     /**
      * constructor with no target
      */
-    public TestArcballCamera(Context context, View view) {
-        this(context, view, (Object3D) null);
+    public TestArcballCamera(BasicRenderer renderer, Context context, View view) {
+        this(renderer, context, view, (Object3D) null);
     }
 
     /**
      * default arcballCamera constructor. sets the principal camera components and
      * adds the camera main listeners
      */
-    public TestArcballCamera(Context context, View view, Object3D target) {
+    public TestArcballCamera(BasicRenderer renderer, Context context, View view, Object3D target) {
         super(context,view,target);
+        this.renderer = renderer;
         this.mContext = context;
         this.mTarget = target;
         this.mView = view;
@@ -86,6 +105,8 @@ public class TestArcballCamera extends ArcballCamera {
         this.xAxis = new Vector3(1,0,0);
         this.yAxis = new Vector3(0,1,0);
         this.zAxis = new Vector3(0,0,1);
+        this.location = new PointF();
+        this.fingers = 0;
     }
 
     /**sets the projection matrix*/
@@ -240,6 +261,54 @@ public class TestArcballCamera extends ArcballCamera {
                 //sets a touch listener
                 TestArcballCamera.this.mGestureListener = new View.OnTouchListener() {
                     public boolean onTouch(View v, MotionEvent event) {
+
+                        //determine what is happening
+                        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+
+                            case MotionEvent.ACTION_UP:
+                            case MotionEvent.ACTION_POINTER_UP:
+
+                                //keep track of how many fingers are touching the screen
+                                fingers--;
+
+                                //only 1 finger can select a chess piece
+                                if (fingers <= 0) {
+
+                                    //calculate distance
+                                    double distance = Entity.getDistance(event.getRawX(), event.getRawY(), location.x, location.y);
+
+                                    if (distance < 0)
+                                        distance = -distance;
+
+                                    //call the on touch event in our renderer
+                                    if (distance < TOUCH_MAX) {
+                                        renderer.onTouchEvent(event);
+
+                                        //don't continue
+                                        return true;
+                                    }
+                                }
+                                break;
+
+                            case MotionEvent.ACTION_DOWN:
+                            case MotionEvent.ACTION_POINTER_DOWN:
+
+                                //keep track of how many fingers are touching the screen
+                                fingers++;
+
+                                //store where we are touching the screen
+                                if (fingers == 1) {
+                                    location.x = event.getRawX();
+                                    location.y = event.getRawY();
+                                }
+                                break;
+
+                            case MotionEvent.ACTION_MOVE:
+                                break;
+                        }
+
+
+
                         //sees if it is a scale event
                         TestArcballCamera.this.mScaleDetector.onTouchEvent(event);
                         if(!TestArcballCamera.this.mIsScaling) {
@@ -275,11 +344,10 @@ public class TestArcballCamera extends ArcballCamera {
     /*scale listener*/
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         private ScaleListener() {
+
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
-//            double fov = Math.max(30.0D, Math.min(100.0D, mArcballCamera.this.mStartFOV * (1.0D / (double)detector.getScaleFactor())));
-            //scale adjusted so that the edges of the sphere dont appear in the screen
             double fov = Math.max(30.0D, Math.min(54.0D, TestArcballCamera.this.mStartFOV * (1.0D / (double)detector.getScaleFactor())));
             Log.e("SCALE", "detector scale factor "+detector.getScaleFactor());
             TestArcballCamera.this.setFieldOfView(fov);
@@ -301,6 +369,7 @@ public class TestArcballCamera extends ArcballCamera {
     /*gesture listener*/
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         private GestureListener() {
+
         }
 
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY) {

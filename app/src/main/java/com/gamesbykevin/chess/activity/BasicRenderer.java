@@ -20,8 +20,6 @@ import org.rajawali3d.util.OnObjectPickedListener;
  */
 public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
-    private int fingers = 0;
-
     private TestArcballCamera camera;
 
     private Context context;
@@ -48,6 +46,22 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         setFrameRate(60);
     }
 
+    private void addBoard() {
+
+        try {
+
+            LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, R.raw.board_obj);
+            objParser.parse();
+
+            board = objParser.getParsedObject();
+            board.setScale(.2);
+            getCurrentScene().addChild(board);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void initScene() {
 
@@ -70,8 +84,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         try {
 
             //create the players and reset the pieces
-            //this.players = new Players(Players.Mode.CpuVsCpu);
-            this.players = new Players(Players.Mode.HumVsCpu);
+            this.players = new Players(Players.Mode.CpuVsCpu);
+            //this.players = new Players(Players.Mode.HumVsCpu);
             this.players.reset(this);
 
         } catch (Exception e) {
@@ -79,7 +93,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         }
 
         //create arc ball camera to rotate around the board
-        setupCamera(board);
+        resetCamera();
     }
 
     @Override
@@ -130,21 +144,12 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
 
-                //we can only select a piece if 1 finger is on the screen
-                if (fingers == 1) {
-
-                    //let's see if we selected a 3d model
-                    getObjectPicker().getObjectAt(event.getRawX(), event.getY());
-                }
-
-                //keep track of how many fingers we have touching the screen
-                fingers--;
+                //let's see if we selected a 3d model
+                getObjectPicker().getObjectAt(event.getRawX(), event.getY());
                 break;
 
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-                //keep track of how many fingers we have touching the screen
-                fingers++;
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -160,29 +165,44 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         return this.objectPicker;
     }
 
-    public void enableRotateCamera(boolean enabled) {
-
-        this.rotate = enabled;
-
-        if (this.rotate) {
-            camera.addListeners();
-            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), camera);
-        } else {
-            camera.removeListeners();
-            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), camera);
-        }
-    }
-
     public void resetCamera() {
-        setupCamera(board);
-    }
 
-    private void setupCamera(Object3D obj) {
 
-        this.camera = new TestArcballCamera(context, view, obj);
-        this.camera.setPosition(1.6, 1.6, 0);
+        if (camera == null) {
+            this.camera = new TestArcballCamera(this, context, view, board);
+            this.camera.setPosition(1.75, 1.75, 0);
+            getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), this.camera);
+        } else {
+            //initialize the camera again
+            ((TestArcballCamera)getCurrentCamera()).initialize();
+            ((TestArcballCamera)getCurrentCamera()).setPosition(1.75, 1.75, 0);
+        }
 
-        enableRotateCamera(rotate);
+        //this.camera.;
+        //white on left
+        //this.camera.setPosition(1.75, 1.75, 0);
+
+        //black on left
+        //this.camera.setPosition(-1.75, 1.75, 0);
+
+        //this.camera.setPosition(-1.75 / 2, 1.75, 0);
+        /*
+        camera.getFarPlane();
+        camera.getFieldOfView();
+        camera.getGraphNode();
+        camera.getLookAt();
+        camera.getNearPlane();
+        camera.getOrientation();
+        camera.getProjectionMatrix();
+        cam.setFarPlane(mFarPlane);
+        cam.setFieldOfView(mFieldOfView);
+        cam.setGraphNode(mGraphNode, mInsideGraph);
+        cam.setLookAt(mLookAt.clone());
+        cam.setNearPlane(mNearPlane);
+        cam.setOrientation(mOrientation.clone());
+        cam.setPosition(mPosition.clone());
+        cam.setProjectionMatrix(mLastWidth, mLastHeight);
+        */
     }
 
     @Override
@@ -201,21 +221,5 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //flag that the board has been initialized
         init = true;
-    }
-
-    private void addBoard() {
-
-        try {
-
-            LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, R.raw.board_obj);
-            objParser.parse();
-
-            board = objParser.getParsedObject();
-            board.setScale(.2);
-            getCurrentScene().addChild(board);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

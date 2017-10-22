@@ -1,5 +1,8 @@
 package com.gamesbykevin.chess.players;
 
+import android.graphics.Color;
+import android.widget.Toast;
+
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.activity.BasicRenderer;
@@ -25,9 +28,8 @@ public class Players {
 
     //our texture materials for the pieces
     private Material textureWhite;
-    private Material textureBlack;
+    private Material textureWood;
     private Material textureHighlight;
-    private Material textureInvalid;
     private Material textureValid;
 
     //our highlighted selection to place for all valid moves
@@ -108,14 +110,14 @@ public class Players {
 
     public void reset(BasicRenderer renderer) {
 
-        //load the valid texture and save
-        PlayerHelper.loadSelected(this, renderer, getTextureValid());
+        //load the board selection visible / non-visible
+        PlayerHelper.loadBoardSelection(this, renderer, getTextureValid());
 
         //player 1 always moves north
         PlayerHelper.reset(getPlayer1(), renderer, getTextureWhite());
 
         //player 2 always moves south
-        PlayerHelper.reset(getPlayer2(), renderer, getTextureBlack());
+        PlayerHelper.reset(getPlayer2(), renderer, getTextureWood());
 
         //register all the chess pieces as click-able so we can select if needed for the humans
         for (int index = 0; index < getPlayer1().getPieceCount(); index++) {
@@ -153,23 +155,17 @@ public class Players {
             this.textureWhite.setColorInfluence(0);
             this.textureWhite.addTexture(new Texture("textureWhite", R.drawable.white));
 
-            this.textureBlack = new Material();
-            this.textureBlack.enableLighting(true);
-            this.textureBlack.setDiffuseMethod(new DiffuseMethod.Lambert());
-            this.textureBlack.setColorInfluence(0);
-            this.textureBlack.addTexture(new Texture("textureBlack", R.drawable.black));
+            this.textureWood = new Material();
+            this.textureWood.enableLighting(true);
+            this.textureWood.setDiffuseMethod(new DiffuseMethod.Lambert());
+            this.textureWood.setColorInfluence(0);
+            this.textureWood.addTexture(new Texture("textureWood", R.drawable.wood));
 
             this.textureHighlight = new Material();
             this.textureHighlight.enableLighting(true);
             this.textureHighlight.setDiffuseMethod(new DiffuseMethod.Lambert());
             this.textureHighlight.setColorInfluence(0);
             this.textureHighlight.addTexture(new Texture("textureHighlighted", R.drawable.highlighted));
-
-            this.textureInvalid = new Material();
-            this.textureInvalid.enableLighting(true);
-            this.textureInvalid.setDiffuseMethod(new DiffuseMethod.Lambert());
-            this.textureInvalid.setColorInfluence(0);
-            this.textureInvalid.addTexture(new Texture("textureInvalid", R.drawable.invalid));
 
             this.textureValid = new Material();
             this.textureValid.enableLighting(true);
@@ -190,16 +186,12 @@ public class Players {
         return this.textureWhite;
     }
 
-    public Material getTextureBlack() {
-        return this.textureBlack;
+    public Material getTextureWood() {
+        return this.textureWood;
     }
 
     public Material getTextureHighlight() {
         return this.textureHighlight;
-    }
-
-    public Material getTextureInvalid() {
-        return this.textureInvalid;
     }
 
     public Material getTextureValid() {
@@ -228,7 +220,7 @@ public class Players {
         if (getSelected() != null) {
 
             //restore the normal texture
-            getSelected().getObject3D().setMaterial(isPlayer1Turn() ? getTextureWhite() : getTextureBlack());
+            getSelected().getObject3D().setMaterial(isPlayer1Turn() ? getTextureWhite() : getTextureWood());
 
             //we no longer have a selected piece
             this.selected = null;
@@ -255,7 +247,11 @@ public class Players {
 
                 Piece piece = player.getPiece(index, false);
 
-                if (piece != null && piece.getObject3D().equals(object3D)) {
+                if (piece == null)
+                    continue;
+
+                //if we select the piece or the floor the piece is on, this is our selected piece
+                if (piece.getObject3D().equals(object3D)) {
                     selected = piece;
                     object3D.setMaterial(getTextureHighlight());
                     found = true;
@@ -288,9 +284,9 @@ public class Players {
                     obj.setY(PlayerHelper.Y + .001);
                     obj.setZ(PlayerHelper.getCoordinate((int) moves.get(i).getRow()));
 
-                    obj.setAlpha(0);
-
-                    //obj.setVisible(false);
+                    //this will remove the texture
+                    if (1 == 0)
+                        obj.setMaterial(null);
 
                     //add to targets list
                     this.targets.add(obj);
@@ -391,6 +387,12 @@ public class Players {
                     }
                 }
 
+                //check if the opponent is in check
+                final boolean check = PlayerHelper.hasCheck(player, opponent);
+
+                if (check)
+                    System.out.println("Opponent is in check");
+
                 //we are no longer moving
                 setMoving(false);
 
@@ -416,12 +418,9 @@ public class Players {
 
             //get the current player
             Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
-            Player opponent = isPlayer1Turn() ? getPlayer2() : getPlayer1();
 
             //if the player is not human, the ai will update
-            if (!player.isHuman()) {
-                player.update(this);
-            }
+            player.update(this);
         }
     }
 }

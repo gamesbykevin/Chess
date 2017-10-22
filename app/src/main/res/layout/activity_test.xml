@@ -9,17 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ToggleButton
-        android:checked="true"
-        android:id="@+id/buttonRotate"
-        android:onClick="onClickRotateCamera"
-        android:textOff="Rotate/Zoom: Off"
-        android:textOn="Rotate/Zoom: On"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <Button
         android:onClick="onClickResetCamera"
         android:text="Reset"

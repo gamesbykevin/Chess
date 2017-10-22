@@ -43,16 +43,6 @@ public class TestActivity extends Activity {
 
     public void onClickResetCamera(View view) {
         renderer.resetCamera();
-
-        ToggleButton button2 = findViewById(R.id.buttonRotate);
-        button2.setChecked(true);
-
-        renderer.enableRotateCamera(button2.isChecked());
-    }
-
-    public void onClickRotateCamera(View view) {
-        ToggleButton button2 = findViewById(R.id.buttonRotate);
-        renderer.enableRotateCamera(button2.isChecked());
     }
 
     @Override

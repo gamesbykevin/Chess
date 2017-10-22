@@ -2,6 +2,7 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.activity.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -34,21 +35,6 @@ public class PlayerHelper {
 
     //distance between each col/row
     private static final float COORDINATE_INCREMENT = .2f;
-
-    public static void correctPiece(Piece piece) {
-
-        //keep the column in boundary
-        if (piece.getObject3D().getX() < COORDINATE_MIN)
-            piece.getObject3D().setX(getCoordinate(0));
-        if (piece.getObject3D().getX() > COORDINATE_MAX)
-            piece.getObject3D().setX(getCoordinate(COLS - 1));
-
-        //keep the row in boundary
-        if (piece.getObject3D().getZ() < COORDINATE_MIN)
-            piece.getObject3D().setZ(getCoordinate(0));
-        if (piece.getObject3D().getZ() > COORDINATE_MAX)
-            piece.getObject3D().setZ(getCoordinate(ROWS - 1));
-    }
 
     public static boolean hasBounds(double col, double row) {
         return (col >= 0 && col < COLS && row >= 0 && row < ROWS);
@@ -92,7 +78,7 @@ public class PlayerHelper {
         return COORDINATE_MIN + (COORDINATE_INCREMENT * row_col);
     }
 
-    protected static void reset(Player player, Renderer renderer, Material material) {
+    protected static void reset(Player player, BasicRenderer renderer, Material material) {
 
         //remove all existing pieces
         player.removeAllPieces();
@@ -129,7 +115,7 @@ public class PlayerHelper {
         addPiece(player, renderer, material, Piece.Type.Rook,   getCoordinate(7), Y, row2);
     }
 
-    private static void addPiece(Player player, Renderer renderer, Material material, Piece.Type type, float x, float y, float z) {
+    private static void addPiece(Player player, BasicRenderer renderer, Material material, Piece.Type type, float x, float y, float z) {
 
         try {
 
@@ -163,7 +149,7 @@ public class PlayerHelper {
         }
     }
 
-    protected static void loadSelected(Players players, Renderer renderer, Material material) {
+    protected static void loadBoardSelection(Players players, Renderer renderer, Material material) {
 
         try {
             //parse our 3d model
@@ -372,5 +358,50 @@ public class PlayerHelper {
         protected Move() {
             //default constructor
         }
+    }
+
+    protected static boolean hasCheck(Player player, Player opponent) {
+
+        Piece king = null;
+
+        //check the opponent for the king chess piece
+        for (int i = 0; i < opponent.getPieceCount(); i++) {
+            Piece piece = opponent.getPiece(i, false);
+
+            //if the piece does not exist continue
+            if (piece == null)
+                continue;
+
+            //if the piece is king, we found it
+            if (piece.getType() == Piece.Type.King) {
+                king = piece;
+                break;
+            }
+        }
+
+        for (int i = 0; i < player.getPieceCount(); i++) {
+            Piece piece = player.getPiece(i, false);
+
+            if (piece == null)
+                continue;
+
+            //get the list of moves for the current piece
+            List<Cell> moves = piece.getMoves(player, opponent);
+
+            //check each move
+            for (int index = 0; index < moves.size(); index++) {
+
+                //if the move is at the location of the king, the king is in check
+                if (king.hasLocation(moves.get(index)))
+                    return true;
+            }
+        }
+
+        //we haven't found the king to be in danger
+        return false;
+    }
+
+    protected static boolean hasCheckMate(Player player, Player opponent) {
+
     }
 }
