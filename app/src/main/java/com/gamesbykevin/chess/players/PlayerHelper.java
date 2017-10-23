@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.players.Cpu.DEFAULT_DEPTH;
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -190,8 +191,19 @@ public class PlayerHelper {
         //create a new list for all the moves
         List<Move> moves = getMoves(player, opponent);
 
+        //count the number of moves
+        int count = 0;
+
+        if (DEBUG)
+            UtilityHelper.logEvent("Thinking... size:" + moves.size());
+
         //go through all of the moves
         for (Move move : moves) {
+
+            if (DEBUG) {
+                count++;
+                UtilityHelper.logEvent("Checking move " + count);
+            }
 
             //execute the current move
             executeMove(move, players);
@@ -292,6 +304,59 @@ public class PlayerHelper {
         return options;
     }
 
+    protected static void updateMoves(List<Cell> moves, Players players) {
+
+        //no need to do anything if the list is empty
+        if (moves.isEmpty())
+            return;
+
+        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+
+        //store the current turn
+        boolean tmpPlayer1Turn = new Boolean(players.isPlayer1Turn());
+
+        //create our move for reference
+        Move move = new Move();
+
+        //remove any moves that don't get us out of check
+        for (int i = 0; i < moves.size(); i++) {
+
+            if (moves.isEmpty())
+                break;
+
+            //populate our next move
+            move.sourceCol = (int)players.getSelected().getCol();
+            move.sourceRow = (int)players.getSelected().getRow();
+            move.destCol = (int)moves.get(i).getCol();
+            move.destRow = (int)moves.get(i).getRow();
+            move.pieceCaptured = opponent.getPiece(move.destCol, move.destRow);
+
+            //execute the move
+            executeMove(move, players);
+
+            //keep the turn the same
+            players.setPlayer1Turn(tmpPlayer1Turn);
+
+            //if we are still in check, this isn't a valid move
+            if (hasCheck(opponent, player)) {
+
+                if (i < moves.size())
+                    moves.remove(i);
+                i--;
+            }
+
+            //undo the move
+            undoMove(move, players);
+
+            //keep the turn the same
+            players.setPlayer1Turn(tmpPlayer1Turn);
+        }
+
+        //restore the correct player turn
+        players.setPlayer1Turn(tmpPlayer1Turn);
+    }
+
     private static void executeMove(Move move, Players players) {
 
         Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
@@ -346,20 +411,12 @@ public class PlayerHelper {
         players.setPlayer1Turn(player1Turn);
     }
 
-    protected static class Move {
-
-        //where the piece is heading
-        protected int destCol, destRow;
-        protected int sourceCol, sourceRow;
-
-        //the piece captured during the move (if exists)
-        protected Piece pieceCaptured;
-
-        protected Move() {
-            //default constructor
-        }
-    }
-
+    /**
+     * Is the opponent in check?
+     * @param player offense
+     * @param opponent defense
+     * @return true if the player has the opponent in check
+     */
     protected static boolean hasCheck(Player player, Player opponent) {
 
         Piece king = null;
@@ -401,7 +458,330 @@ public class PlayerHelper {
         return false;
     }
 
-    protected static boolean hasCheckMate(Player player, Player opponent) {
+    protected static boolean hasStalemate(Players players) {
 
+        //player who needs to escape check
+        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+
+        //opponent attacking the vulnerable player
+        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+
+        //for right now assume stalemate
+        boolean result = true;
+
+        //check all our pieces
+        for (int i = 0; i < opponent.getPieceCount(); i++) {
+
+            Piece piece = opponent.getPiece(i, false);
+
+            if (piece == null)
+                continue;
+
+            //get the list of moves for the current piece
+            List<Cell> tmpMoves = piece.getMoves(opponent, player);
+
+            //remove any invalid moves (if exist)
+            if (!tmpMoves.isEmpty()) {
+
+                final int col = (int)piece.getCol();
+                final int row = (int)piece.getRow();
+
+                //see if any moves can be removed
+                for (int index = 0; index < tmpMoves.size(); index++) {
+
+                    //update the location
+                    piece.setCol(tmpMoves.get(index));
+                    piece.setRow(tmpMoves.get(index));
+
+                    //if we are still in check, remove move
+                    if (hasCheck(player, opponent)) {
+                        tmpMoves.remove(index);
+                        index--;
+                    }
+                }
+
+                //restore location
+                piece.setCol(col);
+                piece.setRow(row);
+            }
+
+            //if we have at least 1 move, this isn't a stalemate
+            if (!tmpMoves.isEmpty()) {
+                result = false;
+                break;
+            }
+        }
+
+        //return our result
+        return result;
+    }
+
+    /**
+     * Do we have check mate?
+     * @return true if the game is over, false otherwise
+     */
+    protected static boolean hasCheckMate(Players players) {
+
+        boolean tmpPlayer1Turn = new Boolean(players.isPlayer1Turn());
+
+        //switch turns temporary to see if the player can escape check
+        players.setPlayer1Turn(!tmpPlayer1Turn);
+
+        //player who needs to escape check
+        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+
+        //opponent attacking the vulnerable player
+        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+
+        //create temp move
+        Move move = new Move();
+
+        //for right now assume check mate
+        boolean result = true;
+
+        for (int i = 0; i < player.getPieceCount(); i++) {
+            Piece piece = player.getPiece(i, false);
+
+            if (piece == null)
+                continue;
+
+            //get the list of moves for the current piece
+            List<Cell> moves = piece.getMoves(player, opponent);
+
+            for (int x = 0; x < moves.size(); x++) {
+
+                //if not in check, no need to continue
+                if (!result)
+                    break;
+
+                //create our move
+                move.sourceCol = (int)piece.getCol();
+                move.sourceRow = (int)piece.getRow();
+                move.destCol = (int)moves.get(x).getCol();
+                move.destRow = (int)moves.get(x).getRow();
+                move.pieceCaptured = opponent.getPiece(move.destCol, move.destRow);
+
+                //execute the move
+                executeMove(move, players);
+
+                //keep the same turn
+                players.setPlayer1Turn(!tmpPlayer1Turn);
+
+                //see if we are still in check
+                if (!hasCheck(opponent, player))
+                    result = false;
+
+                //undo the previous move
+                undoMove(move, players);
+
+                //keep the same turn
+                players.setPlayer1Turn(!tmpPlayer1Turn);
+            }
+        }
+
+        //restore the correct turn
+        players.setPlayer1Turn(tmpPlayer1Turn);
+
+        //return our result
+        return result;
+    }
+
+    protected static void promote(BasicRenderer renderer, Players players, Piece selection) {
+
+        //get the current player
+        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+
+        //identified promotion piece
+        Piece promote = null;
+
+        for (int i = 0; i < player.getPieceCount(); i++) {
+
+            //get the current piece
+            Piece piece = player.getPiece(i, false);
+
+            //if the piece doesn't exist, continue
+            if (piece == null)
+                continue;
+
+            //we are only interested in pawns
+            if (piece.getType() != Piece.Type.Pawn)
+                continue;
+
+            //make sure we are at the end
+            if (player.hasDirection(Player.Direction.North)) {
+
+                if (piece.getRow() == 0) {
+                    promote = piece;
+                    break;
+                }
+
+            } else {
+
+                if (piece.getRow() == ROWS - 1) {
+                    promote = piece;
+                    break;
+                }
+
+            }
+        }
+
+        //we have the pawn piece we want to promote
+        if (promote != null) {
+
+            //if no selection we automatically promote to queen
+            if (selection == null) {
+
+                //check all the pieces
+                for (int index = 0; index < players.getPromotions().size(); index++) {
+
+                    Piece piece = players.getPromotions().get(index);
+
+                    if (piece.getType() == Piece.Type.Queen) {
+                        selection = piece;
+                        break;
+                    }
+                }
+            }
+
+            //assign the piece type
+            promote.setType(selection.getType());
+
+            //remove from scene
+            renderer.getCurrentScene().removeChild(promote.getObject3D());
+
+            //unregister from object picker
+            renderer.getObjectPicker().unregisterObject(promote.getObject3D());
+
+            //get the object position
+            Vector3 position = promote.getObject3D().getPosition();
+
+            //assign the 3d model
+            promote.setObject3D(selection.getObject3D().clone());
+
+            //make sure it is displayed in the correct location
+            promote.getObject3D().setPosition(position);
+
+            //add new 3d model to the scene
+            renderer.getCurrentScene().addChild(promote.getObject3D());
+
+            //register object picker
+            renderer.getObjectPicker().registerObject(promote.getObject3D());
+
+            //hide the promotion pieces
+            for (Piece tmp : players.getPromotions()) {
+                tmp.getObject3D().setVisible(false);
+            }
+        }
+    }
+
+    protected static boolean hasPromotion(Players players) {
+
+        //get the current player
+        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+
+        boolean result = false;
+
+        for (int i = 0; i < player.getPieceCount(); i++) {
+
+            //get the current piece
+            Piece piece = player.getPiece(i, false);
+
+            //if the piece doesn't exist, continue
+            if (piece == null)
+                continue;
+
+            //we are only interested in pawns
+            if (piece.getType() != Piece.Type.Pawn)
+                continue;
+
+            //make sure we are at the end
+            if (player.hasDirection(Player.Direction.North)) {
+
+                if (piece.getRow() == 0) {
+                    result = true;
+                    break;
+                }
+
+            } else {
+
+                if (piece.getRow() == ROWS - 1) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+
+        //if we have promotion, display our options
+        if (result) {
+            if (player.isHuman()) {
+                for (Piece tmp : players.getPromotions()) {
+                    tmp.getObject3D().setVisible(true);
+                }
+            }
+        }
+
+        //return our result
+        return result;
+    }
+
+    protected static void addPromotionPieces(Players players, BasicRenderer renderer) {
+
+        //create our list of promotional pieces
+        List<Piece> promotions = new ArrayList<>();
+
+        for (Piece.Type type : Piece.Type.values()) {
+
+            switch (type) {
+
+                //we can't promote these pieces
+                case King:
+                case Pawn:
+                    break;
+
+                default:
+
+                    //get this piece for the short term
+                    Piece tmp = players.getPlayer1().getPiece(type);
+
+                    //clone the 3d model
+                    Object3D object3D = tmp.getObject3D().clone();
+
+                    //update to be outside the board
+                    object3D.setPosition(getCoordinate(-2), object3D.getY(), COORDINATE_MIN + (promotions.size() * COORDINATE_INCREMENT));
+
+                    //make object invisible
+                    object3D.setVisible(false);
+
+                    //create the piece
+                    Piece piece = new Piece(object3D, type, -1, -1);
+
+                    //add the piece to our promotions list
+                    promotions.add(piece);
+
+                    //add object to the scene
+                    renderer.getCurrentScene().addChild(object3D);
+
+                    //make sure we can pick the model
+                    renderer.getObjectPicker().registerObject(object3D);
+                    break;
+            }
+        }
+
+        //assign our promotion pieces
+        players.setPromotions(promotions);
+    }
+
+    protected static class Move {
+
+        //where the piece is heading
+        protected int destCol, destRow;
+        protected int sourceCol, sourceRow;
+
+        //the piece captured during the move (if exists)
+        protected Piece pieceCaptured;
+
+        protected Move() {
+            //default constructor
+        }
     }
 }

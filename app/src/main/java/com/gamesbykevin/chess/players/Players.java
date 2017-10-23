@@ -17,6 +17,8 @@ import org.rajawali3d.materials.textures.Texture;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
+
 /**
  * Created by Kevin on 10/17/2017.
  */
@@ -42,7 +44,10 @@ public class Players {
     private List<Cell> moves;
 
     //are we moving a chess piece?
-    public boolean moving = false;
+    private boolean moving = false;
+
+    //are we promoting a chess piece?
+    private boolean promoting = false;
 
     /**
      * These are the different kinds of game modes
@@ -61,6 +66,9 @@ public class Players {
 
     //player 1 starts first
     private boolean player1Turn = true;
+
+    //list of promotional pieces when a pawn reaches the end
+    private List<Piece> promotions;
 
     public Players(final Mode mode) {
 
@@ -100,6 +108,22 @@ public class Players {
         createMaterials();
     }
 
+    public void setPromoting(final boolean promoting) {
+        this.promoting = promoting;
+    }
+
+    public boolean isPromoting() {
+        return this.promoting;
+    }
+
+    public void setPromotions(List<Piece> promotions) {
+        this.promotions = promotions;
+    }
+
+    public List<Piece> getPromotions() {
+        return this.promotions;
+    }
+
     public boolean isPlayer1Turn() {
         return this.player1Turn;
     }
@@ -127,6 +151,9 @@ public class Players {
         for (int index = 0; index < getPlayer2().getPieceCount(); index++) {
             renderer.getObjectPicker().registerObject(getPlayer2().getPiece(index, true).getObject3D());
         }
+
+        //add each chess piece so we can do piece promotion
+        PlayerHelper.addPromotionPieces(this, renderer);
     }
 
     public void setMoving(final boolean moving) {
@@ -233,6 +260,14 @@ public class Players {
         if (getSelected() != null)
             return;
 
+        //if the piece is still moving, don't continue
+        if (isMoving())
+            return;
+
+        //is the game over
+        if (isGameOver())
+            return;
+
         //have we found a piece?
         boolean found = false;
 
@@ -241,6 +276,28 @@ public class Players {
 
         //if we haven't found a piece yet, and it is the current player's turn, and the player is human
         if (player.isHuman()) {
+
+            //if we are promoting
+            if (isPromoting()) {
+
+                //check all the promotion pieces
+                for (int index = 0; index < getPromotions().size(); index++) {
+
+                    Piece piece = getPromotions().get(index);
+
+                    //is this the piece we have selected?
+                    if (piece.getObject3D().equals(object3D)) {
+                        //promote the piece
+                        PlayerHelper.promote(renderer, this, piece);
+
+                        //switch turns
+                        setPlayer1Turn(!isPlayer1Turn());
+                    }
+                }
+
+                //don't continue
+                return;
+            }
 
             //check all the pieces
             for (int index = 0; index < player.getPieceCount(); index++) {
@@ -265,6 +322,9 @@ public class Players {
 
             //get list of valid moves
             this.moves = getSelected().getMoves(player, opponent);
+
+            //update list of available moves (in case player is in check)
+            PlayerHelper.updateMoves(this.moves, this);
 
             //make sure moves exist for the chess piece
             if (this.moves.isEmpty()) {
@@ -387,14 +447,26 @@ public class Players {
                     }
                 }
 
+                //update if the player is in check
+                opponent.setCheck(PlayerHelper.hasCheck(player, opponent));
+
                 //check if the opponent is in check
-                final boolean check = PlayerHelper.hasCheck(player, opponent);
+                if (DEBUG && opponent.hasCheck())
+                    UtilityHelper.logEvent(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
 
-                if (check)
-                    System.out.println("Opponent is in check");
+                //check if the game is over if already in  check
+                if (opponent.hasCheck())
+                    opponent.setCheckMate(PlayerHelper.hasCheckMate(this));
 
-                //we are no longer moving
-                setMoving(false);
+                if (DEBUG && opponent.hasCheckMate())
+                    UtilityHelper.logEvent("Checkmate");
+
+                //check if the game ends in a stalemate if we aren't in check
+                if (!opponent.hasCheck())
+                    opponent.setStalemate(PlayerHelper.hasStalemate(this));
+
+                if (DEBUG && opponent.hasStalemate())
+                    UtilityHelper.logEvent("Stalemate");
 
                 //we are at our destination, de-select the chess piece
                 deselect();
@@ -402,13 +474,54 @@ public class Players {
                 //reset
                 player.reset();
 
-                //switch turns
-                setPlayer1Turn(!isPlayer1Turn());
+                //check if we have a promotion
+                setPromoting(PlayerHelper.hasPromotion(this));
+
+                //we are no longer moving
+                setMoving(false);
+
+
+                //if we aren't promoting a piece, switch turns
+                if (!isPromoting()) {
+
+                    setPlayer1Turn(!isPlayer1Turn());
+
+                } else {
+
+                    //display the correct texture
+                    for (Piece piece : getPromotions()) {
+                        piece.getObject3D().setMaterial(isPlayer1Turn() ? getTextureWhite() : getTextureWood());
+                    }
+
+                    //if not human, we will auto promote
+                    if (!player.isHuman()) {
+
+                        //promote the pawn piece
+                        PlayerHelper.promote(renderer, this, null);
+
+                        //flag promoting false
+                        setPromoting(false);
+
+                        //switch turns
+                        setPlayer1Turn(!isPlayer1Turn());
+                    }
+                }
             }
         }
     }
 
+    public boolean isGameOver() {
+        return (getPlayer1().hasCheckMate() ||
+                getPlayer2().hasCheckMate() ||
+                getPlayer1().hasStalemate() ||
+                getPlayer2().hasStalemate());
+    }
+
     public void update(BasicRenderer renderer) {
+
+        //don't do anything if the game is over
+        if (isGameOver())
+            return;
 
         if (isMoving()) {
 

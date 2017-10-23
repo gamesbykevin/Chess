@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
+import static com.gamesbykevin.chess.players.PlayerHelper.getRow;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -21,10 +22,10 @@ public class Piece extends Cell {
     private List<Cell> moves;
 
     //the 3d model for this piece
-    private final Object3D object3D;
+    private Object3D object3D;
 
     //type of chess piece
-    private final Type type;
+    private Type type;
 
     //has this piece moved yet?
     private boolean moved = false;
@@ -35,7 +36,7 @@ public class Piece extends Cell {
     /**
      * The speed at which a chess piece can move
      */
-    public static final float VELOCITY = .01f;
+    public static final float VELOCITY = .025f;
 
     /**
      * Maximum height the knight is allowed to go
@@ -93,8 +94,8 @@ public class Piece extends Cell {
 
     public Piece(Object3D object3D, Type type, float col, float row) {
 
-        this.object3D = object3D;
-        this.type = type;
+        setObject3D(object3D);
+        setType(type);
 
         //assign location
         super.setCol(col);
@@ -103,6 +104,14 @@ public class Piece extends Cell {
         //default to invalid destination
         this.destX = -1;
         this.destZ = -1;
+    }
+
+    public void setObject3D(final Object3D object3D) {
+        this.object3D = object3D;
+    }
+
+    public void setType(final Type type) {
+        this.type = type;
     }
 
     public Object3D getObject3D() {

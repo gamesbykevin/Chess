@@ -7,6 +7,7 @@ import android.view.View;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.Players;
+import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.lights.DirectionalLight;
@@ -14,6 +15,8 @@ import org.rajawali3d.loader.LoaderOBJ;
 import org.rajawali3d.renderer.Renderer;
 import org.rajawali3d.util.ObjectColorPicker;
 import org.rajawali3d.util.OnObjectPickedListener;
+
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 10/12/2017.
@@ -84,8 +87,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         try {
 
             //create the players and reset the pieces
-            this.players = new Players(Players.Mode.CpuVsCpu);
-            //this.players = new Players(Players.Mode.HumVsCpu);
+            //this.players = new Players(Players.Mode.CpuVsCpu);
+            this.players = new Players(Players.Mode.HumVsCpu);
             this.players.reset(this);
 
         } catch (Exception e) {
@@ -98,8 +101,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     @Override
     public void onNoObjectPicked() {
+
         //nothing selected
-        System.out.println("Nothing selected");
+        if (DEBUG)
+            UtilityHelper.logEvent("Nothing selected");
     }
 
     @Override

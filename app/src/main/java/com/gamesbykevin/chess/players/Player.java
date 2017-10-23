@@ -21,12 +21,50 @@ public abstract class Player {
         North, South
     }
 
+    //direction we are heading towards
     private final Direction direction;
+
+    //is the player in check
+    private boolean check = false;
+
+    //is the game over
+    private boolean checkMate = false;
+
+    //does the player have any valid moves remaining?
+    private boolean stalemate = false;
 
     protected Player(final boolean human, final Direction direction) {
         this.human = human;
         this.direction = direction;
         this.pieces = new ArrayList<>();
+
+        setCheck(false);
+        setCheckMate(false);
+        setStalemate(false);
+    }
+
+    public void setStalemate(final boolean stalemate) {
+        this.stalemate = stalemate;
+    }
+
+    public boolean hasStalemate() {
+        return this.stalemate;
+    }
+
+    public void setCheck(final boolean check) {
+        this.check = check;
+    }
+
+    public boolean hasCheck() {
+        return this.check;
+    }
+
+    public void setCheckMate(final boolean checkMate) {
+        this.checkMate = checkMate;
+    }
+
+    public boolean hasCheckMate() {
+        return this.checkMate;
     }
 
     /**
@@ -45,6 +83,18 @@ public abstract class Player {
 
     public boolean isHuman() {
         return this.human;
+    }
+
+    public Piece getPiece(Piece.Type type) {
+
+        for (int i = 0; i < getPieceCount(); i++) {
+            Piece piece = getPiece(i, true);
+
+            if (piece != null && piece.getType() == type)
+                return piece;
+        }
+
+        return null;
     }
 
     public Piece getPiece(int col, int row) {
