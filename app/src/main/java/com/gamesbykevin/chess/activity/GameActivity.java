@@ -1,11 +1,11 @@
 package com.gamesbykevin.chess.activity;
 
 import android.content.Intent;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
@@ -25,7 +25,7 @@ import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 public class GameActivity extends BaseActivity implements Disposable {
 
     //our open GL surface view
-    private GLSurfaceView glSurfaceView;
+    private OpenGLSurfaceView glSurfaceView;
 
     /**
      * Create a random object which the seed as the current time stamp
@@ -44,6 +44,9 @@ public class GameActivity extends BaseActivity implements Disposable {
     //a list of layouts on the game screen, separate from open gl layout
     private List<ViewGroup> layouts;
 
+    //do we interrupt our process
+    public static boolean INTERRUPT = false;
+
     /**
      * Different steps in the game
      */
@@ -59,8 +62,13 @@ public class GameActivity extends BaseActivity implements Disposable {
     //keep track of game time
     private GameTimer timer;
 
+    private ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //we haven't interrupted yet
+        INTERRUPT = false;
 
         //call parent
         super.onCreate(savedInstanceState);
@@ -72,13 +80,33 @@ public class GameActivity extends BaseActivity implements Disposable {
         setContentView(R.layout.activity_game);
 
         //obtain our open gl surface view object for reference
-        this.glSurfaceView = (OpenGLSurfaceView)findViewById(R.id.openGLView);
+        this.glSurfaceView = findViewById(R.id.openGLView);
+
+        this.progressBar = findViewById(R.id.simpleProgressBar);
 
         //add the layouts to our list
         this.layouts = new ArrayList<>();
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameOver));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutLoadingScreen));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameControls));
+    }
+
+    public void updateProgress(final int progress) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setProgress(progress);
+            }
+        });
+    }
+
+    public OpenGLSurfaceView getSurfaceView() {
+        return this.glSurfaceView;
+    }
+
+    public void onClickResetCamera(View view) {
+        getSurfaceView().getRenderer().resetCamera();
     }
 
     public static Game getGame() {
@@ -210,7 +238,7 @@ public class GameActivity extends BaseActivity implements Disposable {
             glSurfaceView = new OpenGLSurfaceView(this);
 
             //resume the game view
-            glSurfaceView.onResume();
+            getSurfaceView().onResume();
 
             //remove layouts from the parent view
             for (int i = 0; i < layouts.size(); i++) {
@@ -218,7 +246,7 @@ public class GameActivity extends BaseActivity implements Disposable {
             }
 
             //set the content view for our open gl surface view
-            setContentView(glSurfaceView);
+            setContentView(getSurfaceView());
 
             //add the layouts to the current content view
             for (int i = 0; i < layouts.size(); i++) {
@@ -228,7 +256,7 @@ public class GameActivity extends BaseActivity implements Disposable {
         } else {
 
             //resume the game view
-            glSurfaceView.onResume();
+            getSurfaceView().onResume();
 
         }
 
@@ -281,6 +309,9 @@ public class GameActivity extends BaseActivity implements Disposable {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+
+        //interrupt our game
+        INTERRUPT = true;
     }
 
     public void onClickMenu(View view) {

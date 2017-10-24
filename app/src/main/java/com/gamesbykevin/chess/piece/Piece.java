@@ -36,7 +36,7 @@ public class Piece extends Cell {
     /**
      * The speed at which a chess piece can move
      */
-    public static final float VELOCITY = .025f;
+    public static final float VELOCITY = .01f;
 
     /**
      * Maximum height the knight is allowed to go
@@ -138,7 +138,7 @@ public class Piece extends Cell {
         return this.moved;
     }
 
-    public List<Cell> getMoves(Player player, Player opponent) {
+    public List<Cell> getMoves(Player player, Player opponent, boolean performCheck) {
 
         if (this.moves == null)
             this.moves = new ArrayList<>();
@@ -408,7 +408,83 @@ public class Piece extends Cell {
                 break;
         }
 
+        //do we check and make sure we aren't putting ourselves in check?
+        if (performCheck)
+            checkForCheck(moves, player, opponent);
+
+        //return our list of moves
         return moves;
+    }
+
+    private void checkForCheck(List<Cell> moves, Player player, Player opponent) {
+
+        //get our king piece
+        Piece king = player.getPiece(Type.King);
+
+        //this should always happen as the king has to exist to play chess
+        if (king != null) {
+
+            //save the source
+            final int sourceCol = (int)getCol();
+            final int sourceRow = (int)getRow();
+
+            for (int i = 0; i < moves.size(); i++) {
+
+                //update to match move
+                setCol(moves.get(i));
+                setRow(moves.get(i));
+
+                //is there a captured piece
+                Piece captured = opponent.getPiece((int)moves.get(i).getCol(), (int)moves.get(i).getRow());
+
+                //if the piece exists, mark it captured
+                if (captured != null)
+                    captured.setCaptured(true);
+
+                //assume this move is safe (for now)
+                boolean safe = true;
+
+                //check every opponent piece
+                for (int index = 0; index < opponent.getPieceCount(); index++) {
+
+                    //get the current piece
+                    Piece tmp = opponent.getPiece(index, false);
+
+                    //skip pieces that don't exist
+                    if (tmp == null)
+                        continue;
+
+                    //get the list of moves for this piece
+                    List<Cell> tmpMoves = tmp.getMoves(opponent, player, false);
+
+                    //check each move
+                    for (int x = 0; x < tmpMoves.size(); x++) {
+
+                        if (tmpMoves.get(x).hasLocation(king)) {
+                            safe = false;
+                            break;
+                        }
+                    }
+
+                    tmpMoves.clear();
+                    tmpMoves = null;
+                }
+
+                //if the move is not safe, remove it
+                if (!safe) {
+                    moves.remove(i);
+                    i--;
+                }
+
+                //now that we are done, un-capture the piece
+                if (captured != null)
+                    captured.setCaptured(false);
+            }
+
+            //restore original position to chess piece
+            setCol(sourceCol);
+            setRow(sourceRow);
+        }
     }
 
     public void setDestinationCoordinates(float destX, float destZ) {

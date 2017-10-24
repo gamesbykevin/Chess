@@ -6,6 +6,7 @@
     android:visibility="invisible">
 
     <TableLayout
+        android:visibility="invisible"
         android:id="@+id/tableGameTimer"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"

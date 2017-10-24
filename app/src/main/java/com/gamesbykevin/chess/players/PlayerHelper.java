@@ -2,7 +2,7 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.activity.BasicRenderer;
+import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -15,6 +15,7 @@ import org.rajawali3d.renderer.Renderer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.activity.GameActivity.INTERRUPT;
 import static com.gamesbykevin.chess.players.Cpu.DEFAULT_DEPTH;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
@@ -200,9 +201,14 @@ public class PlayerHelper {
         //go through all of the moves
         for (Move move : moves) {
 
+            //if we want to interrupt the game
+            if (INTERRUPT)
+                break;
+
             if (DEBUG) {
                 count++;
                 UtilityHelper.logEvent("Checking move " + count);
+                players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
             }
 
             //execute the current move
@@ -228,6 +234,8 @@ public class PlayerHelper {
         moves.clear();
         moves = null;
 
+        players.getActivity().updateProgress(0);
+
         //return the best move
         return bestMove;
     }
@@ -248,6 +256,10 @@ public class PlayerHelper {
 
         //check every valid move
         for (Move currentMove : currentMoves) {
+
+            //if we want to interrupt the game
+            if (INTERRUPT)
+                break;
 
             //execute the move
             executeMove(currentMove, players);
@@ -270,6 +282,12 @@ public class PlayerHelper {
         return bestScore;
     }
 
+    /**
+     * Get the list of available moves
+     * @param player The current players turn
+     * @param opponent The opponent they are facing
+     * @return List of available moves which don't put the player in check
+     */
     private static List<Move> getMoves(Player player, Player opponent) {
 
         //create a new list for all the moves
@@ -285,16 +303,17 @@ public class PlayerHelper {
                 continue;
 
             //get a list of moves for the current piece
-            List<Cell> moves = piece.getMoves(player, opponent);
+            List<Cell> moves = piece.getMoves(player, opponent, true);
 
             //add all possible moves to the list of options
             for (Cell move : moves) {
 
+                //create our new move
                 Move tmp = new Move();
-                tmp.sourceCol = (int)piece.getCol();
-                tmp.sourceRow = (int)piece.getRow();
-                tmp.destCol = (int)move.getCol();
-                tmp.destRow = (int)move.getRow();
+                tmp.sourceCol = (int) piece.getCol();
+                tmp.sourceRow = (int) piece.getRow();
+                tmp.destCol = (int) move.getCol();
+                tmp.destRow = (int) move.getRow();
 
                 //add the move to the list
                 options.add(tmp);
@@ -302,59 +321,6 @@ public class PlayerHelper {
         }
 
         return options;
-    }
-
-    protected static void updateMoves(List<Cell> moves, Players players) {
-
-        //no need to do anything if the list is empty
-        if (moves.isEmpty())
-            return;
-
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
-
-        //store the current turn
-        boolean tmpPlayer1Turn = new Boolean(players.isPlayer1Turn());
-
-        //create our move for reference
-        Move move = new Move();
-
-        //remove any moves that don't get us out of check
-        for (int i = 0; i < moves.size(); i++) {
-
-            if (moves.isEmpty())
-                break;
-
-            //populate our next move
-            move.sourceCol = (int)players.getSelected().getCol();
-            move.sourceRow = (int)players.getSelected().getRow();
-            move.destCol = (int)moves.get(i).getCol();
-            move.destRow = (int)moves.get(i).getRow();
-            move.pieceCaptured = opponent.getPiece(move.destCol, move.destRow);
-
-            //execute the move
-            executeMove(move, players);
-
-            //keep the turn the same
-            players.setPlayer1Turn(tmpPlayer1Turn);
-
-            //if we are still in check, this isn't a valid move
-            if (hasCheck(opponent, player)) {
-
-                if (i < moves.size())
-                    moves.remove(i);
-                i--;
-            }
-
-            //undo the move
-            undoMove(move, players);
-
-            //keep the turn the same
-            players.setPlayer1Turn(tmpPlayer1Turn);
-        }
-
-        //restore the correct player turn
-        players.setPlayer1Turn(tmpPlayer1Turn);
     }
 
     private static void executeMove(Move move, Players players) {
@@ -380,7 +346,7 @@ public class PlayerHelper {
             move.pieceCaptured.setCaptured(true);
         }
 
-        //since we made a move, switch turns
+        //since we executed a move switch turns
         players.setPlayer1Turn(!players.isPlayer1Turn());
     }
 
@@ -390,7 +356,7 @@ public class PlayerHelper {
         Piece piece = players.getPlayer1().getPiece(move.destCol, move.destRow);
         boolean player1Turn = true;
 
-        //if the piece doesn't exist it must be player 2
+        //if the piece doesn't exist it must be player 2's turn
         if (piece == null) {
             piece = players.getPlayer2().getPiece(move.destCol, move.destRow);
             player1Turn = false;
@@ -412,178 +378,101 @@ public class PlayerHelper {
     }
 
     /**
-     * Is the opponent in check?
-     * @param player offense
-     * @param opponent defense
-     * @return true if the player has the opponent in check
+     * Update the state for player 1 (check, checkmate, stalemate)
+     * @param player1
+     * @param player2
      */
-    protected static boolean hasCheck(Player player, Player opponent) {
+    protected static void updateStatus(Player player1, Player player2) {
 
-        Piece king = null;
+        //get list of all possible moves for player 1
+        List<Move> movesPlayer1 = getMoves(player1, player2);
+        List<Move> movesPlayer2 = getMoves(player2, player1);
 
-        //check the opponent for the king chess piece
-        for (int i = 0; i < opponent.getPieceCount(); i++) {
-            Piece piece = opponent.getPiece(i, false);
+        //get the king for player 1
+        Piece king = player1.getPiece(Piece.Type.King);
 
-            //if the piece does not exist continue
-            if (piece == null)
-                continue;
+        //do we have check
+        boolean hasCheck = false;
 
-            //if the piece is king, we found it
-            if (piece.getType() == Piece.Type.King) {
-                king = piece;
+        //check every player 2 move to see if it can capture player 1's king
+        for (int i = 0; i < movesPlayer2.size(); i++) {
+
+            //if the location matches the king, we have check
+            if (king.hasLocation(movesPlayer2.get(i).destCol, movesPlayer2.get(i).destRow)) {
+                hasCheck = true;
                 break;
             }
         }
 
-        for (int i = 0; i < player.getPieceCount(); i++) {
-            Piece piece = player.getPiece(i, false);
+        //update check status if check is true
+        player1.setCheck(hasCheck);
 
-            if (piece == null)
-                continue;
+        //if the player is in check, let's see if any of player 1's moves can fix that
+        if (player1.hasCheck()) {
 
-            //get the list of moves for the current piece
-            List<Cell> moves = piece.getMoves(player, opponent);
+            //assume checkmate (just for now)
+            boolean result = true;
 
-            //check each move
-            for (int index = 0; index < moves.size(); index++) {
+            //check every player 1 move to see if we can avoid check
+            for (int index = 0; index < movesPlayer1.size(); index++) {
 
-                //if the move is at the location of the king, the king is in check
-                if (king.hasLocation(moves.get(index)))
-                    return true;
-            }
-        }
+                //get the current piece
+                Piece piece = player1.getPiece(movesPlayer1.get(index).sourceCol, movesPlayer1.get(index).sourceRow);
 
-        //we haven't found the king to be in danger
-        return false;
-    }
+                //place at destination
+                piece.setCol(movesPlayer1.get(index).destCol);
+                piece.setRow(movesPlayer1.get(index).destRow);
 
-    protected static boolean hasStalemate(Players players) {
+                //get the captured piece (if exists)
+                movesPlayer1.get(index).pieceCaptured = player2.getPiece(movesPlayer1.get(index).destCol, movesPlayer1.get(index).destRow);
 
-        //player who needs to escape check
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+                //if the piece exists, capture it
+                if (movesPlayer1.get(index).pieceCaptured != null)
+                    movesPlayer1.get(index).pieceCaptured.setCaptured(true);
 
-        //opponent attacking the vulnerable player
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+                //get the current king chess piece
+                king = player1.getPiece(Piece.Type.King);
 
-        //for right now assume stalemate
-        boolean result = true;
+                //get the new list of player 2 moves available
+                movesPlayer2 = getMoves(player2, player1);
 
-        //check all our pieces
-        for (int i = 0; i < opponent.getPieceCount(); i++) {
+                boolean tmpCheck = false;
 
-            Piece piece = opponent.getPiece(i, false);
+                //check every player 2 move to see if it can capture player 1's king
+                for (int i = 0; i < movesPlayer2.size(); i++) {
 
-            if (piece == null)
-                continue;
-
-            //get the list of moves for the current piece
-            List<Cell> tmpMoves = piece.getMoves(opponent, player);
-
-            //remove any invalid moves (if exist)
-            if (!tmpMoves.isEmpty()) {
-
-                final int col = (int)piece.getCol();
-                final int row = (int)piece.getRow();
-
-                //see if any moves can be removed
-                for (int index = 0; index < tmpMoves.size(); index++) {
-
-                    //update the location
-                    piece.setCol(tmpMoves.get(index));
-                    piece.setRow(tmpMoves.get(index));
-
-                    //if we are still in check, remove move
-                    if (hasCheck(player, opponent)) {
-                        tmpMoves.remove(index);
-                        index--;
+                    //if the location matches the king, we still have check
+                    if (king.hasLocation(movesPlayer2.get(i).destCol, movesPlayer2.get(i).destRow)) {
+                        tmpCheck = true;
+                        break;
                     }
                 }
 
-                //restore location
-                piece.setCol(col);
-                piece.setRow(row);
-            }
+                //if the piece exists, un-capture it
+                if (movesPlayer1.get(index).pieceCaptured != null)
+                    movesPlayer1.get(index).pieceCaptured.setCaptured(false);
 
-            //if we have at least 1 move, this isn't a stalemate
-            if (!tmpMoves.isEmpty()) {
-                result = false;
-                break;
-            }
-        }
+                //restore the piece to it's original location
+                piece.setCol(movesPlayer1.get(index).sourceCol);
+                piece.setRow(movesPlayer1.get(index).sourceRow);
 
-        //return our result
-        return result;
-    }
-
-    /**
-     * Do we have check mate?
-     * @return true if the game is over, false otherwise
-     */
-    protected static boolean hasCheckMate(Players players) {
-
-        boolean tmpPlayer1Turn = new Boolean(players.isPlayer1Turn());
-
-        //switch turns temporary to see if the player can escape check
-        players.setPlayer1Turn(!tmpPlayer1Turn);
-
-        //player who needs to escape check
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-
-        //opponent attacking the vulnerable player
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
-
-        //create temp move
-        Move move = new Move();
-
-        //for right now assume check mate
-        boolean result = true;
-
-        for (int i = 0; i < player.getPieceCount(); i++) {
-            Piece piece = player.getPiece(i, false);
-
-            if (piece == null)
-                continue;
-
-            //get the list of moves for the current piece
-            List<Cell> moves = piece.getMoves(player, opponent);
-
-            for (int x = 0; x < moves.size(); x++) {
-
-                //if not in check, no need to continue
-                if (!result)
-                    break;
-
-                //create our move
-                move.sourceCol = (int)piece.getCol();
-                move.sourceRow = (int)piece.getRow();
-                move.destCol = (int)moves.get(x).getCol();
-                move.destRow = (int)moves.get(x).getRow();
-                move.pieceCaptured = opponent.getPiece(move.destCol, move.destRow);
-
-                //execute the move
-                executeMove(move, players);
-
-                //keep the same turn
-                players.setPlayer1Turn(!tmpPlayer1Turn);
-
-                //see if we are still in check
-                if (!hasCheck(opponent, player))
+                //if this move doesn't result in check, we can avoid checkmate!!!!
+                if (!tmpCheck) {
                     result = false;
-
-                //undo the previous move
-                undoMove(move, players);
-
-                //keep the same turn
-                players.setPlayer1Turn(!tmpPlayer1Turn);
+                    break;
+                }
             }
+
+            //if the player is in check and there are no moves, checkmate
+            player1.setCheckMate(result);
+        } else {
+
+            //if we aren't in check, there is no chance of checkmate
+            player1.setCheckMate(false);
         }
 
-        //restore the correct turn
-        players.setPlayer1Turn(tmpPlayer1Turn);
-
-        //return our result
-        return result;
+        //if we aren't in check / checkmate, but we have no more moves available
+        player1.setStalemate(!player1.hasCheck() && !player1.hasCheckMate() && movesPlayer1.isEmpty());
     }
 
     protected static void promote(BasicRenderer renderer, Players players, Piece selection) {

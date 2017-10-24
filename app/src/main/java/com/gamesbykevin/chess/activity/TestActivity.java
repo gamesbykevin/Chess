@@ -1,16 +1,13 @@
 package com.gamesbykevin.chess.activity;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ToggleButton;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.opengl.BasicRenderer;
 
-import org.rajawali3d.renderer.Renderer;
 import org.rajawali3d.view.ISurface;
 import org.rajawali3d.view.SurfaceView;
 
@@ -41,9 +38,6 @@ public class TestActivity extends Activity {
         return val;
     }
 
-    public void onClickResetCamera(View view) {
-        renderer.resetCamera();
-    }
 
     @Override
     public void onBackPressed() {

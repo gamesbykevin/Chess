@@ -1,4 +1,4 @@
-package com.gamesbykevin.chess.activity;
+package com.gamesbykevin.chess.opengl;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,7 +9,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-import com.gamesbykevin.chess.base.Entity;
+import com.gamesbykevin.androidframeworkv2.base.Entity;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.ArcballCamera;
@@ -23,7 +23,7 @@ import org.rajawali3d.math.vector.Vector3;
 /**
  * Created by Kevin on 10/15/2017.
  */
-public class TestArcballCamera extends ArcballCamera {
+public class CustomArcballCamera extends ArcballCamera {
 
     private Context mContext;                       //camera context
     private ScaleGestureDetector mScaleDetector;
@@ -69,7 +69,7 @@ public class TestArcballCamera extends ArcballCamera {
     /**
      * constructor with no target
      */
-    public TestArcballCamera(BasicRenderer renderer, Context context, View view) {
+    public CustomArcballCamera(BasicRenderer renderer, Context context, View view) {
         this(renderer, context, view, (Object3D) null);
     }
 
@@ -77,7 +77,7 @@ public class TestArcballCamera extends ArcballCamera {
      * default arcballCamera constructor. sets the principal camera components and
      * adds the camera main listeners
      */
-    public TestArcballCamera(BasicRenderer renderer, Context context, View view, Object3D target) {
+    public CustomArcballCamera(BasicRenderer renderer, Context context, View view, Object3D target) {
         super(context,view,target);
         this.renderer = renderer;
         this.mContext = context;
@@ -243,10 +243,10 @@ public class TestArcballCamera extends ArcballCamera {
     }
 
     public void removeListeners() {
-        TestArcballCamera.this.mGestureListener = null;
-        TestArcballCamera.this.mScaleDetector = null;
-        TestArcballCamera.this.mDetector = null;
-        TestArcballCamera.this.mView.setOnTouchListener(null);
+        CustomArcballCamera.this.mGestureListener = null;
+        CustomArcballCamera.this.mScaleDetector = null;
+        CustomArcballCamera.this.mDetector = null;
+        CustomArcballCamera.this.mView.setOnTouchListener(null);
     }
 
     /** adds the basic listeners to the camera*/
@@ -255,11 +255,11 @@ public class TestArcballCamera extends ArcballCamera {
         ((Activity)this.mContext).runOnUiThread(new Runnable() {
             public void run() {
                 //sets a gesture detector (touch)
-                TestArcballCamera.this.mDetector = new GestureDetector(TestArcballCamera.this.mContext, TestArcballCamera.this.new GestureListener());
+                CustomArcballCamera.this.mDetector = new GestureDetector(CustomArcballCamera.this.mContext, CustomArcballCamera.this.new GestureListener());
                 //sets a scale detector (zoom)
-                TestArcballCamera.this.mScaleDetector = new ScaleGestureDetector(TestArcballCamera.this.mContext, TestArcballCamera.this.new ScaleListener());
+                CustomArcballCamera.this.mScaleDetector = new ScaleGestureDetector(CustomArcballCamera.this.mContext, CustomArcballCamera.this.new ScaleListener());
                 //sets a touch listener
-                TestArcballCamera.this.mGestureListener = new View.OnTouchListener() {
+                CustomArcballCamera.this.mGestureListener = new View.OnTouchListener() {
                     public boolean onTouch(View v, MotionEvent event) {
 
                         //determine what is happening
@@ -310,14 +310,14 @@ public class TestArcballCamera extends ArcballCamera {
 
 
                         //sees if it is a scale event
-                        TestArcballCamera.this.mScaleDetector.onTouchEvent(event);
-                        if(!TestArcballCamera.this.mIsScaling) {
+                        CustomArcballCamera.this.mScaleDetector.onTouchEvent(event);
+                        if(!CustomArcballCamera.this.mIsScaling) {
                             //if not, delivers the event to the movement detector to start rotation
-                            TestArcballCamera.this.mDetector.onTouchEvent(event);
-                            if(event.getAction() == 1 && TestArcballCamera.this.mIsRotating) {
+                            CustomArcballCamera.this.mDetector.onTouchEvent(event);
+                            if(event.getAction() == 1 && CustomArcballCamera.this.mIsRotating) {
                                 //ends the rotation if the event ended
-                                TestArcballCamera.this.endRotation();
-                                TestArcballCamera.this.mIsRotating = false;
+                                CustomArcballCamera.this.endRotation();
+                                CustomArcballCamera.this.mIsRotating = false;
                             }
                         }
 
@@ -325,7 +325,7 @@ public class TestArcballCamera extends ArcballCamera {
                     }
                 };
                 //sets the touch listener
-                TestArcballCamera.this.mView.setOnTouchListener(TestArcballCamera.this.mGestureListener);
+                CustomArcballCamera.this.mView.setOnTouchListener(CustomArcballCamera.this.mGestureListener);
             }
         });
     }
@@ -348,21 +348,21 @@ public class TestArcballCamera extends ArcballCamera {
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
-            double fov = Math.max(30.0D, Math.min(54.0D, TestArcballCamera.this.mStartFOV * (1.0D / (double)detector.getScaleFactor())));
+            double fov = Math.max(30.0D, Math.min(54.0D, CustomArcballCamera.this.mStartFOV * (1.0D / (double)detector.getScaleFactor())));
             Log.e("SCALE", "detector scale factor "+detector.getScaleFactor());
-            TestArcballCamera.this.setFieldOfView(fov);
+            CustomArcballCamera.this.setFieldOfView(fov);
             return true;
         }
 
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            TestArcballCamera.this.mIsScaling = true;
-            TestArcballCamera.this.mIsRotating = false;
+            CustomArcballCamera.this.mIsScaling = true;
+            CustomArcballCamera.this.mIsRotating = false;
             return super.onScaleBegin(detector);
         }
 
         public void onScaleEnd(ScaleGestureDetector detector) {
-            TestArcballCamera.this.mIsRotating = false;
-            TestArcballCamera.this.mIsScaling = false;
+            CustomArcballCamera.this.mIsRotating = false;
+            CustomArcballCamera.this.mIsScaling = false;
         }
     }
 
@@ -373,18 +373,18 @@ public class TestArcballCamera extends ArcballCamera {
         }
 
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY) {
-            if(!TestArcballCamera.this.mIsRotating) {
-                TestArcballCamera.this.originalX=event2.getX();
-                TestArcballCamera.this.originalY=event2.getY();
-//                TestArcballCamera.this.startRotation(event2.getX(), event2.getY());
-                TestArcballCamera.this.startRotation(TestArcballCamera.this.mLastWidth / 2, TestArcballCamera.this.mLastHeight / 2); //0,0 es la esquina superior izquierda. Buscar centro camara en algun lugar
+            if(!CustomArcballCamera.this.mIsRotating) {
+                CustomArcballCamera.this.originalX=event2.getX();
+                CustomArcballCamera.this.originalY=event2.getY();
+//                CustomArcballCamera.this.startRotation(event2.getX(), event2.getY());
+                CustomArcballCamera.this.startRotation(CustomArcballCamera.this.mLastWidth / 2, CustomArcballCamera.this.mLastHeight / 2); //0,0 es la esquina superior izquierda. Buscar centro camara en algun lugar
                 return false;
             } else {
-                float x =  (TestArcballCamera.this.mLastWidth / 2) - (event2.getX() - TestArcballCamera.this.originalX);
-                float y = (TestArcballCamera.this.mLastHeight / 2) - (event2.getY() - TestArcballCamera.this.originalY);
-                TestArcballCamera.this.mIsRotating = true;
-//                TestArcballCamera.this.updateRotation(event2.getX(), event2.getY());
-                TestArcballCamera.this.updateRotation(x, y);
+                float x =  (CustomArcballCamera.this.mLastWidth / 2) - (event2.getX() - CustomArcballCamera.this.originalX);
+                float y = (CustomArcballCamera.this.mLastHeight / 2) - (event2.getY() - CustomArcballCamera.this.originalY);
+                CustomArcballCamera.this.mIsRotating = true;
+//                CustomArcballCamera.this.updateRotation(event2.getX(), event2.getY());
+                CustomArcballCamera.this.updateRotation(x, y);
                 return false;
             }
         }

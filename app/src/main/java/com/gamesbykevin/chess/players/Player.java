@@ -88,6 +88,7 @@ public abstract class Player {
     public Piece getPiece(Piece.Type type) {
 
         for (int i = 0; i < getPieceCount(); i++) {
+
             Piece piece = getPiece(i, true);
 
             if (piece != null && piece.getType() == type)

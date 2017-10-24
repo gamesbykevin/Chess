@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.ToggleButton;
 
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.game.GameHelper;
-import com.gamesbykevin.chess.opengl.OpenGLSurfaceViewHelper;
 import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -140,10 +138,6 @@ public class OptionsActivity extends BaseActivity {
 
         //get the button
         ToggleButton button = view.findViewById(R.id.toggleButtonZoom);
-
-        //update the view  options
-        OpenGLSurfaceViewHelper.ZOOM_ENABLED = button.isChecked();
-        OpenGLSurfaceViewHelper.DRAG_ENABLED = button.isChecked();
     }
 
     public void onClickTimer(View view) {
@@ -152,7 +146,7 @@ public class OptionsActivity extends BaseActivity {
         ToggleButton button = view.findViewById(R.id.toggleButtonTimer);
 
         //update the timer display
-        GameHelper.TIMER = button.isChecked();
+        //GameHelper.TIMER = button.isChecked();
     }
 
     public void onClickGoogleLogin(View view) {

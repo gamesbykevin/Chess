@@ -1,10 +1,11 @@
-package com.gamesbykevin.chess.activity;
+package com.gamesbykevin.chess.opengl;
 
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.opengl.CustomArcballCamera;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.Players;
 import com.gamesbykevin.chess.util.UtilityHelper;
@@ -16,6 +17,7 @@ import org.rajawali3d.renderer.Renderer;
 import org.rajawali3d.util.ObjectColorPicker;
 import org.rajawali3d.util.OnObjectPickedListener;
 
+import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -23,7 +25,7 @@ import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
  */
 public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
-    private TestArcballCamera camera;
+    private CustomArcballCamera camera;
 
     private Context context;
 
@@ -31,16 +33,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     private Object3D board;
 
-    private Players players;
-
-    //private RayPicker rayPicker;
     private ObjectColorPicker objectPicker;
 
     //did we render our board at least once?
-    private boolean init = false;
-
-    //are we rotating the board?
-    private boolean rotate = false;
+    public static boolean INIT = false;
 
     public BasicRenderer(Context context, View view) {
         super(context);
@@ -69,7 +65,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     public void initScene() {
 
         //flag false until our first render
-        init = false;
+        INIT = false;
 
         //create our object picker to select the pieces
         this.objectPicker = new ObjectColorPicker(this);
@@ -84,16 +80,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //add the board to the scene
         addBoard();
 
-        try {
-
-            //create the players and reset the pieces
-            //this.players = new Players(Players.Mode.CpuVsCpu);
-            this.players = new Players(Players.Mode.HumVsCpu);
-            this.players.reset(this);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        if (getGame() != null && getGame().getPlayers() != null)
+            getGame().getPlayers().createMaterials();
 
         //create arc ball camera to rotate around the board
         resetCamera();
@@ -113,16 +101,19 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (object3D == null)
             return;
 
+        if (getGame() == null)
+            return;
+
         //select our chess piece
-        if (getPlayers().getSelected() == null) {
+        if (getGame().getPlayers().getSelected() == null) {
 
             //set our selection
-            getPlayers().select(this, object3D);
+            getGame().getPlayers().select(this, object3D);
 
         } else {
 
             //place at object (if possible)
-            getPlayers().place(this, object3D);
+            getGame().getPlayers().place(this, object3D);
         }
     }
 
@@ -130,15 +121,18 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     public void onTouchEvent(MotionEvent event){
 
         //if not started don't do anything
-        if (!init)
+        if (!INIT)
+            return;
+
+        if (getGame() == null || getGame().getPlayers() == null)
             return;
 
         //if a chess piece is moving, we can't do anything
-        if (getPlayers().isMoving())
+        if (getGame().getPlayers().isMoving())
             return;
 
         //get the current player
-        Player player = players.isPlayer1Turn() ? getPlayers().getPlayer1() : getPlayers().getPlayer2();
+        Player player = getGame().getPlayers().isPlayer1Turn() ? getGame().getPlayers().getPlayer1() : getGame().getPlayers().getPlayer2();
 
         //if the player isn't human, we can't select anything right now
         if (!player.isHuman())
@@ -162,25 +156,20 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         }
     }
 
-    public Players getPlayers() {
-        return this.players;
-    }
-
     public ObjectColorPicker getObjectPicker() {
         return this.objectPicker;
     }
 
     public void resetCamera() {
 
-
         if (camera == null) {
-            this.camera = new TestArcballCamera(this, context, view, board);
+            this.camera = new CustomArcballCamera(this, context, view, board);
             this.camera.setPosition(1.75, 1.75, 0);
             getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), this.camera);
         } else {
             //initialize the camera again
-            ((TestArcballCamera)getCurrentCamera()).initialize();
-            ((TestArcballCamera)getCurrentCamera()).setPosition(1.75, 1.75, 0);
+            ((CustomArcballCamera)getCurrentCamera()).initialize();
+            ((CustomArcballCamera)getCurrentCamera()).setPosition(1.75, 1.75, 0);
         }
 
         //this.camera.;
@@ -218,13 +207,13 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
 
-        //update the players if needed
-        getPlayers().update(this);
+        if (getGame().getPlayers() == null)
+            getGame().reset();
 
         //call parent to render objects
         super.onRender(elapsedTime, deltaTime);
 
         //flag that the board has been initialized
-        init = true;
+        INIT = true;
     }
 }

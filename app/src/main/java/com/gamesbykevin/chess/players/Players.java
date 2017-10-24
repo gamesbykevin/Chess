@@ -1,11 +1,9 @@
 package com.gamesbykevin.chess.players;
 
-import android.graphics.Color;
-import android.widget.Toast;
-
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.activity.BasicRenderer;
+import com.gamesbykevin.chess.activity.GameActivity;
+import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -70,7 +68,12 @@ public class Players {
     //list of promotional pieces when a pawn reaches the end
     private List<Piece> promotions;
 
-    public Players(final Mode mode) {
+    private final GameActivity activity;
+
+    public Players(final GameActivity activity, final Mode mode) {
+
+        //store activity reference
+        this.activity = activity;
 
         //assign the mode of game play
         this.mode = mode;
@@ -106,6 +109,10 @@ public class Players {
 
         //create our textures for the pieces
         createMaterials();
+    }
+
+    public GameActivity getActivity() {
+        return this.activity;
     }
 
     public void setPromoting(final boolean promoting) {
@@ -172,7 +179,7 @@ public class Players {
         return this.selection;
     }
 
-    private void createMaterials() {
+    public void createMaterials() {
 
         try {
 
@@ -277,7 +284,7 @@ public class Players {
         //if we haven't found a piece yet, and it is the current player's turn, and the player is human
         if (player.isHuman()) {
 
-            //if we are promoting
+            //if we are promoting a pawn
             if (isPromoting()) {
 
                 //check all the promotion pieces
@@ -287,6 +294,7 @@ public class Players {
 
                     //is this the piece we have selected?
                     if (piece.getObject3D().equals(object3D)) {
+
                         //promote the piece
                         PlayerHelper.promote(renderer, this, piece);
 
@@ -320,11 +328,8 @@ public class Players {
         //if we selected a piece we need to calculate the moves
         if (found) {
 
-            //get list of valid moves
-            this.moves = getSelected().getMoves(player, opponent);
-
-            //update list of available moves (in case player is in check)
-            PlayerHelper.updateMoves(this.moves, this);
+            //get list of valid moves that don't put us in check
+            this.moves = getSelected().getMoves(player, opponent, true);
 
             //make sure moves exist for the chess piece
             if (this.moves.isEmpty()) {
@@ -447,23 +452,15 @@ public class Players {
                     }
                 }
 
-                //update if the player is in check
-                opponent.setCheck(PlayerHelper.hasCheck(player, opponent));
+                //update the state of the game (check, checkmate, stalemate)
+                PlayerHelper.updateStatus(opponent, player);
 
                 //check if the opponent is in check
                 if (DEBUG && opponent.hasCheck())
                     UtilityHelper.logEvent(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
 
-                //check if the game is over if already in  check
-                if (opponent.hasCheck())
-                    opponent.setCheckMate(PlayerHelper.hasCheckMate(this));
-
                 if (DEBUG && opponent.hasCheckMate())
                     UtilityHelper.logEvent("Checkmate");
-
-                //check if the game ends in a stalemate if we aren't in check
-                if (!opponent.hasCheck())
-                    opponent.setStalemate(PlayerHelper.hasStalemate(this));
 
                 if (DEBUG && opponent.hasStalemate())
                     UtilityHelper.logEvent("Stalemate");
@@ -476,10 +473,6 @@ public class Players {
 
                 //check if we have a promotion
                 setPromoting(PlayerHelper.hasPromotion(this));
-
-                //we are no longer moving
-                setMoving(false);
-
 
                 //if we aren't promoting a piece, switch turns
                 if (!isPromoting()) {
@@ -506,6 +499,9 @@ public class Players {
                         setPlayer1Turn(!isPlayer1Turn());
                     }
                 }
+
+                //we are no longer moving
+                setMoving(false);
             }
         }
     }

@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.opengl.OpenGLSurfaceViewHelper;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 public class MainActivity extends BaseActivity {
@@ -115,8 +114,6 @@ public class MainActivity extends BaseActivity {
 
         //store our shape selection
         //OptionsActivity.OPTION_BOARD_SHAPE = (Board.Shape)getObjectValue(R.string.game_shape_file_key, Board.Shape.class);
-        OpenGLSurfaceViewHelper.DRAG_ENABLED = getBooleanValue(R.string.open_gl_zoom_file_key);
-        OpenGLSurfaceViewHelper.ZOOM_ENABLED = getBooleanValue(R.string.open_gl_zoom_file_key);
 
         //start game
         startActivity(new Intent(this, GameActivity.class));

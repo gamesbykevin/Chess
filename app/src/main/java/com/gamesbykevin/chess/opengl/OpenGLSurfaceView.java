@@ -3,34 +3,23 @@ package com.gamesbykevin.chess.opengl;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 
 import com.gamesbykevin.chess.util.UtilityHelper;
 
+import org.rajawali3d.view.SurfaceView;
+
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
-import static com.gamesbykevin.chess.game.Game.STEP;
-import static com.gamesbykevin.chess.opengl.OpenGLRenderer.LOADED;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 6/1/2017.
  */
-public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
+public class OpenGLSurfaceView extends SurfaceView implements Runnable {
 
     /**
      * Frames per second
      */
-    public static final int FPS = 60;
-
-    /**
-     * Default dimensions this game was designed for
-     */
-    public static final int WIDTH = 800;
-
-    /**
-     * Default dimensions this game was designed for
-     */
-    public static final int HEIGHT = 480;
+    public static final int FPS = 90;
 
     /**
      * The version of open GL we are using
@@ -38,7 +27,7 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
     public static final int OPEN_GL_VERSION = 2;
 
     //our object where we render our pixel data
-    private OpenGLRenderer openGlRenderer;
+    private BasicRenderer renderer;
 
     //our game mechanics will run on this thread
     private Thread thread;
@@ -87,10 +76,13 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
         setPreserveEGLContextOnPause(true);
 
         //create a new instance of our renderer
-        this.openGlRenderer = new OpenGLRenderer(context);
+        this.renderer = new BasicRenderer(context, this);
 
         //set the renderer for drawing on the gl surface view
-        setRenderer(getOpenGlRenderer());
+        setSurfaceRenderer(getRenderer());
+
+        //assign the frame rate
+        setFrameRate(FPS);
 
         //set render mode to only draw when there is a change in the drawing data
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
@@ -100,8 +92,8 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
      * Get our OpenGL Renderer
      * @return Object used for all texture mapping
      */
-    protected OpenGLRenderer getOpenGlRenderer() {
-        return this.openGlRenderer;
+    public BasicRenderer getRenderer() {
+        return this.renderer;
     }
 
     /**
@@ -114,7 +106,8 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
         super.onPause();
 
         //pause the open gl renderer
-        getOpenGlRenderer().onPause();
+        if (getRenderer() != null)
+            getRenderer().onPause();
 
         //flag that we don't want our thread to continue running
         this.running = false;
@@ -122,7 +115,8 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
         try {
 
             //wait for thread to finish
-            this.thread.join();
+            if (this.thread != null)
+                this.thread.join();
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
@@ -139,7 +133,7 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
         super.onResume();
 
         //resume the open gl renderer
-        getOpenGlRenderer().onResume();
+        getRenderer().onResume();
 
         //flag running true
         this.running = true;
@@ -242,38 +236,6 @@ public class OpenGLSurfaceView extends GLSurfaceView implements Runnable {
             //reset frame count
             frames = 0;
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(final MotionEvent event) {
-
-        try
-        {
-            //we can't continue if the textures have not yet loaded
-            if (!LOADED)
-                return true;
-
-            //don't continue if the game is not running
-            switch (STEP) {
-
-                case Running:
-                    break;
-
-                //if the game is not running, don't check motion events
-                default:
-                    return true;
-            }
-
-            //update the motion event
-            OpenGLSurfaceViewHelper.onTouchEvent(this, event);
-        }
-        catch (Exception e)
-        {
-            UtilityHelper.handleException(e);
-        }
-
-        //return true to keep receiving touch events
-        return true;
     }
 
     /**
