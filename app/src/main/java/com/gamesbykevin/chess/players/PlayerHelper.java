@@ -82,73 +82,99 @@ public class PlayerHelper {
 
     protected static void reset(Player player, BasicRenderer renderer, Material material) {
 
-        //remove all existing pieces
-        player.removeAllPieces();
-
-        final float row1, row2;
+        final int row1, row2;
 
         //the rows will depend on the direction the player is targeting
         if (player.hasDirection(Player.Direction.North)) {
-            row1 = COORDINATE_MAX - COORDINATE_INCREMENT;
-            row2 = COORDINATE_MAX;
+            row1 = 6;
+            row2 = 7;
         } else {
-            row1 = COORDINATE_MIN + COORDINATE_INCREMENT;
-            row2 = COORDINATE_MIN;
+            row1 = 1;
+            row2 = 0;
         }
 
         //populate all the pieces for row 1
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(0), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(1), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(2), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(3), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(4), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(5), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(6), Y, row1);
-        addPiece(player, renderer, material, Piece.Type.Pawn, getCoordinate(7), Y, row1);
+        addPiece(player, Piece.Type.Pawn, 0, row1);
+        addPiece(player, Piece.Type.Pawn, 1, row1);
+        addPiece(player, Piece.Type.Pawn, 2, row1);
+        addPiece(player, Piece.Type.Pawn, 3, row1);
+        addPiece(player, Piece.Type.Pawn, 4, row1);
+        addPiece(player, Piece.Type.Pawn, 5, row1);
+        addPiece(player, Piece.Type.Pawn, 6, row1);
+        addPiece(player, Piece.Type.Pawn, 7, row1);
 
         //populate all the pieces for row 2
-        addPiece(player, renderer, material, Piece.Type.Rook,   getCoordinate(0), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.Knight, getCoordinate(1), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.Bishop, getCoordinate(2), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.Queen,  getCoordinate(3), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.King,   getCoordinate(4), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.Bishop, getCoordinate(5), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.Knight, getCoordinate(6), Y, row2);
-        addPiece(player, renderer, material, Piece.Type.Rook,   getCoordinate(7), Y, row2);
+        addPiece(player, Piece.Type.Rook,   0, row2);
+        addPiece(player, Piece.Type.Knight, 1, row2);
+        addPiece(player, Piece.Type.Bishop, 2, row2);
+        addPiece(player, Piece.Type.Queen,  3, row2);
+        addPiece(player, Piece.Type.King,   4, row2);
+        addPiece(player, Piece.Type.Bishop, 5, row2);
+        addPiece(player, Piece.Type.Knight, 6, row2);
+        addPiece(player, Piece.Type.Rook,   7, row2);
+
+        //load the object models
+        loadModels(player, renderer, material);
     }
 
-    private static void addPiece(Player player, BasicRenderer renderer, Material material, Piece.Type type, float x, float y, float z) {
+    protected static void loadModels(Player player, BasicRenderer renderer, Material material) {
 
-        try {
+        for (int i = 0; i < player.getPieceCount(); i++) {
 
-            //parse our 3d model
-            LoaderSTL stlParser = new LoaderSTL(renderer.getContext().getResources(), renderer.getTextureManager(), type.getResId());
-            stlParser.parse();
+            //get the current piece
+            Piece piece = player.getPiece(i, true);
 
-            //get our 3d object
-            Object3D obj = stlParser.getParsedObject();
+            //if the piece does not exist skip to the next
+            if (piece == null)
+                continue;
 
-            //rotate piece 90 degrees so it is standing up
-            obj.rotate(Vector3.Axis.X, 90);
+            //remove previous, if it exists
+            if (piece.getObject3D() != null) {
+                renderer.getCurrentScene().removeChild(piece.getObject3D());
+                renderer.getObjectPicker().unregisterObject(piece.getObject3D());
+            }
 
-            //assign the location
-            obj.setPosition(x, y, z);
+            final double x = getCoordinate((int)piece.getCol());
+            final double y = Y;
+            final double z = getCoordinate((int)piece.getRow());
 
-            //our model is too large so we need to shrink it
-            obj.setScale(.05);
+            try {
 
-            //assign the texture to the model
-            obj.setMaterial(material);
+                //parse our 3d model
+                LoaderSTL stlParser = new LoaderSTL(renderer.getContext().getResources(), renderer.getTextureManager(), piece.getType().getResId());
+                stlParser.parse();
 
-            //add to the scene
-            renderer.getCurrentScene().addChild(obj);
+                //get our 3d object
+                Object3D obj = stlParser.getParsedObject();
 
-            //add piece to the player
-            player.addPiece(new Piece(obj, type, getCol(x), getRow(z)));
+                //rotate piece 90 degrees so it is standing up
+                obj.rotate(Vector3.Axis.X, 90);
 
-        } catch (Exception e) {
-            UtilityHelper.handleException(e);
+                //assign the location
+                obj.setPosition(x, y, z);
+
+                //our model is too large so we need to shrink it
+                obj.setScale(.05);
+
+                //assign the texture to the model
+                obj.setMaterial(material);
+
+                //add to the scene
+                renderer.getCurrentScene().addChild(obj);
+
+                //assign our model to the piece
+                piece.setObject3D(obj);
+
+            } catch (Exception e) {
+                UtilityHelper.handleException(e);
+            }
         }
+    }
+
+    private static void addPiece(Player player, Piece.Type type, int col, int row) {
+
+        //add piece to the player
+        player.addPiece(new Piece(type, col, row));
     }
 
     protected static void loadBoardSelection(Players players, Renderer renderer, Material material) {
@@ -190,7 +216,7 @@ public class PlayerHelper {
         Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
 
         //create a new list for all the moves
-        List<Move> moves = getMoves(player, opponent);
+        List<Move> moves = getMoves(player, opponent, false);
 
         //count the number of moves
         int count = 0;
@@ -205,11 +231,11 @@ public class PlayerHelper {
             if (INTERRUPT)
                 break;
 
-            if (DEBUG) {
-                count++;
+            count++;
+            players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
+
+            if (DEBUG)
                 UtilityHelper.logEvent("Checking move " + count);
-                players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
-            }
 
             //execute the current move
             executeMove(move, players);
@@ -249,7 +275,7 @@ public class PlayerHelper {
             return (player.calculateScore() - opponent.calculateScore());
 
         //get list of all valid moves based on the current state of the board
-        List<Move> currentMoves = getMoves(player, opponent);
+        List<Move> currentMoves = getMoves(player, opponent, false);
 
         //keep track of the best score
         int bestScore = Integer.MIN_VALUE;
@@ -288,7 +314,7 @@ public class PlayerHelper {
      * @param opponent The opponent they are facing
      * @return List of available moves which don't put the player in check
      */
-    private static List<Move> getMoves(Player player, Player opponent) {
+    private static List<Move> getMoves(Player player, Player opponent, final boolean checkForCheck) {
 
         //create a new list for all the moves
         List<Move> options = new ArrayList<>();
@@ -303,7 +329,7 @@ public class PlayerHelper {
                 continue;
 
             //get a list of moves for the current piece
-            List<Cell> moves = piece.getMoves(player, opponent, true);
+            List<Cell> moves = piece.getMoves(player, opponent, checkForCheck);
 
             //add all possible moves to the list of options
             for (Cell move : moves) {
@@ -385,8 +411,8 @@ public class PlayerHelper {
     protected static void updateStatus(Player player1, Player player2) {
 
         //get list of all possible moves for player 1
-        List<Move> movesPlayer1 = getMoves(player1, player2);
-        List<Move> movesPlayer2 = getMoves(player2, player1);
+        List<Move> movesPlayer1 = getMoves(player1, player2, true);
+        List<Move> movesPlayer2 = getMoves(player2, player1, true);
 
         //get the king for player 1
         Piece king = player1.getPiece(Piece.Type.King);
@@ -434,7 +460,7 @@ public class PlayerHelper {
                 king = player1.getPiece(Piece.Type.King);
 
                 //get the new list of player 2 moves available
-                movesPlayer2 = getMoves(player2, player1);
+                movesPlayer2 = getMoves(player2, player1, true);
 
                 boolean tmpCheck = false;
 
@@ -465,6 +491,7 @@ public class PlayerHelper {
 
             //if the player is in check and there are no moves, checkmate
             player1.setCheckMate(result);
+
         } else {
 
             //if we aren't in check, there is no chance of checkmate
@@ -615,6 +642,14 @@ public class PlayerHelper {
 
     protected static void addPromotionPieces(Players players, BasicRenderer renderer) {
 
+        //if the pieces exist, remove existing
+        if (players.getPromotions() != null && !players.getPromotions().isEmpty()) {
+            for (Piece piece : players.getPromotions()) {
+                renderer.getCurrentScene().removeChild(piece.getObject3D());
+                renderer.getObjectPicker().unregisterObject(piece.getObject3D());
+            }
+        }
+
         //create our list of promotional pieces
         List<Piece> promotions = new ArrayList<>();
 
@@ -642,7 +677,8 @@ public class PlayerHelper {
                     object3D.setVisible(false);
 
                     //create the piece
-                    Piece piece = new Piece(object3D, type, -1, -1);
+                    Piece piece = new Piece(type, -1, -1);
+                    piece.setObject3D(object3D);
 
                     //add the piece to our promotions list
                     promotions.add(piece);
@@ -660,7 +696,7 @@ public class PlayerHelper {
         players.setPromotions(promotions);
     }
 
-    protected static class Move {
+    public static class Move {
 
         //where the piece is heading
         protected int destCol, destRow;

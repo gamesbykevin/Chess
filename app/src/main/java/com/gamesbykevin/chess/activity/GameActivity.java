@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
@@ -96,6 +97,10 @@ public class GameActivity extends BaseActivity implements Disposable {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                if (progressBar.getProgress() == 0)
+                    Toast.makeText(getApplicationContext(), "Thinking...", Toast.LENGTH_SHORT).show();
+
                 progressBar.setProgress(progress);
             }
         });

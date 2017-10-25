@@ -1,6 +1,10 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.piece.Piece;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Kevin on 10/17/2017.
@@ -12,6 +16,8 @@ public class Cpu extends Player {
 
     //number of moves we look into the future
     public static final int DEFAULT_DEPTH = 2;
+
+    private List<Cell> piecesPlayer1, piecesPlayer2;
 
     protected Cpu(final Direction direction) {
         super(false, direction);
@@ -29,6 +35,28 @@ public class Cpu extends Player {
 
         //did we calculate our move yet?
         if (!calculate) {
+
+            if (this.piecesPlayer1 != null && this.piecesPlayer2 != null) {
+
+                //our game was interrupted, so restore the chess pieces
+                for (int i = 0; i < piecesPlayer1.size(); i++) {
+
+                    //get the current piece
+                    Piece piece = players.getPlayer1().getPiece((int)piecesPlayer1.get(i).getCol(), (int)piecesPlayer1.get(i).getRow());
+                }
+
+                for (int i = 0; i < piecesPlayer2.size(); i++) {
+
+                }
+
+                ss;
+
+            } else {
+
+                //store locations of pieces on the board in case this process is interrupted
+                this.piecesPlayer1 = new ArrayList<>();
+                this.piecesPlayer2 = new ArrayList<>();
+            }
 
             //store the current turn
             boolean player1Turn = new Boolean(players.isPlayer1Turn());
@@ -63,6 +91,12 @@ public class Cpu extends Player {
 
             //restore the correct player's turn
             players.setPlayer1Turn(player1Turn);
+
+            //remove these objects
+            this.piecesPlayer1.clear();
+            this.piecesPlayer1 = null;
+            this.piecesPlayer2.clear();
+            this.piecesPlayer2 = null;
         }
     }
 }

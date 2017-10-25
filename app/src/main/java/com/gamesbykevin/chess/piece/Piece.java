@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
-import static com.gamesbykevin.chess.players.PlayerHelper.getRow;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -19,7 +18,7 @@ import static com.gamesbykevin.chess.players.PlayerHelper.getRow;
 public class Piece extends Cell {
 
     //list of valid moves by this piece
-    private List<Cell> moves;
+    private List<Cell> options;
 
     //the 3d model for this piece
     private Object3D object3D;
@@ -92,9 +91,8 @@ public class Piece extends Cell {
     //the starting point before we move the chess piece
     private float startX, startZ;
 
-    public Piece(Object3D object3D, Type type, float col, float row) {
+    public Piece(Type type, float col, float row) {
 
-        setObject3D(object3D);
         setType(type);
 
         //assign location
@@ -138,13 +136,13 @@ public class Piece extends Cell {
         return this.moved;
     }
 
-    public List<Cell> getMoves(Player player, Player opponent, boolean performCheck) {
+    public List<Cell> getMoves(Player player, Player opponent, final boolean performCheck) {
 
-        if (this.moves == null)
-            this.moves = new ArrayList<>();
+        if (this.options == null)
+            this.options = new ArrayList<>();
 
         //clear any existing moves
-        this.moves.clear();
+        this.options.clear();
 
         //the starting point
         final int startCol = (int)getCol();
@@ -159,33 +157,33 @@ public class Piece extends Cell {
 
                     //pawn can move forward as long as there is no piece in front of it
                     if (PlayerHelper.hasBounds(startCol, startRow - 1) && !player.hasPiece(startCol, startRow - 1) && !opponent.hasPiece(startCol, startRow - 1))
-                        moves.add(new Cell(startCol, startRow - 1));
+                        options.add(new Cell(startCol, startRow - 1));
 
                     //if this is the first move the pawn can move 2 spaces as long as nothing is in front of it
                     if (PlayerHelper.hasBounds(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 2) && !opponent.hasPiece(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 1) && !opponent.hasPiece(startCol, startRow - 1) && !hasMoved())
-                        moves.add(new Cell(startCol, startRow - 2));
+                        options.add(new Cell(startCol, startRow - 2));
 
                     //if there is an opponent piece diagonally we can capture
                     if (opponent.hasPiece(startCol - 1, startRow - 1))
-                        moves.add(new Cell(startCol - 1, startRow - 1));
+                        options.add(new Cell(startCol - 1, startRow - 1));
                     if (opponent.hasPiece(startCol + 1, startRow - 1))
-                        moves.add(new Cell(startCol + 1, startRow - 1));
+                        options.add(new Cell(startCol + 1, startRow - 1));
 
                 } else {
 
                     //pawn can move forward as long as there is no piece in front of it
                     if (PlayerHelper.hasBounds(startCol, startRow + 1) && !player.hasPiece(startCol, startRow + 1) && !opponent.hasPiece(startCol, startRow + 1))
-                        moves.add(new Cell(startCol, startRow + 1));
+                        options.add(new Cell(startCol, startRow + 1));
 
                     //if this is the first move the pawn can move 2 spaces
                     if (PlayerHelper.hasBounds(startCol, startRow + 2) && !hasMoved() && !player.hasPiece(startCol, startRow + 2) && !opponent.hasPiece(startCol, startRow + 2) && !player.hasPiece(startCol, startRow + 1) && !opponent.hasPiece(startCol, startRow + 1))
-                        moves.add(new Cell(startCol, startRow + 2));
+                        options.add(new Cell(startCol, startRow + 2));
 
                     //if there is an opponent piece diagonally we can capture
                     if (opponent.hasPiece(startCol - 1, startRow + 1))
-                        moves.add(new Cell(startCol - 1, startRow + 1));
+                        options.add(new Cell(startCol - 1, startRow + 1));
                     if (opponent.hasPiece(startCol + 1, startRow + 1))
-                        moves.add(new Cell(startCol + 1, startRow + 1));
+                        options.add(new Cell(startCol + 1, startRow + 1));
                 }
                 break;
 
@@ -216,12 +214,12 @@ public class Piece extends Cell {
 
                             //we also stop if we run into an opponent piece, and add the move
                             if (opponent.hasPiece(col, row)) {
-                                moves.add(new Cell(col, row));
+                                options.add(new Cell(col, row));
                                 break;
                             }
 
                             //any other scenario it is a valid move
-                            moves.add(new Cell(col, row));
+                            options.add(new Cell(col, row));
 
                             //move in the current direction
                             col += velocityCol;
@@ -258,12 +256,12 @@ public class Piece extends Cell {
 
                             //we also stop if we run into an opponent piece, and add the move
                             if (opponent.hasPiece(col, row)) {
-                                moves.add(new Cell(col, row));
+                                options.add(new Cell(col, row));
                                 break;
                             }
 
                             //add the valid move
-                            moves.add(new Cell(col, row));
+                            options.add(new Cell(col, row));
 
                             //move in the current direction
                             col += velocityCol;
@@ -297,12 +295,12 @@ public class Piece extends Cell {
 
                         //we also stop if we run into an opponent piece, and add the move
                         if (opponent.hasPiece(col, row)) {
-                            moves.add(new Cell(col, row));
+                            options.add(new Cell(col, row));
                             continue;
                         }
 
                         //add the valid move
-                        moves.add(new Cell(col, row));
+                        options.add(new Cell(col, row));
                     }
                 }
                 break;
@@ -333,12 +331,12 @@ public class Piece extends Cell {
 
                             //we also stop if we run into an opponent piece, and add the move
                             if (opponent.hasPiece(col, row)) {
-                                moves.add(new Cell(col, row));
+                                options.add(new Cell(col, row));
                                 break;
                             }
 
                             //add the valid move
-                            moves.add(new Cell(col, row));
+                            options.add(new Cell(col, row));
 
                             //move diagonally
                             col += velocityCol;
@@ -355,68 +353,87 @@ public class Piece extends Cell {
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol - 1;
                 row = startRow - 2;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol + 1;
                 row = startRow - 2;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol + 2;
                 row = startRow - 1;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol + 2;
                 row = startRow + 1;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol + 1;
                 row = startRow + 2;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol - 1;
                 row = startRow + 2;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
 
                 col = startCol - 2;
                 row = startRow + 1;
 
                 //make sure in bounds and we don't already have a chess piece there
                 if (PlayerHelper.hasBounds(col, row) && !player.hasPiece(col, row))
-                    moves.add(new Cell(col, row));
+                    options.add(new Cell(col, row));
                 break;
         }
 
         //do we check and make sure we aren't putting ourselves in check?
         if (performCheck)
-            checkForCheck(moves, player, opponent);
+            checkForCheck(options, player, opponent);
 
         //return our list of moves
-        return moves;
+        return options;
     }
 
-    private void checkForCheck(List<Cell> moves, Player player, Player opponent) {
+    public void checkForCheck(List<Cell> moves, Player player, Player opponent) {
+
+        //check every move in the list
+        for (int i = 0; i < moves.size(); i++) {
+
+            //check if this move is safe
+            final boolean result = checkForCheck(moves.get(i), player, opponent);
+
+            //if the move is not safe, remove
+            if (!result) {
+                moves.remove(i);
+                i--;
+            }
+        }
+    }
+
+    public boolean checkForCheck(Cell move, Player player, Player opponent) {
+
+        //assume move is safe (for now...)
+        boolean result = true;
 
         //get our king piece
         Piece king = player.getPiece(Type.King);
@@ -428,63 +445,53 @@ public class Piece extends Cell {
             final int sourceCol = (int)getCol();
             final int sourceRow = (int)getRow();
 
-            for (int i = 0; i < moves.size(); i++) {
+            //update to match move
+            setCol(move);
+            setRow(move);
 
-                //update to match move
-                setCol(moves.get(i));
-                setRow(moves.get(i));
+            //is there a captured piece
+            Piece captured = opponent.getPiece((int)move.getCol(), (int)move.getRow());
 
-                //is there a captured piece
-                Piece captured = opponent.getPiece((int)moves.get(i).getCol(), (int)moves.get(i).getRow());
+            //if the piece exists, mark it captured
+            if (captured != null)
+                captured.setCaptured(true);
 
-                //if the piece exists, mark it captured
-                if (captured != null)
-                    captured.setCaptured(true);
+            //check every opponent piece
+            for (int index = 0; index < opponent.getPieceCount(); index++) {
 
-                //assume this move is safe (for now)
-                boolean safe = true;
+                //get the current piece
+                Piece tmp = opponent.getPiece(index, false);
 
-                //check every opponent piece
-                for (int index = 0; index < opponent.getPieceCount(); index++) {
+                //skip pieces that don't exist
+                if (tmp == null)
+                    continue;
 
-                    //get the current piece
-                    Piece tmp = opponent.getPiece(index, false);
+                //get the list of moves for this piece
+                List<Cell> tmpMoves = tmp.getMoves(opponent, player, false);
 
-                    //skip pieces that don't exist
-                    if (tmp == null)
-                        continue;
-
-                    //get the list of moves for this piece
-                    List<Cell> tmpMoves = tmp.getMoves(opponent, player, false);
-
-                    //check each move
-                    for (int x = 0; x < tmpMoves.size(); x++) {
-
-                        if (tmpMoves.get(x).hasLocation(king)) {
-                            safe = false;
-                            break;
-                        }
+                //check each move
+                for (int x = 0; x < tmpMoves.size(); x++) {
+                    if (tmpMoves.get(x).hasLocation(king)) {
+                        result = false;
+                        break;
                     }
-
-                    tmpMoves.clear();
-                    tmpMoves = null;
                 }
 
-                //if the move is not safe, remove it
-                if (!safe) {
-                    moves.remove(i);
-                    i--;
-                }
-
-                //now that we are done, un-capture the piece
-                if (captured != null)
-                    captured.setCaptured(false);
+                tmpMoves.clear();
+                tmpMoves = null;
             }
+
+            //now that we are done, un-capture the piece
+            if (captured != null)
+                captured.setCaptured(false);
 
             //restore original position to chess piece
             setCol(sourceCol);
             setRow(sourceRow);
         }
+
+        //return our result
+        return result;
     }
 
     public void setDestinationCoordinates(float destX, float destZ) {
@@ -566,5 +573,21 @@ public class Piece extends Cell {
         } else if (getObject3D().getZ() > this.destZ) {
             getObject3D().setZ(getObject3D().getZ() - VELOCITY);
         }
+    }
+
+    public Piece clone() {
+
+        //create new piece
+        Piece piece = new Piece(getType(), (int)getCol(), (int)getRow());
+        piece.setObject3D(getObject3D());
+        piece.setMoved(moved);
+        piece.setCaptured(isCaptured());
+        piece.startX = startX;
+        piece.startZ = startZ;
+        piece.destX = destX;
+        piece.destZ = destZ;
+
+        //return our instance
+        return piece;
     }
 }

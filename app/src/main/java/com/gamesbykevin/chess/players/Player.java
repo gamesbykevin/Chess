@@ -126,10 +126,6 @@ public abstract class Player {
         }
     }
 
-    public void removeAllPieces() {
-        getPieces().clear();
-    }
-
     public void addPiece(Piece piece) {
         getPieces().add(piece);
     }

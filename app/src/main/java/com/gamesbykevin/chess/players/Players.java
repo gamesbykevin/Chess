@@ -106,9 +106,6 @@ public class Players {
             throw new RuntimeException("Each player has to face a different direction");
         if (player1.hasDirection(Player.Direction.South) && player2.hasDirection(Player.Direction.South))
             throw new RuntimeException("Each player has to face a different direction");
-
-        //create our textures for the pieces
-        createMaterials();
     }
 
     public GameActivity getActivity() {
@@ -141,14 +138,28 @@ public class Players {
 
     public void reset(BasicRenderer renderer) {
 
+        //create our textures for the pieces
+        createMaterials();
+
         //load the board selection visible / non-visible
         PlayerHelper.loadBoardSelection(this, renderer, getTextureValid());
 
-        //player 1 always moves north
-        PlayerHelper.reset(getPlayer1(), renderer, getTextureWhite());
+        //if the player already has pieces, we just need to re-load the models
+        if (getPlayer1().getPieceCount() != 0) {
 
-        //player 2 always moves south
-        PlayerHelper.reset(getPlayer2(), renderer, getTextureWood());
+            //just reload the models
+            PlayerHelper.loadModels(getPlayer1(), renderer, getTextureWhite());
+            PlayerHelper.loadModels(getPlayer2(), renderer, getTextureWood());
+
+            if (!isMoving())
+                deselect();
+
+        } else {
+
+            //create the pieces and reload the models
+            PlayerHelper.reset(getPlayer1(), renderer, getTextureWhite());
+            PlayerHelper.reset(getPlayer2(), renderer, getTextureWood());
+        }
 
         //register all the chess pieces as click-able so we can select if needed for the humans
         for (int index = 0; index < getPlayer1().getPieceCount(); index++) {
@@ -330,6 +341,9 @@ public class Players {
 
             //get list of valid moves that don't put us in check
             this.moves = getSelected().getMoves(player, opponent, true);
+
+            //make sure we aren't going to move the player in check
+            getSelected().checkForCheck(moves, player, opponent);
 
             //make sure moves exist for the chess piece
             if (this.moves.isEmpty()) {
@@ -517,6 +531,10 @@ public class Players {
 
         //don't do anything if the game is over
         if (isGameOver())
+            return;
+
+        //if analyzing the player touch event don't check anything below
+        if (renderer.isAnalyzing())
             return;
 
         if (isMoving()) {

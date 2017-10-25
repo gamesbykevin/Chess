@@ -5,9 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.opengl.CustomArcballCamera;
 import com.gamesbykevin.chess.players.Player;
-import com.gamesbykevin.chess.players.Players;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
@@ -38,6 +36,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     //did we render our board at least once?
     public static boolean INIT = false;
 
+    //are we checking the motion event
+    private boolean analyze = false;
+
     public BasicRenderer(Context context, View view) {
         super(context);
         this.context = context;
@@ -67,6 +68,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //flag false until our first render
         INIT = false;
 
+        //flag analyze false
+        analyze = false;
+
         //create our object picker to select the pieces
         this.objectPicker = new ObjectColorPicker(this);
         this.objectPicker.setOnObjectPickedListener(this);
@@ -81,7 +85,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         addBoard();
 
         if (getGame() != null && getGame().getPlayers() != null)
-            getGame().getPlayers().createMaterials();
+            getGame().getPlayers().reset(this);
 
         //create arc ball camera to rotate around the board
         resetCamera();
@@ -93,6 +97,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //nothing selected
         if (DEBUG)
             UtilityHelper.logEvent("Nothing selected");
+
+        //flag checking false
+        analyze = false;
     }
 
     @Override
@@ -115,6 +122,13 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             //place at object (if possible)
             getGame().getPlayers().place(this, object3D);
         }
+
+        //flag checking false
+        analyze = false;
+    }
+
+    public boolean isAnalyzing() {
+        return this.analyze;
     }
 
     @Override
@@ -144,7 +158,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             case MotionEvent.ACTION_POINTER_UP:
 
                 //let's see if we selected a 3d model
-                getObjectPicker().getObjectAt(event.getRawX(), event.getY());
+                if (!analyze) {
+                    analyze = true;
+                    getObjectPicker().getObjectAt(event.getRawX(), event.getY());
+                }
                 break;
 
             case MotionEvent.ACTION_DOWN:
