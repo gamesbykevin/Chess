@@ -30,18 +30,23 @@ public class Game implements IGame {
 
     @Override
     public void onPause() {
-        //do we need to do anything here
+
+        //interrupt our game
+        GameActivity.INTERRUPT = true;
     }
 
     @Override
     public void onResume() {
-        //do we need to resume anything
+
+        //don't interrupt our game
+        GameActivity.INTERRUPT = false;
     }
 
     @Override
     public void reset() {
 
         try {
+
             //create the players and reset the pieces
             //this.players = new Players(Players.Mode.CpuVsCpu);
             this.players = new Players(getActivity(), Players.Mode.HumVsCpu);

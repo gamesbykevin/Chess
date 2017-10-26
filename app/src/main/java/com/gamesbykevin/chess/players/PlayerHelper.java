@@ -159,8 +159,9 @@ public class PlayerHelper {
                 //assign the texture to the model
                 obj.setMaterial(material);
 
-                //add to the scene
-                renderer.getCurrentScene().addChild(obj);
+                //add to the scene as long as it isn't captured
+                if (!piece.isCaptured())
+                    renderer.getCurrentScene().addChild(obj);
 
                 //assign our model to the piece
                 piece.setObject3D(obj);
@@ -357,17 +358,20 @@ public class PlayerHelper {
         //get the player piece at the source location
         Piece piece = player.getPiece(move.sourceCol, move.sourceRow);
 
+
         //get the captured piece at the destination
         Piece captured = opponent.getPiece(move.destCol, move.destRow);
 
         //place at the destination (if it exists)
         if (piece != null) {
+
             piece.setCol(move.destCol);
             piece.setRow(move.destRow);
         }
 
         //flag the piece captured (if it exists)
         if (captured != null) {
+
             move.pieceCaptured = captured;
             move.pieceCaptured.setCaptured(true);
         }

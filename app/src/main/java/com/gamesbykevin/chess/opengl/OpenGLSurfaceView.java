@@ -106,8 +106,10 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
         super.onPause();
 
         //pause the open gl renderer
-        if (getRenderer() != null)
+        if (getRenderer() != null) {
             getRenderer().onPause();
+            getRenderer().INIT = false;
+        }
 
         //flag that we don't want our thread to continue running
         this.running = false;

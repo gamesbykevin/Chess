@@ -575,19 +575,17 @@ public class Piece extends Cell {
         }
     }
 
-    public Piece clone() {
+    public Piece copy() {
 
-        //create new piece
         Piece piece = new Piece(getType(), (int)getCol(), (int)getRow());
-        piece.setObject3D(getObject3D());
-        piece.setMoved(moved);
-        piece.setCaptured(isCaptured());
-        piece.startX = startX;
-        piece.startZ = startZ;
-        piece.destX = destX;
-        piece.destZ = destZ;
+        piece.setMoved(this.moved);
+        piece.setCaptured(this.captured);
+        piece.destX = this.destX;
+        piece.destZ = this.destZ;
+        piece.startX = this.startX;
+        piece.startZ = this.startZ;
+        piece.setObject3D(getObject3D().clone());
 
-        //return our instance
         return piece;
     }
 }

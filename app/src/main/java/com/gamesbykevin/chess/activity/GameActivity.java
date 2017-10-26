@@ -63,6 +63,7 @@ public class GameActivity extends BaseActivity implements Disposable {
     //keep track of game time
     private GameTimer timer;
 
+    //our visual progress bar
     private ProgressBar progressBar;
 
     @Override
@@ -99,11 +100,24 @@ public class GameActivity extends BaseActivity implements Disposable {
             public void run() {
 
                 if (progressBar.getProgress() == 0)
-                    Toast.makeText(getApplicationContext(), "Thinking...", Toast.LENGTH_SHORT).show();
+                    displayMessage("Thinking...");
 
                 progressBar.setProgress(progress);
             }
         });
+    }
+
+    public void displayMessage(final String message) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (DEBUG)
+            UtilityHelper.logEvent(message);
     }
 
     public OpenGLSurfaceView getSurfaceView() {
@@ -315,8 +329,6 @@ public class GameActivity extends BaseActivity implements Disposable {
     public void onBackPressed() {
         super.onBackPressed();
 
-        //interrupt our game
-        INTERRUPT = true;
     }
 
     public void onClickMenu(View view) {

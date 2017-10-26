@@ -13,7 +13,8 @@ import java.util.List;
 
 public abstract class Player {
 
-    private List<Piece> pieces;
+    //list of pieces and its clone
+    private List<Piece> pieces, clone;
 
     private final boolean human;
 
@@ -37,10 +38,39 @@ public abstract class Player {
         this.human = human;
         this.direction = direction;
         this.pieces = new ArrayList<>();
+        this.clone = new ArrayList<>();
 
         setCheck(false);
         setCheckMate(false);
         setStalemate(false);
+    }
+
+    public void restore() {
+
+        //clear the list
+        this.pieces.clear();
+
+        //copy every piece to the existing list
+        for (int i = 0; i < this.clone.size(); i++) {
+            this.pieces.add(this.clone.get(i));
+        }
+
+        //reset anything else necessary
+        reset();
+    }
+
+    /**
+     * Clone all the chess pieces
+     */
+    public void copy() {
+
+        //remove any existing pieces
+        clone.clear();
+
+        //copy every piece to the new list
+        for (int i = 0; i < getPieceCount(); i++) {
+            clone.add(getPiece(i, true).copy());
+        }
     }
 
     public void setStalemate(final boolean stalemate) {

@@ -99,7 +99,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             UtilityHelper.logEvent("Nothing selected");
 
         //flag checking false
-        analyze = false;
+        this.analyze = false;
     }
 
     @Override
@@ -109,6 +109,13 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             return;
 
         if (getGame() == null)
+            return;
+
+        //don't do anything if the game is moving
+        if (getGame().getPlayers().isMoving())
+            return;
+
+        if (!isAnalyzing())
             return;
 
         //select our chess piece
@@ -158,8 +165,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             case MotionEvent.ACTION_POINTER_UP:
 
                 //let's see if we selected a 3d model
-                if (!analyze) {
-                    analyze = true;
+                if (!isAnalyzing()) {
+                    this.analyze = true;
                     getObjectPicker().getObjectAt(event.getRawX(), event.getY());
                 }
                 break;

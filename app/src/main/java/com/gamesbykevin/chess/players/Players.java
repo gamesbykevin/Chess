@@ -15,6 +15,7 @@ import org.rajawali3d.materials.textures.Texture;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.opengl.BasicRenderer.INIT;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -147,6 +148,10 @@ public class Players {
         //if the player already has pieces, we just need to re-load the models
         if (getPlayer1().getPieceCount() != 0) {
 
+            //restore chess pieces (if necessary)
+            getPlayer1().restore();
+            getPlayer2().restore();
+
             //just reload the models
             PlayerHelper.loadModels(getPlayer1(), renderer, getTextureWhite());
             PlayerHelper.loadModels(getPlayer2(), renderer, getTextureWood());
@@ -159,15 +164,24 @@ public class Players {
             //create the pieces and reload the models
             PlayerHelper.reset(getPlayer1(), renderer, getTextureWhite());
             PlayerHelper.reset(getPlayer2(), renderer, getTextureWood());
+
+            getPlayer1().copy();
+            getPlayer2().copy();
         }
 
         //register all the chess pieces as click-able so we can select if needed for the humans
         for (int index = 0; index < getPlayer1().getPieceCount(); index++) {
-            renderer.getObjectPicker().registerObject(getPlayer1().getPiece(index, true).getObject3D());
+
+            //we need to be able to select the piece if it isn't captured
+            if (!getPlayer1().getPiece(index, true).isCaptured())
+                renderer.getObjectPicker().registerObject(getPlayer1().getPiece(index, true).getObject3D());
         }
 
         for (int index = 0; index < getPlayer2().getPieceCount(); index++) {
-            renderer.getObjectPicker().registerObject(getPlayer2().getPiece(index, true).getObject3D());
+
+            //we need to be able to select the piece if it isn't captured
+            if (!getPlayer2().getPiece(index, true).isCaptured())
+                renderer.getObjectPicker().registerObject(getPlayer2().getPiece(index, true).getObject3D());
         }
 
         //add each chess piece so we can do piece promotion
@@ -385,6 +399,16 @@ public class Players {
      */
     public void place(BasicRenderer renderer, Object3D object3D) {
 
+        //is the game over
+        if (isGameOver())
+            return;
+
+        //if moving or promoting don't continue
+        if (isMoving())
+            return;
+        if (isPromoting())
+            return;
+
         //get the location where this object is at
         final int col = PlayerHelper.getCol(object3D.getX());
         final int row = PlayerHelper.getRow(object3D.getZ());
@@ -471,13 +495,13 @@ public class Players {
 
                 //check if the opponent is in check
                 if (DEBUG && opponent.hasCheck())
-                    UtilityHelper.logEvent(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
+                    activity.displayMessage(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
 
                 if (DEBUG && opponent.hasCheckMate())
-                    UtilityHelper.logEvent("Checkmate");
+                    activity.displayMessage("Checkmate");
 
                 if (DEBUG && opponent.hasStalemate())
-                    UtilityHelper.logEvent("Stalemate");
+                    activity.displayMessage("Stalemate");
 
                 //we are at our destination, de-select the chess piece
                 deselect();
@@ -514,6 +538,10 @@ public class Players {
                     }
                 }
 
+                //copy the pieces in case the game is interrupted
+                getPlayer1().copy();
+                getPlayer2().copy();
+
                 //we are no longer moving
                 setMoving(false);
             }
@@ -535,6 +563,10 @@ public class Players {
 
         //if analyzing the player touch event don't check anything below
         if (renderer.isAnalyzing())
+            return;
+
+        //if not open gl context has not yet rendered, don't continue
+        if (!INIT)
             return;
 
         if (isMoving()) {
