@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.opengl.BasicRenderer.INIT;
+import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -41,12 +42,6 @@ public class Players {
 
     //list of valid moves
     private List<Cell> moves;
-
-    //are we moving a chess piece?
-    private boolean moving = false;
-
-    //are we promoting a chess piece?
-    private boolean promoting = false;
 
     /**
      * These are the different kinds of game modes
@@ -107,18 +102,12 @@ public class Players {
             throw new RuntimeException("Each player has to face a different direction");
         if (player1.hasDirection(Player.Direction.South) && player2.hasDirection(Player.Direction.South))
             throw new RuntimeException("Each player has to face a different direction");
+
+        PlayerVars.PLAYER_1_TURN = true;
     }
 
     public GameActivity getActivity() {
         return this.activity;
-    }
-
-    public void setPromoting(final boolean promoting) {
-        this.promoting = promoting;
-    }
-
-    public boolean isPromoting() {
-        return this.promoting;
     }
 
     public void setPromotions(List<Piece> promotions) {
@@ -135,6 +124,12 @@ public class Players {
 
     public void setPlayer1Turn(final boolean player1Turn) {
         this.player1Turn = player1Turn;
+    }
+
+    private void switchTurns() {
+        setPlayer1Turn(!isPlayer1Turn());
+        PLAYER_1_TURN = !PLAYER_1_TURN;
+        PlayerVars.STATUS = PlayerVars.Status.Select;
     }
 
     public void reset(BasicRenderer renderer) {
@@ -155,9 +150,6 @@ public class Players {
             //just reload the models
             PlayerHelper.loadModels(getPlayer1(), renderer, getTextureWhite());
             PlayerHelper.loadModels(getPlayer2(), renderer, getTextureWood());
-
-            if (!isMoving())
-                deselect();
 
         } else {
 
@@ -186,14 +178,6 @@ public class Players {
 
         //add each chess piece so we can do piece promotion
         PlayerHelper.addPromotionPieces(this, renderer);
-    }
-
-    public void setMoving(final boolean moving) {
-        this.moving = moving;
-    }
-
-    public boolean isMoving() {
-        return this.moving;
     }
 
     public void setBoardSelection(final Object3D selection) {
@@ -292,61 +276,61 @@ public class Players {
         if (getSelected() != null)
             return;
 
-        //if the piece is still moving, don't continue
-        if (isMoving())
+        //is the game over
+        if (PlayerVars.isGameover())
             return;
 
-        //is the game over
-        if (isGameOver())
+        //if we aren't selecting or promoting
+        if (PlayerVars.STATUS != PlayerVars.Status.Select && PlayerVars.STATUS != PlayerVars.Status.Promote)
+            return;
+
+        Player player = PLAYER_1_TURN ? getPlayer1() : getPlayer2();
+        Player opponent = PLAYER_1_TURN ? getPlayer2() : getPlayer1();
+
+        //if the current player isn't human
+        if (!player.isHuman())
             return;
 
         //have we found a piece?
         boolean found = false;
 
-        Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
-        Player opponent = isPlayer1Turn() ? getPlayer2() : getPlayer1();
+        //if we are promoting a pawn
+        if (PlayerVars.STATUS == PlayerVars.Status.Promote) {
 
-        //if we haven't found a piece yet, and it is the current player's turn, and the player is human
-        if (player.isHuman()) {
+            //check all the promotion pieces
+            for (int index = 0; index < getPromotions().size(); index++) {
 
-            //if we are promoting a pawn
-            if (isPromoting()) {
+                Piece piece = getPromotions().get(index);
 
-                //check all the promotion pieces
-                for (int index = 0; index < getPromotions().size(); index++) {
+                //is this the piece we have selected?
+                if (piece.getObject3D().equals(object3D)) {
 
-                    Piece piece = getPromotions().get(index);
+                    //promote the piece
+                    PlayerHelper.promote(renderer, this, piece);
 
-                    //is this the piece we have selected?
-                    if (piece.getObject3D().equals(object3D)) {
-
-                        //promote the piece
-                        PlayerHelper.promote(renderer, this, piece);
-
-                        //switch turns
-                        setPlayer1Turn(!isPlayer1Turn());
-                    }
+                    //switch turns
+                    switchTurns();
                 }
-
-                //don't continue
-                return;
             }
 
-            //check all the pieces
-            for (int index = 0; index < player.getPieceCount(); index++) {
+            //don't continue
+            return;
+        }
 
-                Piece piece = player.getPiece(index, false);
+        //check all the pieces
+        for (int index = 0; index < player.getPieceCount(); index++) {
 
-                if (piece == null)
-                    continue;
+            Piece piece = player.getPiece(index, false);
 
-                //if we select the piece or the floor the piece is on, this is our selected piece
-                if (piece.getObject3D().equals(object3D)) {
-                    selected = piece;
-                    object3D.setMaterial(getTextureHighlight());
-                    found = true;
-                    break;
-                }
+            if (piece == null)
+                continue;
+
+            //if we select the piece or the floor the piece is on, this is our selected piece
+            if (piece.getObject3D().equals(object3D)) {
+                selected = piece;
+                object3D.setMaterial(getTextureHighlight());
+                found = true;
+                break;
             }
         }
 
@@ -364,6 +348,9 @@ public class Players {
 
                 //if no moves, de-select the piece
                 deselect();
+
+                //go back to selecting
+                PlayerVars.STATUS = PlayerVars.Status.Select;
 
             } else {
 
@@ -400,13 +387,11 @@ public class Players {
     public void place(BasicRenderer renderer, Object3D object3D) {
 
         //is the game over
-        if (isGameOver())
+        if (PlayerVars.isGameover())
             return;
 
-        //if moving or promoting don't continue
-        if (isMoving())
-            return;
-        if (isPromoting())
+        //if not placing, don't continue
+        if (PlayerVars.STATUS != PlayerVars.Status.Select)
             return;
 
         //get the location where this object is at
@@ -447,21 +432,26 @@ public class Players {
         targets.clear();
 
         //flag that we are moving a piece
-        setMoving(true);
+        PlayerVars.STATUS = PlayerVars.Status.Move;
     }
 
-    public void updatePiece(BasicRenderer renderer) {
+    private void updatePiece(BasicRenderer renderer) {
 
-        if (getSelected() != null && !getSelected().hasDestination()) {
+        if (getSelected() == null)
+            return;
+
+        if (!getSelected().hasDestination()) {
 
             getSelected().move();
 
-            //if we have the destination, can we capture an opponent piece
             if (getSelected().hasDestination()) {
 
+                if (DEBUG)
+                    UtilityHelper.logEvent("At destination");
+
                 //check if we captured an opponent piece during this move
-                Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
-                Player opponent = isPlayer1Turn() ? getPlayer2() : getPlayer1();
+                Player player = PLAYER_1_TURN ? getPlayer1() : getPlayer2();
+                Player opponent = PLAYER_1_TURN ? getPlayer2() : getPlayer1();
 
                 //check if we selected an opponent piece to capture it
                 for (int i = 0; i < opponent.getPieceCount(); i++) {
@@ -473,8 +463,8 @@ public class Players {
                         continue;
 
                     //if the opponents piece is at the same location, we can capture
-                    if ((int)piece.getCol() == (int)getSelected().getCol() &&
-                        (int)piece.getRow() == (int)getSelected().getRow()) {
+                    if ((int) piece.getCol() == (int) getSelected().getCol() &&
+                            (int) piece.getRow() == (int) getSelected().getRow()) {
 
                         //remove from object picker
                         renderer.getObjectPicker().unregisterObject(piece.getObject3D());
@@ -497,10 +487,10 @@ public class Players {
                 if (DEBUG && opponent.hasCheck())
                     activity.displayMessage(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
 
-                if (DEBUG && opponent.hasCheckMate())
+                if (DEBUG && (PlayerVars.STATE == PlayerVars.State.LosePlayer1 || PlayerVars.STATE == PlayerVars.State.LosePlayer2))
                     activity.displayMessage("Checkmate");
 
-                if (DEBUG && opponent.hasStalemate())
+                if (DEBUG && PlayerVars.STATE == PlayerVars.State.Stalemate)
                     activity.displayMessage("Stalemate");
 
                 //we are at our destination, de-select the chess piece
@@ -510,12 +500,14 @@ public class Players {
                 player.reset();
 
                 //check if we have a promotion
-                setPromoting(PlayerHelper.hasPromotion(this));
+                if (PlayerHelper.hasPromotion(this))
+                    PlayerVars.STATUS = PlayerVars.Status.Promote;
 
                 //if we aren't promoting a piece, switch turns
-                if (!isPromoting()) {
+                if (PlayerVars.STATUS != PlayerVars.Status.Promote) {
 
-                    setPlayer1Turn(!isPlayer1Turn());
+                    //switch turns
+                    switchTurns();
 
                 } else {
 
@@ -530,53 +522,36 @@ public class Players {
                         //promote the pawn piece
                         PlayerHelper.promote(renderer, this, null);
 
-                        //flag promoting false
-                        setPromoting(false);
-
                         //switch turns
-                        setPlayer1Turn(!isPlayer1Turn());
+                        switchTurns();
                     }
                 }
 
                 //copy the pieces in case the game is interrupted
                 getPlayer1().copy();
                 getPlayer2().copy();
-
-                //we are no longer moving
-                setMoving(false);
             }
         }
-    }
-
-    public boolean isGameOver() {
-        return (getPlayer1().hasCheckMate() ||
-                getPlayer2().hasCheckMate() ||
-                getPlayer1().hasStalemate() ||
-                getPlayer2().hasStalemate());
     }
 
     public void update(BasicRenderer renderer) {
 
         //don't do anything if the game is over
-        if (isGameOver())
+        if (PlayerVars.isGameover())
             return;
 
-        //if analyzing the player touch event don't check anything below
-        if (renderer.isAnalyzing())
-            return;
-
-        //if not open gl context has not yet rendered, don't continue
+        //if the open gl context has not yet rendered, don't continue
         if (!INIT)
             return;
 
-        if (isMoving()) {
+        if (PlayerVars.STATUS == PlayerVars.Status.Move) {
 
             updatePiece(renderer);
 
-        } else {
+        } else if (PlayerVars.STATUS == PlayerVars.Status.Select) {
 
             //get the current player
-            Player player = isPlayer1Turn() ? getPlayer1() : getPlayer2();
+            Player player = PLAYER_1_TURN ? getPlayer1() : getPlayer2();
 
             //if the player is not human, the ai will update
             player.update(this);

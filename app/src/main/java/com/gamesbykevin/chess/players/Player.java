@@ -28,12 +28,6 @@ public abstract class Player {
     //is the player in check
     private boolean check = false;
 
-    //is the game over
-    private boolean checkMate = false;
-
-    //does the player have any valid moves remaining?
-    private boolean stalemate = false;
-
     protected Player(final boolean human, final Direction direction) {
         this.human = human;
         this.direction = direction;
@@ -41,8 +35,6 @@ public abstract class Player {
         this.clone = new ArrayList<>();
 
         setCheck(false);
-        setCheckMate(false);
-        setStalemate(false);
     }
 
     public void restore() {
@@ -73,28 +65,12 @@ public abstract class Player {
         }
     }
 
-    public void setStalemate(final boolean stalemate) {
-        this.stalemate = stalemate;
-    }
-
-    public boolean hasStalemate() {
-        return this.stalemate;
-    }
-
     public void setCheck(final boolean check) {
         this.check = check;
     }
 
     public boolean hasCheck() {
         return this.check;
-    }
-
-    public void setCheckMate(final boolean checkMate) {
-        this.checkMate = checkMate;
-    }
-
-    public boolean hasCheckMate() {
-        return this.checkMate;
     }
 
     /**

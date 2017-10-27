@@ -4,6 +4,7 @@ import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerHelper;
+import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
 
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -471,9 +473,21 @@ public class Piece extends Cell {
 
                 //check each move
                 for (int x = 0; x < tmpMoves.size(); x++) {
-                    if (tmpMoves.get(x).hasLocation(king)) {
-                        result = false;
-                        break;
+
+                    try {
+
+                        if (tmpMoves.get(x).hasLocation(king)) {
+                            result = false;
+                            break;
+                        }
+                    } catch (Exception e) {
+
+                        if (DEBUG) {
+                            UtilityHelper.logEvent(player.isHuman() ? "Player: Hum, Opponent: Cpu" : "Player: Cpu, Opponent: Hum");
+                            UtilityHelper.logEvent("x=" + x + ", size=" + tmpMoves.size());
+                        }
+
+                        throw new RuntimeException(e);
                     }
                 }
 

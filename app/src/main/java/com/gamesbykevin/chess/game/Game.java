@@ -1,6 +1,7 @@
 package com.gamesbykevin.chess.game;
 
 import com.gamesbykevin.chess.activity.GameActivity;
+import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.players.Players;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -32,14 +33,14 @@ public class Game implements IGame {
     public void onPause() {
 
         //interrupt our game
-        GameActivity.INTERRUPT = true;
+        PlayerVars.STATUS = PlayerVars.Status.Interrupt;
     }
 
     @Override
     public void onResume() {
 
         //don't interrupt our game
-        GameActivity.INTERRUPT = false;
+        PlayerVars.STATUS = PlayerVars.Status.Select;
     }
 
     @Override
@@ -75,7 +76,7 @@ public class Game implements IGame {
      */
     @Override
     public void dispose() {
-
+        this.players = null;
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
+import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -45,9 +46,6 @@ public class GameActivity extends BaseActivity implements Disposable {
     //a list of layouts on the game screen, separate from open gl layout
     private List<ViewGroup> layouts;
 
-    //do we interrupt our process
-    public static boolean INTERRUPT = false;
-
     /**
      * Different steps in the game
      */
@@ -69,8 +67,8 @@ public class GameActivity extends BaseActivity implements Disposable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //we haven't interrupted yet
-        INTERRUPT = false;
+        //assign to calculate
+        PlayerVars.STATUS = PlayerVars.Status.Select;
 
         //call parent
         super.onCreate(savedInstanceState);

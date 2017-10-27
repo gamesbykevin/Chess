@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.players.Player;
+import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
@@ -35,9 +36,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     //did we render our board at least once?
     public static boolean INIT = false;
-
-    //are we checking the motion event
-    private boolean analyze = false;
 
     public BasicRenderer(Context context, View view) {
         super(context);
@@ -69,7 +67,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         INIT = false;
 
         //flag analyze false
-        analyze = false;
+        PlayerVars.STATUS = PlayerVars.Status.Select;
 
         //create our object picker to select the pieces
         this.objectPicker = new ObjectColorPicker(this);
@@ -97,9 +95,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //nothing selected
         if (DEBUG)
             UtilityHelper.logEvent("Nothing selected");
-
-        //flag checking false
-        this.analyze = false;
     }
 
     @Override
@@ -111,12 +106,11 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (getGame() == null)
             return;
 
-        //don't do anything if the game is moving
-        if (getGame().getPlayers().isMoving())
+        if (PlayerVars.STATUS != PlayerVars.Status.Select && PlayerVars.STATUS != PlayerVars.Status.Promote)
             return;
 
-        if (!isAnalyzing())
-            return;
+        if (DEBUG)
+            UtilityHelper.logEvent("OnObjectPicked");
 
         //select our chess piece
         if (getGame().getPlayers().getSelected() == null) {
@@ -129,13 +123,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             //place at object (if possible)
             getGame().getPlayers().place(this, object3D);
         }
-
-        //flag checking false
-        analyze = false;
-    }
-
-    public boolean isAnalyzing() {
-        return this.analyze;
     }
 
     @Override
@@ -148,12 +135,11 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (getGame() == null || getGame().getPlayers() == null)
             return;
 
-        //if a chess piece is moving, we can't do anything
-        if (getGame().getPlayers().isMoving())
+        if (PlayerVars.STATUS != PlayerVars.Status.Select && PlayerVars.STATUS != PlayerVars.Status.Promote)
             return;
 
         //get the current player
-        Player player = getGame().getPlayers().isPlayer1Turn() ? getGame().getPlayers().getPlayer1() : getGame().getPlayers().getPlayer2();
+        Player player = PlayerVars.PLAYER_1_TURN ? getGame().getPlayers().getPlayer1() : getGame().getPlayers().getPlayer2();
 
         //if the player isn't human, we can't select anything right now
         if (!player.isHuman())
@@ -164,11 +150,11 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
 
+                if (DEBUG)
+                    UtilityHelper.logEvent("OnTouchEvent ACTION_UP");
+
                 //let's see if we selected a 3d model
-                if (!isAnalyzing()) {
-                    this.analyze = true;
-                    getObjectPicker().getObjectAt(event.getRawX(), event.getY());
-                }
+                getObjectPicker().getObjectAt(event.getRawX(), event.getY());
                 break;
 
             case MotionEvent.ACTION_DOWN:
@@ -204,23 +190,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //this.camera.setPosition(-1.75, 1.75, 0);
 
         //this.camera.setPosition(-1.75 / 2, 1.75, 0);
-        /*
-        camera.getFarPlane();
-        camera.getFieldOfView();
-        camera.getGraphNode();
-        camera.getLookAt();
-        camera.getNearPlane();
-        camera.getOrientation();
-        camera.getProjectionMatrix();
-        cam.setFarPlane(mFarPlane);
-        cam.setFieldOfView(mFieldOfView);
-        cam.setGraphNode(mGraphNode, mInsideGraph);
-        cam.setLookAt(mLookAt.clone());
-        cam.setNearPlane(mNearPlane);
-        cam.setOrientation(mOrientation.clone());
-        cam.setPosition(mPosition.clone());
-        cam.setProjectionMatrix(mLastWidth, mLastHeight);
-        */
     }
 
     @Override

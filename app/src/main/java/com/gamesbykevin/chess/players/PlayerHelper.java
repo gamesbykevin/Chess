@@ -15,8 +15,8 @@ import org.rajawali3d.renderer.Renderer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.gamesbykevin.chess.activity.GameActivity.INTERRUPT;
 import static com.gamesbykevin.chess.players.Cpu.DEFAULT_DEPTH;
+import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -229,14 +229,11 @@ public class PlayerHelper {
         for (Move move : moves) {
 
             //if we want to interrupt the game
-            if (INTERRUPT)
+            if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
                 break;
 
             count++;
             players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
-
-            if (DEBUG)
-                UtilityHelper.logEvent("Checking move " + count);
 
             //execute the current move
             executeMove(move, players);
@@ -285,7 +282,7 @@ public class PlayerHelper {
         for (Move currentMove : currentMoves) {
 
             //if we want to interrupt the game
-            if (INTERRUPT)
+            if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
                 break;
 
             //execute the move
@@ -494,16 +491,13 @@ public class PlayerHelper {
             }
 
             //if the player is in check and there are no moves, checkmate
-            player1.setCheckMate(result);
-
-        } else {
-
-            //if we aren't in check, there is no chance of checkmate
-            player1.setCheckMate(false);
+            if (result)
+                PlayerVars.STATE = PLAYER_1_TURN ? PlayerVars.State.LosePlayer1 : PlayerVars.State.LosePlayer2;
         }
 
         //if we aren't in check / checkmate, but we have no more moves available
-        player1.setStalemate(!player1.hasCheck() && !player1.hasCheckMate() && movesPlayer1.isEmpty());
+        if (movesPlayer1.isEmpty() && !player1.hasCheck())
+            PlayerVars.STATE = PlayerVars.State.Stalemate;
     }
 
     protected static void promote(BasicRenderer renderer, Players players, Piece selection) {
