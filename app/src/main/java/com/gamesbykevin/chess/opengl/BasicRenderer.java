@@ -83,7 +83,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         addBoard();
 
         if (getGame() != null && getGame().getPlayers() != null)
-            getGame().getPlayers().reset(this);
+            getGame().getPlayers().reset();
 
         //create arc ball camera to rotate around the board
         resetCamera();
@@ -116,12 +116,12 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (getGame().getPlayers().getSelected() == null) {
 
             //set our selection
-            getGame().getPlayers().select(this, object3D);
+            getGame().getPlayers().select(object3D);
 
         } else {
 
             //place at object (if possible)
-            getGame().getPlayers().place(this, object3D);
+            getGame().getPlayers().place(object3D);
         }
     }
 

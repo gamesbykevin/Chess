@@ -1,5 +1,7 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.chess.opengl.BasicRenderer;
+
 /**
  * Created by Kevin on 10/15/2017.
  */
@@ -10,12 +12,7 @@ public class Human extends Player {
     }
 
     @Override
-    public void reset() {
-
-    }
-
-    @Override
     public void update(Players players) {
-
+        //do anything here
     }
 }

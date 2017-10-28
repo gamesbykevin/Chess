@@ -51,13 +51,12 @@ public class Game implements IGame {
             //create the players and reset the pieces
             //this.players = new Players(Players.Mode.CpuVsCpu);
             this.players = new Players(getActivity(), Players.Mode.HumVsCpu);
-            this.players.reset(getActivity().getSurfaceView().getRenderer());
+            //this.players = new Players(getActivity(), Players.Mode.HumVsHum);
+            this.players.reset();
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
         }
-
-
 
         //track game started in analytics
         //AnalyticsHelper.trackPuzzleStarted(getActivity(), this);
@@ -67,8 +66,8 @@ public class Game implements IGame {
     public void update() {
 
         //update the players if needed
-        if (getPlayers() != null && getActivity() != null && getActivity().getSurfaceView() != null)
-            getPlayers().update(getActivity().getSurfaceView().getRenderer());
+        if (getPlayers() != null)
+            getPlayers().update();
     }
 
     /**

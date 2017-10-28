@@ -2,15 +2,14 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.chess.piece.Piece;
 
-import org.rajawali3d.Object3D;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 
 /**
  * Created by Kevin on 10/15/2017.
  */
-
 public abstract class Player {
 
     //list of pieces and its clone
@@ -46,9 +45,6 @@ public abstract class Player {
         for (int i = 0; i < this.clone.size(); i++) {
             this.pieces.add(this.clone.get(i));
         }
-
-        //reset anything else necessary
-        reset();
     }
 
     /**
@@ -77,11 +73,6 @@ public abstract class Player {
      * Players need to implement different logic upon update
      */
     public abstract void update(Players players);
-
-    /**
-     * In case we need to reset anything
-     */
-    public abstract void reset();
 
     public boolean hasDirection(final Direction direction) {
         return (this.direction == direction);
@@ -165,8 +156,29 @@ public abstract class Player {
                 //add to the score based on the piece type
                 score += piece.getType().getScore();
 
-                //also add bonus score depending where the piece is located
+                //add bonus score depending where the piece is located
                 score += Piece.BONUS_SCORE[(int)piece.getRow()][(int)piece.getCol()];
+
+                //this bonus only applies to pawns
+                if (piece.getType() == Piece.Type.Pawn) {
+
+                    //add extra bonus if the pawn can promote itself
+                    if (this.direction == Direction.North) {
+
+                        if (piece.getRow() == 0)
+                            score += 2;
+                        if (piece.getRow() == 1)
+                            score += 1;
+
+                    } else {
+
+                        if (piece.getRow() == ROWS - 1)
+                            score += 2;
+                        if (piece.getRow() == ROWS - 2)
+                            score += 1;
+
+                    }
+                }
             }
         }
 

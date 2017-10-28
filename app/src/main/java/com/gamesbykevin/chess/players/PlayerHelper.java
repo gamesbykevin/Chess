@@ -217,7 +217,7 @@ public class PlayerHelper {
         Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
 
         //create a new list for all the moves
-        List<Move> moves = getMoves(player, opponent, false);
+        List<Move> moves = getMoves(player, opponent, player.hasCheck());
 
         //count the number of moves
         int count = 0;
@@ -232,6 +232,7 @@ public class PlayerHelper {
             if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
                 break;
 
+            //update the ai progress
             count++;
             players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
 
@@ -273,7 +274,7 @@ public class PlayerHelper {
             return (player.calculateScore() - opponent.calculateScore());
 
         //get list of all valid moves based on the current state of the board
-        List<Move> currentMoves = getMoves(player, opponent, false);
+        List<Move> currentMoves = getMoves(player, opponent, player.hasCheck());
 
         //keep track of the best score
         int bestScore = Integer.MIN_VALUE;
@@ -405,83 +406,83 @@ public class PlayerHelper {
     }
 
     /**
-     * Update the state for player 1 (check, checkmate, stalemate)
-     * @param player1
-     * @param player2
+     * Update the state for the opposing player (check, checkmate, stalemate)
+     * @param opposing
+     * @param attacking
      */
-    protected static void updateStatus(Player player1, Player player2) {
+    protected static void updateStatus(Player opposing, Player attacking) {
 
-        //get list of all possible moves for player 1
-        List<Move> movesPlayer1 = getMoves(player1, player2, true);
-        List<Move> movesPlayer2 = getMoves(player2, player1, true);
+        //get list of all possible moves for players
+        List<Move> movesOpposingPlayer = getMoves(opposing, attacking, true);
+        List<Move> movesAttackingPlayer = getMoves(attacking, opposing, true);
 
-        //get the king for player 1
-        Piece king = player1.getPiece(Piece.Type.King);
+        //get the king for opposing player
+        Piece king = opposing.getPiece(Piece.Type.King);
 
         //do we have check
         boolean hasCheck = false;
 
-        //check every player 2 move to see if it can capture player 1's king
-        for (int i = 0; i < movesPlayer2.size(); i++) {
+        //check every attacking player move to see if it can capture opposing player's king
+        for (int i = 0; i < movesAttackingPlayer.size(); i++) {
 
             //if the location matches the king, we have check
-            if (king.hasLocation(movesPlayer2.get(i).destCol, movesPlayer2.get(i).destRow)) {
+            if (king.hasLocation(movesAttackingPlayer.get(i).destCol, movesAttackingPlayer.get(i).destRow)) {
                 hasCheck = true;
                 break;
             }
         }
 
         //update check status if check is true
-        player1.setCheck(hasCheck);
+        opposing.setCheck(hasCheck);
 
         //if the player is in check, let's see if any of player 1's moves can fix that
-        if (player1.hasCheck()) {
+        if (opposing.hasCheck()) {
 
-            //assume checkmate (just for now)
+            //assume checkmate (for now)
             boolean result = true;
 
-            //check every player 1 move to see if we can avoid check
-            for (int index = 0; index < movesPlayer1.size(); index++) {
+            //check every opposing player move to see if we can avoid check
+            for (int index = 0; index < movesOpposingPlayer.size(); index++) {
 
                 //get the current piece
-                Piece piece = player1.getPiece(movesPlayer1.get(index).sourceCol, movesPlayer1.get(index).sourceRow);
+                Piece piece = opposing.getPiece(movesOpposingPlayer.get(index).sourceCol, movesOpposingPlayer.get(index).sourceRow);
 
                 //place at destination
-                piece.setCol(movesPlayer1.get(index).destCol);
-                piece.setRow(movesPlayer1.get(index).destRow);
+                piece.setCol(movesOpposingPlayer.get(index).destCol);
+                piece.setRow(movesOpposingPlayer.get(index).destRow);
 
                 //get the captured piece (if exists)
-                movesPlayer1.get(index).pieceCaptured = player2.getPiece(movesPlayer1.get(index).destCol, movesPlayer1.get(index).destRow);
+                movesOpposingPlayer.get(index).pieceCaptured = attacking.getPiece(movesOpposingPlayer.get(index).destCol, movesOpposingPlayer.get(index).destRow);
 
                 //if the piece exists, capture it
-                if (movesPlayer1.get(index).pieceCaptured != null)
-                    movesPlayer1.get(index).pieceCaptured.setCaptured(true);
+                if (movesOpposingPlayer.get(index).pieceCaptured != null)
+                    movesOpposingPlayer.get(index).pieceCaptured.setCaptured(true);
 
                 //get the current king chess piece
-                king = player1.getPiece(Piece.Type.King);
+                king = opposing.getPiece(Piece.Type.King);
 
-                //get the new list of player 2 moves available
-                movesPlayer2 = getMoves(player2, player1, true);
+                //get the new list of attacking player moves available
+                movesAttackingPlayer = getMoves(attacking, opposing, true);
 
                 boolean tmpCheck = false;
 
-                //check every player 2 move to see if it can capture player 1's king
-                for (int i = 0; i < movesPlayer2.size(); i++) {
+                //check every attacking player's move to see if it can capture opposing player's king
+                for (int i = 0; i < movesAttackingPlayer.size(); i++) {
 
                     //if the location matches the king, we still have check
-                    if (king.hasLocation(movesPlayer2.get(i).destCol, movesPlayer2.get(i).destRow)) {
+                    if (king.hasLocation(movesAttackingPlayer.get(i).destCol, movesAttackingPlayer.get(i).destRow)) {
                         tmpCheck = true;
                         break;
                     }
                 }
 
                 //if the piece exists, un-capture it
-                if (movesPlayer1.get(index).pieceCaptured != null)
-                    movesPlayer1.get(index).pieceCaptured.setCaptured(false);
+                if (movesOpposingPlayer.get(index).pieceCaptured != null)
+                    movesOpposingPlayer.get(index).pieceCaptured.setCaptured(false);
 
                 //restore the piece to it's original location
-                piece.setCol(movesPlayer1.get(index).sourceCol);
-                piece.setRow(movesPlayer1.get(index).sourceRow);
+                piece.setCol(movesOpposingPlayer.get(index).sourceCol);
+                piece.setRow(movesOpposingPlayer.get(index).sourceRow);
 
                 //if this move doesn't result in check, we can avoid checkmate!!!!
                 if (!tmpCheck) {
@@ -496,7 +497,7 @@ public class PlayerHelper {
         }
 
         //if we aren't in check / checkmate, but we have no more moves available
-        if (movesPlayer1.isEmpty() && !player1.hasCheck())
+        if (movesOpposingPlayer.isEmpty() && !opposing.hasCheck())
             PlayerVars.STATE = PlayerVars.State.Stalemate;
     }
 

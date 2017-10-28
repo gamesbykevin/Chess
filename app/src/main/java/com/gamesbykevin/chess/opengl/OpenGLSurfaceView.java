@@ -131,6 +131,10 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
     @Override
     public void onResume() {
 
+        //don't create another thread if already running
+        if (this.running)
+            return;
+
         //call parent function
         super.onResume();
 
@@ -142,6 +146,11 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
 
         //create the thread
         this.thread = new Thread(this);
+
+        if (DEBUG) {
+            this.thread.setName("Thread " + System.nanoTime());
+            UtilityHelper.logEvent(this.thread.getName());
+        }
 
         //start the thread
         this.thread.start();

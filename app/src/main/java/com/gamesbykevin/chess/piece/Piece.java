@@ -37,7 +37,7 @@ public class Piece extends Cell {
     /**
      * The speed at which a chess piece can move
      */
-    public static final float VELOCITY = .01f;
+    public static final float VELOCITY = .025f;
 
     /**
      * Maximum height the knight is allowed to go
