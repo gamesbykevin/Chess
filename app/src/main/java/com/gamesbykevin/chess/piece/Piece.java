@@ -11,6 +11,8 @@ import org.rajawali3d.Object3D;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.players.PlayerHelper.COLS;
+import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
@@ -303,6 +305,63 @@ public class Piece extends Cell {
 
                         //add the valid move
                         options.add(new Cell(col, row));
+                    }
+                }
+
+                //if the King hasn't moved, check if we can castle
+                if (!hasMoved()) {
+
+                    //we can't be in check if castling and the king has to be in the original position
+                    if (!player.hasCheck() && getCol() == 4) {
+
+                        //which row has the rooks
+                        final int row = player.hasDirection(Player.Direction.North) ? ROWS - 1 : 0;
+
+                        //get the west piece
+                        Piece west = player.getPiece(0, row);
+
+                        //the rook also can't move previously
+                        if (west != null && !west.hasMoved()) {
+
+                            //is the move valid
+                            boolean valid = true;
+
+                            //make sure no pieces in between
+                            for (int col = 1; col < getCol(); col++) {
+
+                                if (player.hasPiece(col, row) || opponent.hasPiece(col, row)) {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+
+                            //if valid add move
+                            if (valid)
+                                options.add(new Cell(getCol() - 2, getRow()));
+                        }
+
+                        //get the east piece
+                        Piece east = player.getPiece(COLS - 1, row);
+
+                        //the rook also can't move previous
+                        if (east != null && !east.hasMoved()) {
+
+                            //is the move valid
+                            boolean valid = true;
+
+                            //make sure no pieces in between
+                            for (int col = (int)getCol() + 1; col < COLS - 1; col++) {
+
+                                if (player.hasPiece(col, row) || opponent.hasPiece(col, row)) {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+
+                            //if valid add move
+                            if (valid)
+                                options.add(new Cell(getCol() + 2, getRow()));
+                        }
                     }
                 }
                 break;

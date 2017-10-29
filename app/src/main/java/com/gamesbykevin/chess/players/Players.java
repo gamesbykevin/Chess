@@ -16,7 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.opengl.BasicRenderer.INIT;
+import static com.gamesbykevin.chess.players.PlayerHelper.COLS;
+import static com.gamesbykevin.chess.players.PlayerHelper.getCoordinate;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
+import static com.gamesbykevin.chess.players.PlayerVars.STATE;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -103,7 +106,9 @@ public class Players {
         if (player1.hasDirection(Player.Direction.South) && player2.hasDirection(Player.Direction.South))
             throw new RuntimeException("Each player has to face a different direction");
 
+        //we are playing with player 1 going first
         PlayerVars.PLAYER_1_TURN = true;
+        PlayerVars.STATE = STATE.Playing;
     }
 
     public GameActivity getActivity() {
@@ -401,38 +406,26 @@ public class Players {
         //check if we selected a valid move
         for (int i = 0; i < this.moves.size(); i++) {
 
-            //get the possible move
-            Cell cell = this.moves.get(i);
-
             //make sure we are making a valid move
-            if (col == (int)cell.getCol() && row == (int)cell.getRow())
-                movePiece(object3D);
+            if (this.moves.get(i).hasLocation(col, row)) {
+
+                //setup the move
+                PlayerHelper.setupMove(this, (int)getSelected().getCol(), (int)getSelected().getRow(), col, row);
+
+                //remove all targets from the scene
+                for (int x = 0; x < targets.size(); x++) {
+                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(targets.get(x));
+                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(targets.get(x));
+                }
+
+                //clear list
+                targets.clear();
+            }
         }
     }
 
-    private void movePiece(Object3D object3D) {
-
-        //update the location of the selection on the chess board
-        getSelected().setCol(PlayerHelper.getCol(object3D.getX()));
-        getSelected().setRow(PlayerHelper.getRow(object3D.getZ()));
-
-        //assign our destination
-        getSelected().setDestinationCoordinates((float)object3D.getX(), (float)object3D.getZ());
-
-        //flag the piece as moved
-        getSelected().setMoved(true);
-
-        //remove all targets from the scene
-        for (int x = 0; x < targets.size(); x++) {
-            getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(targets.get(x));
-            getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(targets.get(x));
-        }
-
-        //clear list
-        targets.clear();
-
-        //flag that we are moving a piece
-        PlayerVars.STATUS = PlayerVars.Status.Move;
+    public Player getPlayer() {
+        return PLAYER_1_TURN ? getPlayer1() : getPlayer2();
     }
 
     private void move() {

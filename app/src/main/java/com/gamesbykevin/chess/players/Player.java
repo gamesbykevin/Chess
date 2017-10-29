@@ -1,10 +1,12 @@
 package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.util.UtilityHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.players.PlayerHelper.COLS;
 import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 
 /**

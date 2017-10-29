@@ -15,9 +15,7 @@ import org.rajawali3d.renderer.Renderer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.gamesbykevin.chess.players.Cpu.DEFAULT_DEPTH;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
-import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -112,6 +110,9 @@ public class PlayerHelper {
         addPiece(player, Piece.Type.Bishop, 5, row2);
         addPiece(player, Piece.Type.Knight, 6, row2);
         addPiece(player, Piece.Type.Rook,   7, row2);
+        //addPiece(player, Piece.Type.Rook,   0, row2);
+        //addPiece(player, Piece.Type.King,   4, row2);
+        //addPiece(player, Piece.Type.Rook,   7, row2);
 
         //load the object models
         loadModels(player, renderer, material);
@@ -205,115 +206,13 @@ public class PlayerHelper {
         }
     }
 
-    protected static Move getBestMove(Players players) {
-
-        //keep track of the score for the best move
-        int score = Integer.MIN_VALUE;
-
-        //keep track of our best move
-        Move bestMove = null;
-
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
-
-        //create a new list for all the moves
-        List<Move> moves = getMoves(player, opponent, player.hasCheck());
-
-        //count the number of moves
-        int count = 0;
-
-        if (DEBUG)
-            UtilityHelper.logEvent("Thinking... size:" + moves.size());
-
-        //go through all of the moves
-        for (Move move : moves) {
-
-            //if we want to interrupt the game
-            if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
-                break;
-
-            //update the ai progress
-            count++;
-            players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
-
-            //execute the current move
-            executeMove(move, players);
-
-            //calculate the score
-            final int tmpScore = -1 * negaMax(DEFAULT_DEPTH, players);
-
-            //undo the previous move
-            undoMove(move, players);
-
-            //if we have a better score
-            if (tmpScore > score) {
-
-                //this is the new score to beat
-                score = tmpScore;
-
-                //this is now the best move
-                bestMove = move;
-            }
-        }
-
-        moves.clear();
-        moves = null;
-
-        players.getActivity().updateProgress(0);
-
-        //return the best move
-        return bestMove;
-    }
-
-    private static int negaMax(int depth, Players players) {
-
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
-
-        if (depth <= 0)
-            return (player.calculateScore() - opponent.calculateScore());
-
-        //get list of all valid moves based on the current state of the board
-        List<Move> currentMoves = getMoves(player, opponent, player.hasCheck());
-
-        //keep track of the best score
-        int bestScore = Integer.MIN_VALUE;
-
-        //check every valid move
-        for (Move currentMove : currentMoves) {
-
-            //if we want to interrupt the game
-            if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
-                break;
-
-            //execute the move
-            executeMove(currentMove, players);
-
-            //calculate the score
-            final int tmpScore = -1 * negaMax(depth - 1, players);
-
-            //undo the move
-            undoMove(currentMove, players);
-
-            //if there is a new best score
-            if (tmpScore > bestScore)
-                bestScore = tmpScore;
-        }
-
-        currentMoves.clear();
-        currentMoves = null;
-
-        //return the best score we found
-        return bestScore;
-    }
-
     /**
      * Get the list of available moves
      * @param player The current players turn
      * @param opponent The opponent they are facing
      * @return List of available moves which don't put the player in check
      */
-    private static List<Move> getMoves(Player player, Player opponent, final boolean checkForCheck) {
+    protected static List<Move> getMoves(Player player, Player opponent, final boolean checkForCheck) {
 
         //create a new list for all the moves
         List<Move> options = new ArrayList<>();
@@ -346,63 +245,6 @@ public class PlayerHelper {
         }
 
         return options;
-    }
-
-    private static void executeMove(Move move, Players players) {
-
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
-
-        //get the player piece at the source location
-        Piece piece = player.getPiece(move.sourceCol, move.sourceRow);
-
-
-        //get the captured piece at the destination
-        Piece captured = opponent.getPiece(move.destCol, move.destRow);
-
-        //place at the destination (if it exists)
-        if (piece != null) {
-
-            piece.setCol(move.destCol);
-            piece.setRow(move.destRow);
-        }
-
-        //flag the piece captured (if it exists)
-        if (captured != null) {
-
-            move.pieceCaptured = captured;
-            move.pieceCaptured.setCaptured(true);
-        }
-
-        //since we executed a move switch turns
-        players.setPlayer1Turn(!players.isPlayer1Turn());
-    }
-
-    private static void undoMove(Move move, Players players) {
-
-        //let's try to get the piece at the destination location for player 1
-        Piece piece = players.getPlayer1().getPiece(move.destCol, move.destRow);
-        boolean player1Turn = true;
-
-        //if the piece doesn't exist it must be player 2's turn
-        if (piece == null) {
-            piece = players.getPlayer2().getPiece(move.destCol, move.destRow);
-            player1Turn = false;
-        }
-
-        //move back to the source
-        piece.setCol(move.sourceCol);
-        piece.setRow(move.sourceRow);
-
-        //flag the piece captured false (if it exists)
-        if (move.pieceCaptured != null) {
-            move.pieceCaptured.setCaptured(false);
-            move.pieceCaptured.setCol(move.destCol);
-            move.pieceCaptured.setRow(move.destRow);
-        }
-
-        //assign the correct turn
-        players.setPlayer1Turn(player1Turn);
     }
 
     /**
@@ -707,5 +549,88 @@ public class PlayerHelper {
         protected Move() {
             //default constructor
         }
+    }
+
+    protected static void setupMove(Players players, Move move) {
+        setupMove(players, move.sourceCol, move.sourceRow, move.destCol, move.destRow);
+    }
+
+    protected static void setupMove(Players players, float sourceCol, float sourceRow, float destCol, float destRow) {
+
+        //get the current player playing
+        Player player = players.getPlayer();
+
+        //get the piece at the source
+        Piece piece = player.getPiece((int)sourceCol, (int)sourceRow);
+
+        //assign our selected piece, in case not yet selected
+        players.setSelected(piece);
+
+        //place at the destination
+        piece.setCol(destCol);
+        piece.setRow(destRow);
+
+        //set the destination where it will be rendered
+        piece.setDestinationCoordinates(getCoordinate((int)piece.getCol()), getCoordinate((int)piece.getRow()));
+
+        switch (piece.getType()) {
+            case King:
+
+                //the king can't move in order to castle
+                if (!piece.hasMoved()) {
+
+                    //we have to be on the same row to castle
+                    if (sourceRow == destRow) {
+
+                        //the king can move 2 columns in either direction to castle
+                        if (sourceCol - destCol > 1 || destCol - sourceCol > 1) {
+
+                            //we need to get the correct rook
+                            Piece rook = null;
+
+                            //which rook do we get?
+                            if (sourceCol > destCol) {
+
+                                //get the rook
+                                rook = player.getPiece(0, (int)destRow);
+
+                                //move to the right of the king
+                                rook.setCol(destCol + 1);
+
+                            } else {
+
+                                //get the rook
+                                rook = player.getPiece(COLS - 1, (int)destRow);
+
+                                //move to the left of the king
+                                rook.setCol(destCol - 1);
+                            }
+
+                            //set the new destination
+                            rook.setDestinationCoordinates(getCoordinate((int)rook.getCol()), getCoordinate((int)rook.getRow()));
+
+                            //flag that the rook has moved
+                            rook.setMoved(true);
+
+                            //move the rook until at it's destination
+                            while (!rook.hasDestination()) {
+
+                                //move
+                                rook.move();
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case Pawn:
+                break;
+        }
+
+        //flag the piece as moved
+        piece.setMoved(true);
+
+        //flag that we are moving a piece
+        PlayerVars.STATUS = PlayerVars.Status.Move;
     }
 }
