@@ -20,8 +20,8 @@ public class PlayerVars {
 
     public enum State {
         Playing,
-        LosePlayer1,
-        LosePlayer2,
+        WinPlayer1,
+        WinPlayer2,
         Stalemate
     }
 

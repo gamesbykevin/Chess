@@ -3,8 +3,10 @@ package com.gamesbykevin.chess.players;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 import static com.gamesbykevin.chess.players.PlayerHelper.getMoves;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
@@ -16,8 +18,14 @@ public class Cpu extends Player {
     //number of moves we look into the future
     public static final int DEFAULT_DEPTH = 2;
 
+    //list of the best moves
+    private List<PlayerHelper.Move> bestMoves;
+
     protected Cpu(final Direction direction) {
         super(false, direction);
+
+        //create new list for the best moves
+        this.bestMoves = new ArrayList<>();
     }
 
     @Override
@@ -36,17 +44,17 @@ public class Cpu extends Player {
 
     private PlayerHelper.Move getBestMove(Players players) {
 
+        //remove list if previous moves exist
+        bestMoves.clear();
+
         //keep track of the score for the best move
         int score = Integer.MIN_VALUE;
-
-        //keep track of our best move
-        PlayerHelper.Move bestMove = null;
 
         Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
         Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
 
         //create a new list for all the moves
-        List<PlayerHelper.Move> moves = getMoves(player, opponent, player.hasCheck());
+        List<PlayerHelper.Move> moves = getMoves(player, opponent, player.hasCheck() || DEFAULT_DEPTH < 2);
 
         //count the number of moves
         int count = 0;
@@ -75,13 +83,17 @@ public class Cpu extends Player {
             undoMove(move, players);
 
             //if we have a better score
-            if (tmpScore > score) {
+            if (tmpScore >= score) {
+
+                //if best score, remove previous list
+                if (tmpScore > score)
+                    bestMoves.clear();
 
                 //this is the new score to beat
                 score = tmpScore;
 
-                //this is now the best move
-                bestMove = move;
+                //add best move to the list
+                bestMoves.add(move);
             }
         }
 
@@ -89,6 +101,15 @@ public class Cpu extends Player {
         moves = null;
 
         players.getActivity().updateProgress(0);
+
+        //pick a random index
+        final int index = UtilityHelper.getRandom().nextInt(bestMoves.size());
+
+        //pick our best move
+        PlayerHelper.Move bestMove = bestMoves.get(index);
+
+        //clear list of moves
+        bestMoves.clear();
 
         //return the best move
         return bestMove;
@@ -103,7 +124,7 @@ public class Cpu extends Player {
             return (player.calculateScore() - opponent.calculateScore());
 
         //get list of all valid moves based on the current state of the board
-        List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, player.hasCheck());
+        List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, player.hasCheck() && DEFAULT_DEPTH < 2);
 
         //keep track of the best score
         int bestScore = Integer.MIN_VALUE;

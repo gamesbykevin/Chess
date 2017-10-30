@@ -4,6 +4,7 @@ import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.piece.PieceHelper.Type;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
@@ -92,27 +93,30 @@ public class PlayerHelper {
         }
 
         //populate all the pieces for row 1
-        addPiece(player, Piece.Type.Pawn, 0, row1);
-        addPiece(player, Piece.Type.Pawn, 1, row1);
-        addPiece(player, Piece.Type.Pawn, 2, row1);
-        addPiece(player, Piece.Type.Pawn, 3, row1);
-        addPiece(player, Piece.Type.Pawn, 4, row1);
-        addPiece(player, Piece.Type.Pawn, 5, row1);
-        addPiece(player, Piece.Type.Pawn, 6, row1);
-        addPiece(player, Piece.Type.Pawn, 7, row1);
+        player.addPiece(new Piece(Type.Pawn, 0, row1));
+        player.addPiece(new Piece(Type.Pawn, 1, row1));
+        player.addPiece(new Piece(Type.Pawn, 2, row1));
+        player.addPiece(new Piece(Type.Pawn, 3, row1));
+        player.addPiece(new Piece(Type.Pawn, 4, row1));
+        player.addPiece(new Piece(Type.Pawn, 5, row1));
+        player.addPiece(new Piece(Type.Pawn, 6, row1));
+        player.addPiece(new Piece(Type.Pawn, 7, row1));
 
         //populate all the pieces for row 2
-        addPiece(player, Piece.Type.Rook,   0, row2);
-        addPiece(player, Piece.Type.Knight, 1, row2);
-        addPiece(player, Piece.Type.Bishop, 2, row2);
-        addPiece(player, Piece.Type.Queen,  3, row2);
-        addPiece(player, Piece.Type.King,   4, row2);
-        addPiece(player, Piece.Type.Bishop, 5, row2);
-        addPiece(player, Piece.Type.Knight, 6, row2);
-        addPiece(player, Piece.Type.Rook,   7, row2);
-        //addPiece(player, Piece.Type.Rook,   0, row2);
-        //addPiece(player, Piece.Type.King,   4, row2);
-        //addPiece(player, Piece.Type.Rook,   7, row2);
+        player.addPiece(new Piece(Type.Rook,      0, row2));
+        player.addPiece(new Piece(Type.Knight,    1, row2));
+        player.addPiece(new Piece(Type.Bishop,    2, row2));
+        player.addPiece(new Piece(Type.Queen,     3, row2));
+        player.addPiece(new Piece(Type.King,      4, row2));
+        player.addPiece(new Piece(Type.Bishop,    5, row2));
+        player.addPiece(new Piece(Type.Knight,    6, row2));
+        player.addPiece(new Piece(Type.Rook,      7, row2));
+
+        /*
+        player.addPiece(new Piece(Type.Rook,      0, row2));
+        player.addPiece(new Piece(Type.King,      4, row2));
+        player.addPiece(new Piece(Type.Rook,      7, row2));
+        */
 
         //load the object models
         loadModels(player, renderer, material);
@@ -167,16 +171,13 @@ public class PlayerHelper {
                 //assign our model to the piece
                 piece.setObject3D(obj);
 
+                //now that we have assigned the object, set the destination coordinates
+                piece.setDestinationCoordinates((float)x, (float)z);
+
             } catch (Exception e) {
                 UtilityHelper.handleException(e);
             }
         }
-    }
-
-    private static void addPiece(Player player, Piece.Type type, int col, int row) {
-
-        //add piece to the player
-        player.addPiece(new Piece(type, col, row));
     }
 
     protected static void loadBoardSelection(Players players, Renderer renderer, Material material) {
@@ -259,7 +260,7 @@ public class PlayerHelper {
         List<Move> movesAttackingPlayer = getMoves(attacking, opposing, true);
 
         //get the king for opposing player
-        Piece king = opposing.getPiece(Piece.Type.King);
+        Piece king = opposing.getPiece(Type.King);
 
         //do we have check
         boolean hasCheck = false;
@@ -301,7 +302,7 @@ public class PlayerHelper {
                     movesOpposingPlayer.get(index).pieceCaptured.setCaptured(true);
 
                 //get the current king chess piece
-                king = opposing.getPiece(Piece.Type.King);
+                king = opposing.getPiece(Type.King);
 
                 //get the new list of attacking player moves available
                 movesAttackingPlayer = getMoves(attacking, opposing, true);
@@ -335,7 +336,7 @@ public class PlayerHelper {
 
             //if the player is in check and there are no moves, checkmate
             if (result)
-                PlayerVars.STATE = PLAYER_1_TURN ? PlayerVars.State.LosePlayer1 : PlayerVars.State.LosePlayer2;
+                PlayerVars.STATE = PLAYER_1_TURN ? PlayerVars.State.WinPlayer1 : PlayerVars.State.WinPlayer2;
         }
 
         //if we aren't in check / checkmate, but we have no more moves available
@@ -346,7 +347,7 @@ public class PlayerHelper {
     protected static void promote(BasicRenderer renderer, Players players, Piece selection) {
 
         //get the current player
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+        Player player = players.getPlayer();
 
         //identified promotion piece
         Piece promote = null;
@@ -361,7 +362,7 @@ public class PlayerHelper {
                 continue;
 
             //we are only interested in pawns
-            if (piece.getType() != Piece.Type.Pawn)
+            if (piece.getType() != Type.Pawn)
                 continue;
 
             //make sure we are at the end
@@ -393,7 +394,7 @@ public class PlayerHelper {
 
                     Piece piece = players.getPromotions().get(index);
 
-                    if (piece.getType() == Piece.Type.Queen) {
+                    if (piece.getType() == Type.Queen) {
                         selection = piece;
                         break;
                     }
@@ -417,6 +418,9 @@ public class PlayerHelper {
 
             //make sure it is displayed in the correct location
             promote.getObject3D().setPosition(position);
+
+            //make sure the correct texture is displayed
+            promote.getObject3D().setMaterial(PLAYER_1_TURN ? players.getTextureWhite() : players.getTextureWood());
 
             //add new 3d model to the scene
             renderer.getCurrentScene().addChild(promote.getObject3D());
@@ -448,7 +452,7 @@ public class PlayerHelper {
                 continue;
 
             //we are only interested in pawns
-            if (piece.getType() != Piece.Type.Pawn)
+            if (piece.getType() != Type.Pawn)
                 continue;
 
             //make sure we are at the end
@@ -468,17 +472,33 @@ public class PlayerHelper {
             }
         }
 
-        //if we have promotion, display our options
-        if (result) {
-            if (player.isHuman()) {
-                for (Piece tmp : players.getPromotions()) {
-                    tmp.getObject3D().setVisible(true);
-                }
-            }
-        }
-
         //return our result
         return result;
+    }
+
+    protected static void displayPromotion(Players players, BasicRenderer renderer) {
+
+        if (!players.getPlayer().isHuman()) {
+
+            //ai will always promote to queen
+            promote(renderer, players, null);
+
+            //switch turns
+            players.switchTurns();
+
+        } else {
+
+            for (Piece tmp : players.getPromotions()) {
+                tmp.getObject3D().setVisible(true);
+            }
+
+            //display the correct texture
+            for (Piece piece : players.getPromotions()) {
+                piece.getObject3D().setMaterial(PLAYER_1_TURN ? players.getTextureWhite() : players.getTextureWood());
+            }
+
+            PlayerVars.STATUS = PlayerVars.Status.Promote;
+        }
     }
 
     protected static void addPromotionPieces(Players players, BasicRenderer renderer) {
@@ -494,7 +514,7 @@ public class PlayerHelper {
         //create our list of promotional pieces
         List<Piece> promotions = new ArrayList<>();
 
-        for (Piece.Type type : Piece.Type.values()) {
+        for (Type type : Type.values()) {
 
             switch (type) {
 
@@ -574,6 +594,13 @@ public class PlayerHelper {
         piece.setDestinationCoordinates(getCoordinate((int)piece.getCol()), getCoordinate((int)piece.getRow()));
 
         switch (piece.getType()) {
+
+            case Knight:
+
+                //we will always jump the knight
+                piece.setJumping(true);
+                break;
+
             case King:
 
                 //the king can't move in order to castle
@@ -612,18 +639,21 @@ public class PlayerHelper {
                             //flag that the rook has moved
                             rook.setMoved(true);
 
-                            //move the rook until at it's destination
-                            while (!rook.hasDestination()) {
-
-                                //move
-                                rook.move();
-                            }
+                            //we will jump the rook
+                            rook.setJumping(true);
                         }
                     }
                 }
                 break;
 
             case Pawn:
+
+                //if we haven't moved the piece yet
+                if (!piece.hasMoved()) {
+
+                    //if the chess piece moved 2 places on the first move, it can be captured via "en passant"
+                    piece.setPassant(sourceRow - destRow > 1 || destRow - sourceRow > 1);
+                }
                 break;
         }
 

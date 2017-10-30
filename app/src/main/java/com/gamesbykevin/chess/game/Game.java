@@ -49,7 +49,7 @@ public class Game implements IGame {
         try {
 
             //create the players and reset the pieces
-            //this.players = new Players(Players.Mode.CpuVsCpu);
+            //this.players = new Players(getActivity(), Players.Mode.CpuVsCpu);
             this.players = new Players(getActivity(), Players.Mode.HumVsCpu);
             //this.players = new Players(getActivity(), Players.Mode.HumVsHum);
             this.players.reset();

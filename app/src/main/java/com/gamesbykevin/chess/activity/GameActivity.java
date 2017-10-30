@@ -29,11 +29,6 @@ public class GameActivity extends BaseActivity implements Disposable {
     //our open GL surface view
     private OpenGLSurfaceView glSurfaceView;
 
-    /**
-     * Create a random object which the seed as the current time stamp
-     */
-    private static Random RANDOM;
-
     //Our game manager class
     private static Game GAME;
 
@@ -96,10 +91,6 @@ public class GameActivity extends BaseActivity implements Disposable {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                if (progressBar.getProgress() == 0)
-                    displayMessage("Thinking...");
-
                 progressBar.setProgress(progress);
             }
         });
@@ -138,29 +129,6 @@ public class GameActivity extends BaseActivity implements Disposable {
 
         //return our timer object
         return this.timer;
-    }
-
-    /**
-     * Get our random object.<br>
-     * If object is null a new instance will be instantiated
-     * @return Random object used to generate random events
-     */
-    public static Random getRandomObject() {
-
-        //create the object if null
-        if (RANDOM == null) {
-
-            //get the current timestamp
-            final long time = System.nanoTime();
-
-            //create our Random object
-            RANDOM = new Random(time);
-
-            if (DEBUG)
-                UtilityHelper.logEvent("Random seed: " + time);
-        }
-
-        return RANDOM;
     }
 
     @Override

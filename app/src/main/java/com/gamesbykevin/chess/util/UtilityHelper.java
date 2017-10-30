@@ -8,10 +8,17 @@ import android.widget.Toast;
 
 import com.google.firebase.crash.FirebaseCrash;
 
+import java.util.Random;
+
 /**
  * Created by Kevin on 9/2/2017.
  */
 public class UtilityHelper {
+
+    /**
+     * Create a random object which the seed as the current time stamp
+     */
+    private static Random RANDOM;
 
     /**
      * Are we debugging the application
@@ -32,6 +39,26 @@ public class UtilityHelper {
      * App name for our framework
      */
     public static final String TAG = "AndroidFrameworkV2";
+
+    public static Random getRandom() {
+
+        //if null, create our object
+        if (RANDOM == null) {
+
+            //get the current timestamp
+            final long time = System.nanoTime();
+
+            //create instance with seed
+            RANDOM = new Random(time);
+
+            //print seed
+            if (DEBUG)
+                UtilityHelper.logEvent("Random seed: " + time);
+        }
+
+        //return our result
+        return RANDOM;
+    }
 
     public static void handleException(final Exception exception) {
 

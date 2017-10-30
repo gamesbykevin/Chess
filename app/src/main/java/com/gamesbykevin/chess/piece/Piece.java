@@ -1,10 +1,9 @@
 package com.gamesbykevin.chess.piece;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
-import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerHelper;
-import com.gamesbykevin.chess.util.UtilityHelper;
+import com.gamesbykevin.chess.piece.PieceHelper.Type;
 
 import org.rajawali3d.Object3D;
 
@@ -14,7 +13,6 @@ import java.util.List;
 import static com.gamesbykevin.chess.players.PlayerHelper.COLS;
 import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
-import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -36,6 +34,12 @@ public class Piece extends Cell {
     //is this piece captured
     private boolean captured = false;
 
+    //is this piece jumping?
+    private boolean jumping = false;
+
+    //can the pawn be captured via "en passant"?
+    private boolean passant = false;
+
     /**
      * The speed at which a chess piece can move
      */
@@ -44,56 +48,13 @@ public class Piece extends Cell {
     /**
      * Maximum height the knight is allowed to go
      */
-    private static final float HEIGHT_MAX = .4f;
-
-    /**
-     * Different types of pieces and the 3d model that shapes the piece
-     */
-    public enum Type {
-        Pawn(R.raw.pawn_stl, 10),
-        Bishop(R.raw.bishop_stl, 30),
-        Knight(R.raw.knight_stl, 30),
-        Rook(R.raw.rook_stl, 50),
-        Queen(R.raw.queen_stl, 90),
-        King(R.raw.king_stl, 99999);
-
-        private final int resId;
-
-        private final int score;
-
-        Type(int resId, int score) {
-            this.resId = resId;
-            this.score = score;
-        }
-
-        public int getResId() {
-            return this.resId;
-        }
-
-        public int getScore() {
-            return this.score;
-        }
-    }
-
-    /**
-     * These are the bonus scores depending on the location of the chess piece
-     */
-    public static final int[][] BONUS_SCORE = {
-        {1,1,1,1,1,1,1,1},
-        {2,2,2,2,2,2,2,2},
-        {2,2,3,3,3,3,2,2},
-        {2,2,3,4,4,3,2,2},
-        {2,2,3,4,4,3,2,2},
-        {2,2,3,3,3,3,2,2},
-        {2,2,2,2,2,2,2,2},
-        {1,1,1,1,1,1,1,1}
-    };
+    protected static final float HEIGHT_MAX = .4f;
 
     //x,y coordinates where we want the chess piece to go
-    private float destX, destZ;
+    protected float destX, destZ;
 
     //the starting point before we move the chess piece
-    private float startX, startZ;
+    protected float startX, startZ;
 
     public Piece(Type type, float col, float row) {
 
@@ -106,6 +67,22 @@ public class Piece extends Cell {
         //default to invalid destination
         this.destX = -1;
         this.destZ = -1;
+    }
+
+    public void setJumping(final boolean jumping) {
+        this.jumping = jumping;
+    }
+
+    public boolean isJumping() {
+        return this.jumping;
+    }
+
+    public void setPassant(final boolean passant) {
+        this.passant = passant;
+    }
+
+    public boolean hasPassant() {
+        return this.passant;
     }
 
     public void setObject3D(final Object3D object3D) {
@@ -157,37 +134,45 @@ public class Piece extends Cell {
 
             case Pawn:
 
-                if (player.hasDirection(Player.Direction.North)) {
+                //the rows will be the direction we are heading
+                int singleRow = player.hasDirection(Player.Direction.North) ? -1 : 1;
+                int doubleRow = player.hasDirection(Player.Direction.North) ? -2 : 2;
 
-                    //pawn can move forward as long as there is no piece in front of it
-                    if (PlayerHelper.hasBounds(startCol, startRow - 1) && !player.hasPiece(startCol, startRow - 1) && !opponent.hasPiece(startCol, startRow - 1))
-                        options.add(new Cell(startCol, startRow - 1));
+                //pawn can move forward as long as there is no piece in front of it
+                if (PlayerHelper.hasBounds(startCol, startRow + singleRow) && !player.hasPiece(startCol, startRow + singleRow) && !opponent.hasPiece(startCol, startRow + singleRow))
+                    options.add(new Cell(startCol, startRow + singleRow));
 
-                    //if this is the first move the pawn can move 2 spaces as long as nothing is in front of it
-                    if (PlayerHelper.hasBounds(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 2) && !opponent.hasPiece(startCol, startRow - 2) && !player.hasPiece(startCol, startRow - 1) && !opponent.hasPiece(startCol, startRow - 1) && !hasMoved())
-                        options.add(new Cell(startCol, startRow - 2));
+                //if this is the first move the pawn can move 2 spaces as long as nothing is in front of it
+                if (PlayerHelper.hasBounds(startCol, startRow + doubleRow) && !player.hasPiece(startCol, startRow + doubleRow) && !opponent.hasPiece(startCol, startRow + doubleRow) && !player.hasPiece(startCol, startRow + singleRow) && !opponent.hasPiece(startCol, startRow + singleRow) && !hasMoved())
+                    options.add(new Cell(startCol, startRow + doubleRow));
 
-                    //if there is an opponent piece diagonally we can capture
-                    if (opponent.hasPiece(startCol - 1, startRow - 1))
-                        options.add(new Cell(startCol - 1, startRow - 1));
-                    if (opponent.hasPiece(startCol + 1, startRow - 1))
-                        options.add(new Cell(startCol + 1, startRow - 1));
+                //if there is an opponent piece diagonally we can capture
+                if (opponent.hasPiece(startCol - 1, startRow + singleRow))
+                    options.add(new Cell(startCol - 1, startRow + singleRow));
+                if (opponent.hasPiece(startCol + 1, startRow + singleRow))
+                    options.add(new Cell(startCol + 1, startRow + singleRow));
 
-                } else {
 
-                    //pawn can move forward as long as there is no piece in front of it
-                    if (PlayerHelper.hasBounds(startCol, startRow + 1) && !player.hasPiece(startCol, startRow + 1) && !opponent.hasPiece(startCol, startRow + 1))
-                        options.add(new Cell(startCol, startRow + 1));
+                //check for NW capture via "en passant"
+                if (PlayerHelper.hasBounds(startCol - 1, startRow + singleRow) && !opponent.hasPiece(startCol - 1, startRow + singleRow)) {
 
-                    //if this is the first move the pawn can move 2 spaces
-                    if (PlayerHelper.hasBounds(startCol, startRow + 2) && !hasMoved() && !player.hasPiece(startCol, startRow + 2) && !opponent.hasPiece(startCol, startRow + 2) && !player.hasPiece(startCol, startRow + 1) && !opponent.hasPiece(startCol, startRow + 1))
-                        options.add(new Cell(startCol, startRow + 2));
+                    //get neighbor piece
+                    Piece piece = opponent.getPiece(startCol - 1, startRow);
 
-                    //if there is an opponent piece diagonally we can capture
-                    if (opponent.hasPiece(startCol - 1, startRow + 1))
-                        options.add(new Cell(startCol - 1, startRow + 1));
-                    if (opponent.hasPiece(startCol + 1, startRow + 1))
-                        options.add(new Cell(startCol + 1, startRow + 1));
+                    //we can only capture pawn's via "en passant" after their first move
+                    if (piece != null && piece.getType() == Type.Pawn && piece.hasPassant())
+                        options.add(new Cell(startCol - 1, startRow + singleRow));
+                }
+
+                //check for NE capture via "en passant"
+                if (PlayerHelper.hasBounds(startCol + 1, startRow + + singleRow) && !opponent.hasPiece(startCol + 1, startRow + singleRow)) {
+
+                    //get neighbor piece
+                    Piece piece = opponent.getPiece(startCol + 1, startRow);
+
+                    //we can only capture pawn's via "en passant" after their first move
+                    if (piece != null && piece.getType() == Type.Pawn && piece.hasPassant())
+                        options.add(new Cell(startCol + 1, startRow + singleRow));
                 }
                 break;
 
@@ -469,102 +454,10 @@ public class Piece extends Cell {
 
         //do we check and make sure we aren't putting ourselves in check?
         if (performCheck)
-            checkForCheck(options, player, opponent);
+            PieceHelper.checkForCheck(this, options, player, opponent);
 
         //return our list of moves
         return options;
-    }
-
-    public void checkForCheck(List<Cell> moves, Player player, Player opponent) {
-
-        //check every move in the list
-        for (int i = 0; i < moves.size(); i++) {
-
-            //check if this move is safe
-            final boolean result = checkForCheck(moves.get(i), player, opponent);
-
-            //if the move is not safe, remove
-            if (!result) {
-                moves.remove(i);
-                i--;
-            }
-        }
-    }
-
-    public boolean checkForCheck(Cell move, Player player, Player opponent) {
-
-        //assume move is safe (for now...)
-        boolean result = true;
-
-        //get our king piece
-        Piece king = player.getPiece(Type.King);
-
-        //this should always happen as the king has to exist to play chess
-        if (king != null) {
-
-            //save the source
-            final int sourceCol = (int)getCol();
-            final int sourceRow = (int)getRow();
-
-            //update to match move
-            setCol(move);
-            setRow(move);
-
-            //is there a captured piece
-            Piece captured = opponent.getPiece((int)move.getCol(), (int)move.getRow());
-
-            //if the piece exists, mark it captured
-            if (captured != null)
-                captured.setCaptured(true);
-
-            //check every opponent piece
-            for (int index = 0; index < opponent.getPieceCount(); index++) {
-
-                //get the current piece
-                Piece tmp = opponent.getPiece(index, false);
-
-                //skip pieces that don't exist
-                if (tmp == null)
-                    continue;
-
-                //get the list of moves for this piece
-                List<Cell> tmpMoves = tmp.getMoves(opponent, player, false);
-
-                //check each move
-                for (int x = 0; x < tmpMoves.size(); x++) {
-
-                    try {
-
-                        if (tmpMoves.get(x).hasLocation(king)) {
-                            result = false;
-                            break;
-                        }
-                    } catch (Exception e) {
-
-                        if (DEBUG) {
-                            UtilityHelper.logEvent(player.isHuman() ? "Player: Hum, Opponent: Cpu" : "Player: Cpu, Opponent: Hum");
-                            UtilityHelper.logEvent("x=" + x + ", size=" + tmpMoves.size());
-                        }
-
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                tmpMoves.clear();
-                tmpMoves = null;
-            }
-
-            //now that we are done, un-capture the piece
-            if (captured != null)
-                captured.setCaptured(false);
-
-            //restore original position to chess piece
-            setCol(sourceCol);
-            setRow(sourceRow);
-        }
-
-        //return our result
-        return result;
     }
 
     public void setDestinationCoordinates(float destX, float destZ) {
@@ -580,85 +473,5 @@ public class Piece extends Cell {
 
     public boolean hasDestination() {
         return (getObject3D().getX() == destX && getObject3D().getZ() == destZ && getObject3D().getY() == Y);
-    }
-
-    public void move() {
-
-        //only change height for the knight
-        if (getType() == Type.Knight) {
-
-            //change the height at the start
-            if (getObject3D().getX() == startX && getObject3D().getZ() == startZ) {
-
-                //if we aren't at our desired height yet
-                if (getObject3D().getY() < HEIGHT_MAX) {
-
-                    //move the 3d model up
-                    getObject3D().setY(getObject3D().getY() + VELOCITY);
-
-                    //don't do anything else yet
-                    return;
-
-                } else {
-
-                    //assign desired height
-                    getObject3D().setY(HEIGHT_MAX);
-                }
-            }
-
-            //change the height at the destination
-            if (getObject3D().getX() == destX && getObject3D().getZ() == destZ) {
-
-                if (getObject3D().getY() > Y) {
-
-                    //move the 3d model down
-                    getObject3D().setY(getObject3D().getY() - VELOCITY);
-
-                    //don't do anything else yet
-                    return;
-
-                } else {
-
-                    getObject3D().setY(Y);
-                }
-            }
-        }
-
-        //place at the destination if close enough
-        if (getObject3D().getX() > this.destX && getObject3D().getX() - this.destX < VELOCITY)
-            getObject3D().setX(this.destX);
-        if (this.destX > getObject3D().getX() && this.destX - getObject3D().getX() < VELOCITY)
-            getObject3D().setX(this.destX);
-        if (getObject3D().getZ() > this.destZ && getObject3D().getZ() - this.destZ < VELOCITY)
-            getObject3D().setZ(this.destZ);
-        if (this.destZ > getObject3D().getZ() && this.destZ - getObject3D().getZ() < VELOCITY)
-            getObject3D().setZ(this.destZ);
-
-        //update location of 3d model
-        if (getObject3D().getX() < this.destX) {
-            getObject3D().setX(getObject3D().getX() + VELOCITY);
-        } else if (getObject3D().getX() > this.destX) {
-            getObject3D().setX(getObject3D().getX() - VELOCITY);
-        }
-
-        if (getObject3D().getZ() < this.destZ) {
-            getObject3D().setZ(getObject3D().getZ() + VELOCITY);
-        } else if (getObject3D().getZ() > this.destZ) {
-            getObject3D().setZ(getObject3D().getZ() - VELOCITY);
-        }
-    }
-
-    public Piece copy() {
-
-        Piece piece = new Piece(getType(), (int)getCol(), (int)getRow());
-        piece.setMoved(this.moved);
-        piece.setCaptured(this.captured);
-        piece.destX = this.destX;
-        piece.destZ = this.destZ;
-        piece.startX = this.startX;
-        piece.startZ = this.startZ;
-        piece.setObject3D(getObject3D().clone());
-
-        return piece;
     }
 }
