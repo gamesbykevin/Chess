@@ -62,6 +62,9 @@ public class GameActivity extends BaseActivity implements Disposable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        if (DEBUG)
+            UtilityHelper.logEvent("onCreate");
+
         //assign to calculate
         PlayerVars.STATUS = PlayerVars.Status.Select;
 
@@ -134,12 +137,18 @@ public class GameActivity extends BaseActivity implements Disposable {
     @Override
     protected void onStart() {
 
+        if (DEBUG)
+            UtilityHelper.logEvent("onStart");
+
         //call parent
         super.onStart();
     }
 
     @Override
     protected void onDestroy() {
+
+        if (DEBUG)
+            UtilityHelper.logEvent("onDestroy");
 
         //call parent
         super.onDestroy();
@@ -177,10 +186,14 @@ public class GameActivity extends BaseActivity implements Disposable {
 
         glSurfaceView = null;
         layoutParams = null;
+        GAME = null;
     }
 
     @Override
     protected void onPause() {
+
+        if (DEBUG)
+            UtilityHelper.logEvent("onPause");
 
         //call parent
         super.onPause();
@@ -203,6 +216,9 @@ public class GameActivity extends BaseActivity implements Disposable {
 
     @Override
     protected void onResume() {
+
+        if (DEBUG)
+            UtilityHelper.logEvent("onResume");
 
         //call parent
         super.onResume();
@@ -293,7 +309,12 @@ public class GameActivity extends BaseActivity implements Disposable {
 
     @Override
     public void onBackPressed() {
+
+        if (DEBUG)
+            UtilityHelper.logEvent("onBackPressed");
+
         super.onBackPressed();
+        finish();
 
     }
 

@@ -1,6 +1,7 @@
 package com.gamesbykevin.chess.piece;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
+import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.piece.PieceHelper.Type;
@@ -17,7 +18,7 @@ import static com.gamesbykevin.chess.players.PlayerHelper.Y;
 /**
  * Created by Kevin on 10/15/2017.
  */
-public class Piece extends Cell {
+public class Piece extends Cell implements Disposable {
 
     //list of valid moves by this piece
     private List<Cell> options;
@@ -56,6 +57,9 @@ public class Piece extends Cell {
     //the starting point before we move the chess piece
     protected float startX, startZ;
 
+    //where is this piece coming from
+    protected int sourceCol, sourceRow;
+
     public Piece(Type type, float col, float row) {
 
         setType(type);
@@ -67,6 +71,43 @@ public class Piece extends Cell {
         //default to invalid destination
         this.destX = -1;
         this.destZ = -1;
+    }
+
+    @Override
+    public void dispose() {
+
+        if (options != null)
+            options.clear();
+        if (object3D != null)
+            object3D.destroy();
+
+        this.options = null;
+        this.object3D = null;
+        this.type = null;
+    }
+
+    public void setSourceCol(final float sourceCol) {
+        setSourceCol((int)sourceCol);
+    }
+
+    public void setSourceCol(final int sourceCol) {
+        this.sourceCol = sourceCol;
+    }
+
+    public void setSourceRow(final float sourceRow) {
+        setSourceRow((int)sourceRow);
+    }
+
+    public void setSourceRow(final int sourceRow) {
+        this.sourceRow = sourceRow;
+    }
+
+    public int getSourceCol() {
+        return this.sourceCol;
+    }
+
+    public int getSourceRow() {
+        return this.sourceRow;
     }
 
     public void setJumping(final boolean jumping) {
@@ -153,7 +194,7 @@ public class Piece extends Cell {
                     options.add(new Cell(startCol + 1, startRow + singleRow));
 
 
-                //check for NW capture via "en passant"
+                //check for NW/SW capture via "en passant"
                 if (PlayerHelper.hasBounds(startCol - 1, startRow + singleRow) && !opponent.hasPiece(startCol - 1, startRow + singleRow)) {
 
                     //get neighbor piece
@@ -164,7 +205,7 @@ public class Piece extends Cell {
                         options.add(new Cell(startCol - 1, startRow + singleRow));
                 }
 
-                //check for NE capture via "en passant"
+                //check for NE/SE capture via "en passant"
                 if (PlayerHelper.hasBounds(startCol + 1, startRow + + singleRow) && !opponent.hasPiece(startCol + 1, startRow + singleRow)) {
 
                     //get neighbor piece

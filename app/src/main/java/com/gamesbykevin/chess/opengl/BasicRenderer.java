@@ -82,8 +82,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //add the board to the scene
         addBoard();
 
-        if (getGame() != null && getGame().getPlayers() != null)
-            getGame().getPlayers().reset();
+        if (getGame() != null)
+            getGame().reset();
 
         //create arc ball camera to rotate around the board
         resetCamera();
@@ -113,15 +113,15 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             UtilityHelper.logEvent("OnObjectPicked");
 
         //select our chess piece
-        if (getGame().getPlayers().getSelected() == null) {
+        if (getGame().getSelected() == null) {
 
             //set our selection
-            getGame().getPlayers().select(object3D);
+            getGame().select(object3D);
 
         } else {
 
             //place at object (if possible)
-            getGame().getPlayers().place(object3D);
+            getGame().place(object3D);
         }
     }
 
@@ -132,14 +132,14 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (!INIT)
             return;
 
-        if (getGame() == null || getGame().getPlayers() == null)
+        if (getGame() == null)
             return;
 
         if (PlayerVars.STATUS != PlayerVars.Status.Select && PlayerVars.STATUS != PlayerVars.Status.Promote)
             return;
 
         //get the current player
-        Player player = PlayerVars.PLAYER_1_TURN ? getGame().getPlayers().getPlayer1() : getGame().getPlayers().getPlayer2();
+        Player player = PlayerVars.PLAYER_1_TURN ? getGame().getPlayer1() : getGame().getPlayer2();
 
         //if the player isn't human, we can't select anything right now
         if (!player.isHuman())
@@ -200,7 +200,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
 
-        if (getGame().getPlayers() == null)
+        if (getGame().getPlayer() == null)
             getGame().reset();
 
         //call parent to render objects

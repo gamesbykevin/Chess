@@ -135,14 +135,14 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
         if (this.running)
             return;
 
+        //flag running true
+        this.running = true;
+
         //call parent function
         super.onResume();
 
         //resume the open gl renderer
         getRenderer().onResume();
-
-        //flag running true
-        this.running = true;
 
         //create the thread
         this.thread = new Thread(this);

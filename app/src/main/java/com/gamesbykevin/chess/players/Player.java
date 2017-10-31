@@ -1,5 +1,7 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.androidframeworkv2.base.Disposable;
+import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.piece.PieceHelper;
 import com.gamesbykevin.chess.piece.PieceHelper.Type;
@@ -12,7 +14,7 @@ import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 /**
  * Created by Kevin on 10/15/2017.
  */
-public abstract class Player {
+public abstract class Player implements Disposable {
 
     //list of pieces and its clone
     private List<Piece> pieces, clone;
@@ -36,6 +38,39 @@ public abstract class Player {
         this.clone = new ArrayList<>();
 
         setCheck(false);
+    }
+
+    @Override
+    public void dispose() {
+
+        if (pieces != null) {
+
+            for (int i = 0; i < pieces.size(); i++) {
+
+                if (pieces.get(i) != null)
+                    pieces.get(i).dispose();
+
+                pieces.set(i, null);
+            }
+
+            pieces.clear();
+        }
+
+        if (clone != null) {
+
+            for (int i = 0; i < clone.size(); i++) {
+
+                if (clone.get(i) != null)
+                    clone.get(i).dispose();
+
+                clone.set(i, null);
+            }
+
+            clone.clear();
+        }
+
+        pieces = null;
+        clone = null;
     }
 
     public void restore() {
@@ -108,7 +143,7 @@ public abstract class Player {
     /**
      * Players need to implement different logic upon update
      */
-    public abstract void update(Players players);
+    public abstract void update(Game game);
 
     public boolean hasDirection(final Direction direction) {
         return (this.direction == direction);

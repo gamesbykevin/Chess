@@ -1,5 +1,6 @@
 package com.gamesbykevin.chess.players;
 
+import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -21,7 +22,7 @@ public class Cpu extends Player {
     //list of the best moves
     private List<PlayerHelper.Move> bestMoves;
 
-    protected Cpu(final Direction direction) {
+    public Cpu(final Direction direction) {
         super(false, direction);
 
         //create new list for the best moves
@@ -29,20 +30,30 @@ public class Cpu extends Player {
     }
 
     @Override
-    public void update(Players players) {
+    public void dispose() {
+        super.dispose();
+
+        if (bestMoves != null)
+            bestMoves.clear();
+
+        bestMoves = null;
+    }
+
+    @Override
+    public void update(Game game) {
 
         //get the best move
-        PlayerHelper.Move bestMove = getBestMove(players);
+        PlayerHelper.Move bestMove = getBestMove(game);
 
         //if game is interrupted don't continue right now
         if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
             return;
 
         //setup the next move
-        PlayerHelper.setupMove(players, bestMove);
+        PlayerHelper.setupMove(game, bestMove);
     }
 
-    private PlayerHelper.Move getBestMove(Players players) {
+    private PlayerHelper.Move getBestMove(Game game) {
 
         //remove list if previous moves exist
         bestMoves.clear();
@@ -50,11 +61,11 @@ public class Cpu extends Player {
         //keep track of the score for the best move
         int score = Integer.MIN_VALUE;
 
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+        Player player = game.isPlayer1Turn() ? game.getPlayer1() : game.getPlayer2();
+        Player opponent = game.isPlayer1Turn() ? game.getPlayer2() : game.getPlayer1();
 
         //create a new list for all the moves
-        List<PlayerHelper.Move> moves = getMoves(player, opponent, player.hasCheck() || DEFAULT_DEPTH < 2);
+        List<PlayerHelper.Move> moves = getMoves(player, opponent, true);//player.hasCheck() || DEFAULT_DEPTH < 2);
 
         //count the number of moves
         int count = 0;
@@ -71,16 +82,16 @@ public class Cpu extends Player {
 
             //update the ai progress
             count++;
-            players.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
+            game.getActivity().updateProgress((int)(((float)count / (float)moves.size()) * 100));
 
             //execute the current move
-            executeMove(move, players);
+            executeMove(move, game);
 
             //calculate the score
-            final int tmpScore = -1 * negaMax(DEFAULT_DEPTH, players);
+            final int tmpScore = -1 * negaMax(DEFAULT_DEPTH, game);
 
             //undo the previous move
-            undoMove(move, players);
+            undoMove(move, game);
 
             //if we have a better score
             if (tmpScore >= score) {
@@ -100,7 +111,7 @@ public class Cpu extends Player {
         moves.clear();
         moves = null;
 
-        players.getActivity().updateProgress(0);
+        game.getActivity().updateProgress(0);
 
         //pick a random index
         final int index = UtilityHelper.getRandom().nextInt(bestMoves.size());
@@ -108,17 +119,14 @@ public class Cpu extends Player {
         //pick our best move
         PlayerHelper.Move bestMove = bestMoves.get(index);
 
-        //clear list of moves
-        bestMoves.clear();
-
         //return the best move
         return bestMove;
     }
 
-    private int negaMax(int depth, Players players) {
+    private int negaMax(int depth, Game game) {
 
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+        Player player = game.isPlayer1Turn() ? game.getPlayer1() : game.getPlayer2();
+        Player opponent = game.isPlayer1Turn() ? game.getPlayer2() : game.getPlayer1();
 
         if (depth <= 0)
             return (player.calculateScore() - opponent.calculateScore());
@@ -137,13 +145,13 @@ public class Cpu extends Player {
                 break;
 
             //execute the move
-            executeMove(currentMove, players);
+            executeMove(currentMove, game);
 
             //calculate the score
-            final int tmpScore = -1 * negaMax(depth - 1, players);
+            final int tmpScore = -1 * negaMax(depth - 1, game);
 
             //undo the move
-            undoMove(currentMove, players);
+            undoMove(currentMove, game);
 
             //if there is a new best score
             if (tmpScore > bestScore)
@@ -157,10 +165,10 @@ public class Cpu extends Player {
         return bestScore;
     }
 
-    private void executeMove(PlayerHelper.Move move, Players players) {
+    private void executeMove(PlayerHelper.Move move, Game game) {
 
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
-        Player opponent = players.isPlayer1Turn() ? players.getPlayer2() : players.getPlayer1();
+        Player player = game.isPlayer1Turn() ? game.getPlayer1() : game.getPlayer2();
+        Player opponent = game.isPlayer1Turn() ? game.getPlayer2() : game.getPlayer1();
 
         //get the player piece at the source location
         Piece piece = player.getPiece(move.sourceCol, move.sourceRow);
@@ -184,18 +192,18 @@ public class Cpu extends Player {
         }
 
         //since we executed a move switch turns
-        players.setPlayer1Turn(!players.isPlayer1Turn());
+        game.setPlayer1Turn(!game.isPlayer1Turn());
     }
 
-    private void undoMove(PlayerHelper.Move move, Players players) {
+    private void undoMove(PlayerHelper.Move move, Game game) {
 
         //let's try to get the piece at the destination location for player 1
-        Piece piece = players.getPlayer1().getPiece(move.destCol, move.destRow);
+        Piece piece = game.getPlayer1().getPiece(move.destCol, move.destRow);
         boolean player1Turn = true;
 
         //if the piece doesn't exist it must be player 2's turn
         if (piece == null) {
-            piece = players.getPlayer2().getPiece(move.destCol, move.destRow);
+            piece = game.getPlayer2().getPiece(move.destCol, move.destRow);
             player1Turn = false;
         }
 
@@ -211,6 +219,6 @@ public class Cpu extends Player {
         }
 
         //assign the correct turn
-        players.setPlayer1Turn(player1Turn);
+        game.setPlayer1Turn(player1Turn);
     }
 }

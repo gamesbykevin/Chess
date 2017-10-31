@@ -2,6 +2,7 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.piece.PieceHelper.Type;
@@ -79,7 +80,7 @@ public class PlayerHelper {
         return COORDINATE_MIN + (COORDINATE_INCREMENT * row_col);
     }
 
-    protected static void reset(Player player, BasicRenderer renderer, Material material) {
+    public static void reset(Player player, BasicRenderer renderer, Material material) {
 
         final int row1, row2;
 
@@ -112,17 +113,11 @@ public class PlayerHelper {
         player.addPiece(new Piece(Type.Knight,    6, row2));
         player.addPiece(new Piece(Type.Rook,      7, row2));
 
-        /*
-        player.addPiece(new Piece(Type.Rook,      0, row2));
-        player.addPiece(new Piece(Type.King,      4, row2));
-        player.addPiece(new Piece(Type.Rook,      7, row2));
-        */
-
         //load the object models
         loadModels(player, renderer, material);
     }
 
-    protected static void loadModels(Player player, BasicRenderer renderer, Material material) {
+    public static void loadModels(Player player, BasicRenderer renderer, Material material) {
 
         for (int i = 0; i < player.getPieceCount(); i++) {
 
@@ -180,7 +175,7 @@ public class PlayerHelper {
         }
     }
 
-    protected static void loadBoardSelection(Players players, Renderer renderer, Material material) {
+    public static void loadBoardSelection(Game game, Renderer renderer, Material material) {
 
         try {
             //parse our 3d model
@@ -200,7 +195,7 @@ public class PlayerHelper {
             obj.setMaterial(material);
 
             //assign accordingly
-            players.setBoardSelection(obj);
+            game.setBoardSelection(obj);
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
@@ -253,7 +248,7 @@ public class PlayerHelper {
      * @param opposing
      * @param attacking
      */
-    protected static void updateStatus(Player opposing, Player attacking) {
+    public static void updateStatus(Player opposing, Player attacking) {
 
         //get list of all possible moves for players
         List<Move> movesOpposingPlayer = getMoves(opposing, attacking, true);
@@ -344,10 +339,10 @@ public class PlayerHelper {
             PlayerVars.STATE = PlayerVars.State.Stalemate;
     }
 
-    protected static void promote(BasicRenderer renderer, Players players, Piece selection) {
+    public static void promote(BasicRenderer renderer, Game game, Piece selection) {
 
         //get the current player
-        Player player = players.getPlayer();
+        Player player = game.getPlayer();
 
         //identified promotion piece
         Piece promote = null;
@@ -390,9 +385,9 @@ public class PlayerHelper {
             if (selection == null) {
 
                 //check all the pieces
-                for (int index = 0; index < players.getPromotions().size(); index++) {
+                for (int index = 0; index < game.getPromotions().size(); index++) {
 
-                    Piece piece = players.getPromotions().get(index);
+                    Piece piece = game.getPromotions().get(index);
 
                     if (piece.getType() == Type.Queen) {
                         selection = piece;
@@ -420,7 +415,7 @@ public class PlayerHelper {
             promote.getObject3D().setPosition(position);
 
             //make sure the correct texture is displayed
-            promote.getObject3D().setMaterial(PLAYER_1_TURN ? players.getTextureWhite() : players.getTextureWood());
+            promote.getObject3D().setMaterial(PLAYER_1_TURN ? game.getTextureWhite() : game.getTextureWood());
 
             //add new 3d model to the scene
             renderer.getCurrentScene().addChild(promote.getObject3D());
@@ -429,16 +424,16 @@ public class PlayerHelper {
             renderer.getObjectPicker().registerObject(promote.getObject3D());
 
             //hide the promotion pieces
-            for (Piece tmp : players.getPromotions()) {
+            for (Piece tmp : game.getPromotions()) {
                 tmp.getObject3D().setVisible(false);
             }
         }
     }
 
-    protected static boolean hasPromotion(Players players) {
+    public static boolean hasPromotion(Game game) {
 
         //get the current player
-        Player player = players.isPlayer1Turn() ? players.getPlayer1() : players.getPlayer2();
+        Player player = game.isPlayer1Turn() ? game.getPlayer1() : game.getPlayer2();
 
         boolean result = false;
 
@@ -476,36 +471,36 @@ public class PlayerHelper {
         return result;
     }
 
-    protected static void displayPromotion(Players players, BasicRenderer renderer) {
+    public static void displayPromotion(Game game, BasicRenderer renderer) {
 
-        if (!players.getPlayer().isHuman()) {
+        if (!game.getPlayer().isHuman()) {
 
             //ai will always promote to queen
-            promote(renderer, players, null);
+            promote(renderer, game, null);
 
             //switch turns
-            players.switchTurns();
+            game.switchTurns();
 
         } else {
 
-            for (Piece tmp : players.getPromotions()) {
+            for (Piece tmp : game.getPromotions()) {
                 tmp.getObject3D().setVisible(true);
             }
 
             //display the correct texture
-            for (Piece piece : players.getPromotions()) {
-                piece.getObject3D().setMaterial(PLAYER_1_TURN ? players.getTextureWhite() : players.getTextureWood());
+            for (Piece piece : game.getPromotions()) {
+                piece.getObject3D().setMaterial(PLAYER_1_TURN ? game.getTextureWhite() : game.getTextureWood());
             }
 
             PlayerVars.STATUS = PlayerVars.Status.Promote;
         }
     }
 
-    protected static void addPromotionPieces(Players players, BasicRenderer renderer) {
+    public static void addPromotionPieces(Game game, BasicRenderer renderer) {
 
         //if the pieces exist, remove existing
-        if (players.getPromotions() != null && !players.getPromotions().isEmpty()) {
-            for (Piece piece : players.getPromotions()) {
+        if (game.getPromotions() != null && !game.getPromotions().isEmpty()) {
+            for (Piece piece : game.getPromotions()) {
                 renderer.getCurrentScene().removeChild(piece.getObject3D());
                 renderer.getObjectPicker().unregisterObject(piece.getObject3D());
             }
@@ -526,7 +521,7 @@ public class PlayerHelper {
                 default:
 
                     //get this piece for the short term
-                    Piece tmp = players.getPlayer1().getPiece(type);
+                    Piece tmp = game.getPlayer1().getPiece(type);
 
                     //clone the 3d model
                     Object3D object3D = tmp.getObject3D().clone();
@@ -554,37 +549,27 @@ public class PlayerHelper {
         }
 
         //assign our promotion pieces
-        players.setPromotions(promotions);
+        game.setPromotions(promotions);
     }
 
-    public static class Move {
-
-        //where the piece is heading
-        protected int destCol, destRow;
-        protected int sourceCol, sourceRow;
-
-        //the piece captured during the move (if exists)
-        protected Piece pieceCaptured;
-
-        protected Move() {
-            //default constructor
-        }
+    public static void setupMove(Game game, Move move) {
+        setupMove(game, move.sourceCol, move.sourceRow, move.destCol, move.destRow);
     }
 
-    protected static void setupMove(Players players, Move move) {
-        setupMove(players, move.sourceCol, move.sourceRow, move.destCol, move.destRow);
-    }
-
-    protected static void setupMove(Players players, float sourceCol, float sourceRow, float destCol, float destRow) {
+    public static void setupMove(Game game, float sourceCol, float sourceRow, float destCol, float destRow) {
 
         //get the current player playing
-        Player player = players.getPlayer();
+        Player player = game.getPlayer();
 
         //get the piece at the source
         Piece piece = player.getPiece((int)sourceCol, (int)sourceRow);
 
+        //assign where we are coming from to track each move
+        piece.setSourceCol(sourceCol);
+        piece.setSourceRow(sourceRow);
+
         //assign our selected piece, in case not yet selected
-        players.setSelected(piece);
+        game.setSelected(piece);
 
         //place at the destination
         piece.setCol(destCol);
@@ -662,5 +647,22 @@ public class PlayerHelper {
 
         //flag that we are moving a piece
         PlayerVars.STATUS = PlayerVars.Status.Move;
+    }
+
+    public static class Move {
+
+        //where the piece is heading
+        public int destCol, destRow;
+        public int sourceCol, sourceRow;
+
+        //the piece captured during the move (if exists)
+        public Piece pieceCaptured;
+
+        //the promotion piece (if applicable)
+        public Type promotion;
+
+        public Move() {
+            //default constructor
+        }
     }
 }
