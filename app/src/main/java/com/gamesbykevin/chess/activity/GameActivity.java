@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
+import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
 import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.GameTimer;
@@ -312,6 +313,9 @@ public class GameActivity extends BaseActivity implements Disposable {
 
         if (DEBUG)
             UtilityHelper.logEvent("onBackPressed");
+
+        //save current game to shared preferences
+        GameHelper.saveHistory(this, getGame());
 
         super.onBackPressed();
         finish();

@@ -483,16 +483,35 @@ public class PlayerHelper {
 
         } else {
 
-            for (Piece tmp : game.getPromotions()) {
-                tmp.getObject3D().setVisible(true);
-            }
+            if (game.hasReplay()) {
 
-            //display the correct texture
-            for (Piece piece : game.getPromotions()) {
-                piece.getObject3D().setMaterial(PLAYER_1_TURN ? game.getTextureWhite() : game.getTextureWood());
-            }
+                Move move = game.getHistory().get(0);
 
-            PlayerVars.STATUS = PlayerVars.Status.Promote;
+                for (int i = 0; i < game.getPromotions().size(); i++) {
+
+                    if (game.getPromotions().get(i).getType() == move.promotion) {
+
+                        promote(renderer, game, game.getPromotions().get(i));
+
+                        //switch turns
+                        game.switchTurns();
+                        break;
+                    }
+                }
+
+            } else {
+
+                for (Piece tmp : game.getPromotions()) {
+                    tmp.getObject3D().setVisible(true);
+                }
+
+                //display the correct texture
+                for (Piece piece : game.getPromotions()) {
+                    piece.getObject3D().setMaterial(PLAYER_1_TURN ? game.getTextureWhite() : game.getTextureWood());
+                }
+
+                PlayerVars.STATUS = PlayerVars.Status.Promote;
+            }
         }
     }
 

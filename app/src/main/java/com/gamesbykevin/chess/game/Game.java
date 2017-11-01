@@ -1,5 +1,7 @@
 package com.gamesbykevin.chess.game;
 
+import android.content.SharedPreferences;
+
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.activity.GameActivity;
@@ -15,6 +17,7 @@ import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.players.PlayerVars.Status;
 import com.gamesbykevin.chess.players.PlayerVars.State;
 import com.gamesbykevin.chess.util.UtilityHelper;
+import com.google.gson.reflect.TypeToken;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.materials.Material;
@@ -24,6 +27,7 @@ import org.rajawali3d.materials.textures.Texture;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
 import static com.gamesbykevin.chess.opengl.BasicRenderer.INIT;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.players.PlayerVars.STATE;
@@ -59,6 +63,9 @@ public class Game implements IGame {
     //maintain a list of moves
     private List<PlayerHelper.Move> history;
 
+    //is this game a replay
+    private boolean replay = false;
+
     /**
      * These are the different kinds of game modes
      */
@@ -86,7 +93,7 @@ public class Game implements IGame {
         this.activity = activity;
 
         //assign game mode
-        this.mode = Mode.CpuVsCpu;
+        this.mode = Mode.HumVsCpu;
 
         //create list of target destinations
         this.targets = new ArrayList<>();
@@ -124,6 +131,31 @@ public class Game implements IGame {
         PlayerVars.PLAYER_1_TURN = true;
         PlayerVars.STATE = State.Playing;
         PlayerVars.STATUS = Status.Select;
+
+        //get the shared preferences
+        SharedPreferences preferences = getActivity().getSharedPreferences();
+
+        if (preferences.contains(getActivity().getString(R.string.saved_match_file_key))) {
+            final String json = preferences.getString(getActivity().getString(R.string.saved_match_file_key), "");
+            java.lang.reflect.Type listType = new TypeToken<List<Move>>(){}.getType();
+
+            List<Move> tmpHistory = (List<Move>)GSON.fromJson(json, listType);
+
+            if (tmpHistory != null) {
+                setHistory(tmpHistory);
+                setReplay(true);
+            } else {
+                setReplay(false);
+            }
+        }
+    }
+
+    public void setReplay(final boolean replay) {
+        this.replay = replay;
+    }
+
+    public boolean hasReplay() {
+        return this.replay;
     }
 
     public GameActivity getActivity() {
@@ -154,6 +186,9 @@ public class Game implements IGame {
 
     public void track(Piece piece) {
 
+        if (hasReplay())
+            return;
+
         //create the move
         Move move = new Move();
         move.sourceCol = piece.getSourceCol();
@@ -170,6 +205,9 @@ public class Game implements IGame {
 
     public void track(Type type) {
 
+        if (hasReplay())
+            return;
+
         //get the last move in our history
         Move move = this.history.get(this.history.size() - 1);
 
@@ -180,6 +218,13 @@ public class Game implements IGame {
             UtilityHelper.logEvent("Promotion saved (" + move.sourceCol +  "," + move.sourceRow + ") (" + move.destCol + "," + move.destRow + ") " + move.promotion.toString());
     }
 
+    public List<Move> getHistory() {
+        return this.history;
+    }
+
+    public void setHistory(List<Move> history) {
+        this.history = history;
+    }
 
     @Override
     public void onPause() {
@@ -287,8 +332,22 @@ public class Game implements IGame {
                 //get the current player
                 Player player = PLAYER_1_TURN ? getPlayer1() : getPlayer2();
 
-                //if the player is not human, the ai will update
-                player.update(this);
+                if (hasReplay()) {
+
+                    if (!getHistory().isEmpty()) {
+
+                        //if we have replay get the current move
+                        Move move = getHistory().get(0);
+
+                        //setup the move
+                        PlayerHelper.setupMove(this, move);
+                    }
+
+                } else {
+
+                    //if the player is not human, the ai will update
+                    player.update(this);
+                }
                 break;
         }
     }
@@ -459,6 +518,9 @@ public class Game implements IGame {
 
     public void select(Object3D object3D) {
 
+        if (hasReplay())
+            return;
+
         //if we previously have a selected piece don't interact with anything else
         if (getSelected() != null)
             return;
@@ -587,6 +649,9 @@ public class Game implements IGame {
      * Place our selected piece
      */
     public void place(Object3D object3D) {
+
+        if (hasReplay())
+            return;
 
         //is the game over
         if (PlayerVars.isGameover())
@@ -754,6 +819,9 @@ public class Game implements IGame {
             //if we aren't promoting a piece, switch turns
             switchTurns();
         }
+
+        if (hasReplay())
+            this.history.remove(0);
 
         //copy the pieces in case the game is interrupted
         getPlayer1().copy();

@@ -117,8 +117,10 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
         try {
 
             //wait for thread to finish
-            if (this.thread != null)
+            if (this.thread != null) {
                 this.thread.join();
+                this.thread = null;
+            }
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
@@ -132,7 +134,7 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
     public void onResume() {
 
         //don't create another thread if already running
-        if (this.running)
+        if (this.running || this.thread != null)
             return;
 
         //flag running true
