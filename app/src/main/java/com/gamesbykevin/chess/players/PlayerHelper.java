@@ -683,5 +683,14 @@ public class PlayerHelper {
         public Move() {
             //default constructor
         }
+
+        public boolean hasMatch(Move move) {
+
+            return (move.sourceCol == sourceCol &&
+                    move.sourceRow == sourceRow &&
+                    move.destCol == destCol &&
+                    move.destRow == destRow
+            );
+        }
     }
 }

@@ -17,7 +17,7 @@ import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 public abstract class Player implements Disposable {
 
     //list of pieces and its clone
-    private List<Piece> pieces, clone;
+    private ArrayList<Piece> pieces, clone;
 
     private final boolean human;
 
@@ -31,6 +31,8 @@ public abstract class Player implements Disposable {
     //is the player in check
     private boolean check = false;
 
+    private String name = "";
+
     protected Player(final boolean human, final Direction direction) {
         this.human = human;
         this.direction = direction;
@@ -38,6 +40,14 @@ public abstract class Player implements Disposable {
         this.clone = new ArrayList<>();
 
         setCheck(false);
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     @Override

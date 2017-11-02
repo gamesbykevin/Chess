@@ -32,6 +32,7 @@ import static com.gamesbykevin.chess.opengl.BasicRenderer.INIT;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.players.PlayerVars.STATE;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
+import static com.gamesbykevin.chess.util.UtilityHelper.getRandom;
 
 /**
  * Created by Kevin on 7/19/2017.
@@ -113,14 +114,18 @@ public class Game implements IGame {
 
             case HumVsCpu:
                 this.player1 = new Human(Player.Direction.North);
-                this.player2 = new Cpu(Player.Direction.South);
+                this.player2 = new Cpu(Player.Direction.South, getRandom().nextInt(3) + 1);
                 break;
 
             case CpuVsCpu:
-                this.player1 = new Cpu(Player.Direction.North);
-                this.player2 = new Cpu(Player.Direction.South);
+                this.player1 = new Cpu(Player.Direction.North, getRandom().nextInt(3) + 1);
+                this.player2 = new Cpu(Player.Direction.South, getRandom().nextInt(3) + 1);
                 break;
         }
+
+        //give the object a name
+        this.player1.setName("Player 1");
+        this.player2.setName("Player 2");
 
         if (player1.hasDirection(Player.Direction.North) && player2.hasDirection(Player.Direction.North))
             throw new RuntimeException("Each player has to face a different direction");
@@ -770,8 +775,17 @@ public class Game implements IGame {
             }
         }
 
+        //we only have 1 move to capture the opponent's pawn via "en passant"
+        opponent.removePassant();
+
+        //track the move
+        track(getSelected());
+
         //update the state of the game (check, checkmate, stalemate)
         PlayerHelper.updateStatus(opponent, player);
+
+        //check for a draw (stalemate)
+        GameHelper.checkDraw(this);
 
         if (DEBUG) {
 
@@ -791,7 +805,7 @@ public class Game implements IGame {
 
                 default:
 
-                    if (opponent.hasCheck()) {
+                    if (opponent.hasCheck() && !hasReplay()) {
                         getActivity().displayMessage(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
                     } else if (!opponent.isHuman()) {
                         //getActivity().displayMessage("Thinking...");
@@ -799,12 +813,6 @@ public class Game implements IGame {
                     break;
             }
         }
-
-        //we only have 1 move to capture the opponent's pawn via "en passant"
-        opponent.removePassant();
-
-        //track the move
-        track(getSelected());
 
         //we are at our destination, de-select the chess piece
         deselect();
