@@ -9,6 +9,7 @@ import com.gamesbykevin.chess.piece.PieceHelper.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.players.Player.Direction.North;
 import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 
 /**
@@ -237,33 +238,47 @@ public abstract class Player implements Disposable {
                 //add to the score based on the piece type
                 score += piece.getType().getScore();
 
+                //our bonus array based on our position
+                float[][] bonus;
+
                 //add bonus score depending where the piece is located
-                score += PieceHelper.BONUS_SCORE[(int)piece.getRow()][(int)piece.getCol()];
+                switch (piece.getType()) {
 
-                //this bonus only applies to pawns
-                if (piece.getType() == Type.Pawn) {
+                    case Pawn:
+                        bonus = PieceHelper.BONUS_PAWN;
+                        break;
 
-                    //add extra bonus if the pawn can promote itself
-                    if (this.direction == Direction.North) {
+                    case Knight:
+                        bonus = PieceHelper.BONUS_KNIGHT;
+                        break;
 
-                        if (piece.getRow() == 0)
-                            score += 3;
-                        if (piece.getRow() == 1)
-                            score += 2;
-                        if (piece.getRow() == 2)
-                            score += 1;
+                    case Rook:
+                        bonus = PieceHelper.BONUS_ROOK;
+                        break;
 
-                    } else {
+                    case Bishop:
+                        bonus = PieceHelper.BONUS_BISHOP;
+                        break;
 
-                        if (piece.getRow() == ROWS - 1)
-                            score += 3;
-                        if (piece.getRow() == ROWS - 2)
-                            score += 2;
-                        if (piece.getRow() == ROWS - 3)
-                            score += 1;
+                    case Queen:
+                        bonus = PieceHelper.BONUS_QUEEN;
+                        break;
 
-                    }
+                    case King:
+                        bonus = PieceHelper.BONUS_KING;
+                        break;
+
+                    default:
+                        throw new RuntimeException("Type not handled: " + piece.getType());
                 }
+
+                //flip the row index if the player is heading south
+                if (hasDirection(North)) {
+                    score += bonus[(int)piece.getRow()][(int)piece.getCol()];
+                } else {
+                    score += bonus[(ROWS-1) - (int)piece.getRow()][(int)piece.getCol()];
+                }
+
             }
         }
 

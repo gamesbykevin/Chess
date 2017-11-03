@@ -26,11 +26,14 @@ public class Cpu extends Player {
     private Player player1, player2;
     private boolean player1Turn;
 
+    //track how many moves were thought of
+    private int total = 0;
+
     public Cpu(final Direction direction, final int depth) {
         super(false, direction);
 
         //assign the depth (moves thinking ahead)
-        DEFAULT_DEPTH = depth;
+        DEFAULT_DEPTH = 2;
 
         //create new list of best moves
         this.bestMoves = new ArrayList<>();
@@ -54,6 +57,9 @@ public class Cpu extends Player {
         //the best score
         int bestScore = Integer.MIN_VALUE;
 
+        //reset back to 0
+        this.total = 0;
+
         //clear list
         this.bestMoves.clear();
 
@@ -61,7 +67,7 @@ public class Cpu extends Player {
         this.player2 = game.getPlayer2();
         this.player1Turn = game.isPlayer1Turn();
 
-        //create a new list for all the moves
+        //get a new list for all the available moves
         List<PlayerHelper.Move> moves = getMoves(getPlayer(), getOpponent(), true);
 
         if (DEBUG)
@@ -69,6 +75,9 @@ public class Cpu extends Player {
 
         //count the number of moves
         int count = 0;
+
+        //keep track of total
+        this.total += moves.size();
 
         //create a thread for each move
         for (Move move : moves) {
@@ -85,7 +94,7 @@ public class Cpu extends Player {
             executeMove(move);
 
             //calculate the score
-            final int tmpScore = -1 * negaMax(DEFAULT_DEPTH);
+            final int tmpScore = negaMax(DEFAULT_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
             //undo the previous move
             undoMove(move);
@@ -105,6 +114,9 @@ public class Cpu extends Player {
             }
         }
 
+        if (DEBUG)
+            UtilityHelper.logEvent("Moves evaluated: " + total);
+
         final int index = getRandom().nextInt(bestMoves.size());
         Move bestMove = bestMoves.get(index);
 
@@ -115,49 +127,91 @@ public class Cpu extends Player {
         game.getActivity().updateProgress(0);
     }
 
-    private int negaMax(int depth) {
+    private int negaMax(int depth, int alpha, int beta, boolean maximizePlayer) {
 
         Player player = getPlayer();
         Player opponent = getOpponent();
 
-        if (depth <= 0)
+        if (depth < 0)
             return (player.calculateScore() - opponent.calculateScore());
 
         //get list of all valid moves based on the current state of the board
         List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, player.hasCheck() || DEFAULT_DEPTH < 2);
 
-        //keep track of the best score
-        int bestScore = Integer.MIN_VALUE;
+        //keep track of total
+        this.total += currentMoves.size();
 
-        if (DEBUG)
-            UtilityHelper.logEvent("Thinking... size: " + currentMoves.size());
+        //are we trying to maximize this player's score
+        if (maximizePlayer) {
 
-        //check every valid move
-        for (PlayerHelper.Move currentMove : currentMoves) {
+            //keep track of the best score
+            int bestScore = Integer.MIN_VALUE;
 
-            //if we want to interrupt the game
-            if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
-                break;
+            //check every valid move
+            for (PlayerHelper.Move currentMove : currentMoves) {
 
-            //execute the move
-            executeMove(currentMove);
+                //if we want to interrupt the game
+                if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
+                    break;
 
-            //calculate the score
-            final int tmpScore = -1 * negaMax(depth - 1);
+                //execute the move
+                executeMove(currentMove);
 
-            //undo the move
-            undoMove(currentMove);
+                //calculate the score
+                bestScore = Math.max(bestScore, negaMax(depth - 1, alpha, beta, !maximizePlayer));
 
-            //if there is a new best score
-            if (tmpScore > bestScore)
-                bestScore = tmpScore;
+                //undo the move
+                undoMove(currentMove);
+
+                //get the max value for the min variable
+                alpha = Math.max(alpha, bestScore);
+
+                //if the max is less than the min, return score
+                if (beta <= alpha)
+                    return bestScore;
+            }
+
+            currentMoves.clear();
+            currentMoves = null;
+
+            //return the best score
+            return bestScore;
+
+        } else {
+
+            //keep track of the best score
+            int bestScore = Integer.MAX_VALUE;
+
+            //check every valid move
+            for (PlayerHelper.Move currentMove : currentMoves) {
+
+                //if we want to interrupt the game
+                if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
+                    break;
+
+                //execute the move
+                executeMove(currentMove);
+
+                //calculate the score
+                bestScore = Math.min(bestScore, negaMax(depth - 1, alpha, beta, !maximizePlayer));
+
+                //undo the move
+                undoMove(currentMove);
+
+                //get the min value for the max variable
+                beta = Math.min(beta, bestScore);
+
+                //if the max is less than the min, return score
+                if (beta <= alpha)
+                    return bestScore;
+            }
+
+            currentMoves.clear();
+            currentMoves = null;
+
+            //return the best score
+            return bestScore;
         }
-
-        currentMoves.clear();
-        currentMoves = null;
-
-        //return the best score we found
-        return bestScore;
     }
 
     private void executeMove(PlayerHelper.Move move) {
