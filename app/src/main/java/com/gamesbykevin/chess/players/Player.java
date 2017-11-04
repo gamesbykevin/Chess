@@ -222,10 +222,10 @@ public abstract class Player implements Disposable {
         return this.pieces;
     }
 
-    public int calculateScore() {
+    public float calculateScore() {
 
         //keep track of our score
-        int score = 0;
+        float score = 0;
 
         //check
         for (int index = 0; index < getPieceCount(); index++) {

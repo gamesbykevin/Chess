@@ -606,9 +606,6 @@ public class Game implements IGame {
             //get list of valid moves that don't put us in check
             this.moves = getSelected().getMoves(player, opponent, true);
 
-            //make sure we aren't going to move the player in check
-            PieceHelper.checkForCheck(getSelected(), moves, player, opponent);
-
             //make sure moves exist for the chess piece
             if (this.moves.isEmpty()) {
 

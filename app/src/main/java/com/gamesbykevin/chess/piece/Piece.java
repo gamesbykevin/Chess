@@ -180,11 +180,17 @@ public class Piece extends Cell implements Disposable {
                 int doubleRow = player.hasDirection(Player.Direction.North) ? -2 : 2;
 
                 //pawn can move forward as long as there is no piece in front of it
-                if (PlayerHelper.hasBounds(startCol, startRow + singleRow) && !player.hasPiece(startCol, startRow + singleRow) && !opponent.hasPiece(startCol, startRow + singleRow))
+                if (PlayerHelper.hasBounds(startCol, startRow + singleRow) &&
+                        !player.hasPiece(startCol, startRow + singleRow) &&
+                        !opponent.hasPiece(startCol, startRow + singleRow))
                     options.add(new Cell(startCol, startRow + singleRow));
 
                 //if this is the first move the pawn can move 2 spaces as long as nothing is in front of it
-                if (PlayerHelper.hasBounds(startCol, startRow + doubleRow) && !player.hasPiece(startCol, startRow + doubleRow) && !opponent.hasPiece(startCol, startRow + doubleRow) && !player.hasPiece(startCol, startRow + singleRow) && !opponent.hasPiece(startCol, startRow + singleRow) && !hasMoved())
+                if (!hasMoved() && PlayerHelper.hasBounds(startCol, startRow + doubleRow) &&
+                        !player.hasPiece(startCol, startRow + doubleRow) &&
+                        !opponent.hasPiece(startCol, startRow + doubleRow) &&
+                        !player.hasPiece(startCol, startRow + singleRow) &&
+                        !opponent.hasPiece(startCol, startRow + singleRow))
                     options.add(new Cell(startCol, startRow + doubleRow));
 
                 //if there is an opponent piece diagonally we can capture
@@ -193,9 +199,10 @@ public class Piece extends Cell implements Disposable {
                 if (opponent.hasPiece(startCol + 1, startRow + singleRow))
                     options.add(new Cell(startCol + 1, startRow + singleRow));
 
-
                 //check for NW/SW capture via "en passant"
-                if (PlayerHelper.hasBounds(startCol - 1, startRow + singleRow) && !opponent.hasPiece(startCol - 1, startRow + singleRow)) {
+                if (PlayerHelper.hasBounds(startCol - 1, startRow + singleRow) &&
+                        !opponent.hasPiece(startCol - 1, startRow + singleRow) &&
+                        !player.hasPiece(startCol - 1, startRow + singleRow)) {
 
                     //get neighbor piece
                     Piece piece = opponent.getPiece(startCol - 1, startRow);
@@ -206,7 +213,9 @@ public class Piece extends Cell implements Disposable {
                 }
 
                 //check for NE/SE capture via "en passant"
-                if (PlayerHelper.hasBounds(startCol + 1, startRow + + singleRow) && !opponent.hasPiece(startCol + 1, startRow + singleRow)) {
+                if (PlayerHelper.hasBounds(startCol + 1, startRow + singleRow) &&
+                        !opponent.hasPiece(startCol + 1, startRow + singleRow) &&
+                        !player.hasPiece(startCol + 1, startRow + singleRow)) {
 
                     //get neighbor piece
                     Piece piece = opponent.getPiece(startCol + 1, startRow);

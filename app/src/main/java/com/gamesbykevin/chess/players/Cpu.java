@@ -18,7 +18,7 @@ import static com.gamesbykevin.chess.util.UtilityHelper.getRandom;
 public class Cpu extends Player {
 
     //number of moves we look into the future
-    public static int DEFAULT_DEPTH = 2;
+    private static int DEFAULT_DEPTH = 2;
 
     //list of the best moves
     private List<PlayerHelper.Move> bestMoves;
@@ -33,7 +33,7 @@ public class Cpu extends Player {
         super(false, direction);
 
         //assign the depth (moves thinking ahead)
-        DEFAULT_DEPTH = 2;
+        DEFAULT_DEPTH = 3;
 
         //create new list of best moves
         this.bestMoves = new ArrayList<>();
@@ -55,7 +55,7 @@ public class Cpu extends Player {
     public void update(Game game) {
 
         //the best score
-        int bestScore = Integer.MIN_VALUE;
+        float bestScore = Float.MIN_VALUE;
 
         //reset back to 0
         this.total = 0;
@@ -94,7 +94,7 @@ public class Cpu extends Player {
             executeMove(move);
 
             //calculate the score
-            final int tmpScore = negaMax(DEFAULT_DEPTH, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+            final float tmpScore = negaMax(DEFAULT_DEPTH, Float.MIN_VALUE, Float.MAX_VALUE, true);
 
             //undo the previous move
             undoMove(move);
@@ -127,12 +127,12 @@ public class Cpu extends Player {
         game.getActivity().updateProgress(0);
     }
 
-    private int negaMax(int depth, int alpha, int beta, boolean maximizePlayer) {
+    private float negaMax(int depth, float alpha, float beta, boolean maximizePlayer) {
 
         Player player = getPlayer();
         Player opponent = getOpponent();
 
-        if (depth < 0)
+        if (depth <= 0)
             return (player.calculateScore() - opponent.calculateScore());
 
         //get list of all valid moves based on the current state of the board
@@ -145,7 +145,7 @@ public class Cpu extends Player {
         if (maximizePlayer) {
 
             //keep track of the best score
-            int bestScore = Integer.MIN_VALUE;
+            float bestScore = Float.MIN_VALUE;
 
             //check every valid move
             for (PlayerHelper.Move currentMove : currentMoves) {
@@ -180,7 +180,7 @@ public class Cpu extends Player {
         } else {
 
             //keep track of the best score
-            int bestScore = Integer.MAX_VALUE;
+            float bestScore = Float.MAX_VALUE;
 
             //check every valid move
             for (PlayerHelper.Move currentMove : currentMoves) {

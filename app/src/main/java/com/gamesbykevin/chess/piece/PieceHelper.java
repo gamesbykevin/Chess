@@ -29,9 +29,9 @@ public class PieceHelper {
 
         private final int resId;
 
-        private final int score;
+        private final float score;
 
-        Type(int resId, int score) {
+        Type(int resId, float score) {
             this.resId = resId;
             this.score = score;
         }
@@ -40,7 +40,7 @@ public class PieceHelper {
             return this.resId;
         }
 
-        public int getScore() {
+        public float getScore() {
             return this.score;
         }
     }
@@ -80,23 +80,23 @@ public class PieceHelper {
 
     public static final float[][] BONUS_BISHOP = {
         {-2,-1,-1,-1,-1,-1,-1,-2},
-        {-1,  0,  0,  0,  0,  0,  0,-1},
-        {-1,  0,  .5f, 1, 1,  .5f,  0,-1},
-        {-1,  .5f,  .5f, 1, 1,  .5f,  .5f,-1},
-        {-1,  0, 1, 1, 1, 1,  0,-1},
-        {-1, 1, 1, 1, 1, 1, 1,-1},
-        {-1,  .5f,  0,  0,  0,  0,  .5f,-1},
+        {-1,0,0,0,0,0,0,-1},
+        {-1,0,.5f,1,1,.5f,0,-1},
+        {-1,.5f,.5f,1,1,.5f,.5f,-1},
+        {-1,0, 1,1,1,1,0,-1},
+        {-1,1, 1,1,1,1,1,-1},
+        {-1,.5f,0,0,0,0,.5f,-1},
         {-2,-1,-1,-1,-1,-1,-1,-2}
     };
 
     public static final float[][] BONUS_KNIGHT = {
         {-5,-4,-3,-3,-3,-3,-4,-5},
-        {-4,-2,  0,  0,  0,  0,-2,-4},
-        {-3,  0, 1, 1.5f, 1.5f, 1,  0,-3},
-        {-3,  .5f, 1.5f, 2, 2, 1.5f,  .5f,-3},
-        {-3,  0, 1.5f, 2, 2, 1.5f,  0,-3},
-        {-3,  .5f, 1, 1.5f, 1.5f, 1,  .5f,-3},
-        {-4,-2,  0,  .5f,  .5f,  0,-2,-4},
+        {-4,-2,0,0,0,0,-2,-4},
+        {-3,0,1,1.5f,1.5f,1,0,-3},
+        {-3,.5f,1.5f,2,2,1.5f,.5f,-3},
+        {-3,0,1.5f,2,2,1.5f,0,-3},
+        {-3,.5f,1,1.5f,1.5f,1,.5f,-3},
+        {-4,-2,0,.5f,.5f,0,-2,-4},
         {-5,-4,-3,-3,-3,-3,-4,-5}
     };
 
