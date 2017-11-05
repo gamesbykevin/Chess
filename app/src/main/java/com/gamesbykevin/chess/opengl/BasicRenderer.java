@@ -24,18 +24,25 @@ import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
  */
 public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
+    //arc ball camera to move around our target board
     private CustomArcballCamera camera;
 
+    //store the context
     private Context context;
 
+    //our view reference
     private View view;
 
+    //the object representing the board
     private Object3D board;
 
+    //used to detect if we select a 3d model
     private ObjectColorPicker objectPicker;
 
     //did we render our board at least once?
     public static boolean INIT = false;
+
+    private boolean analyzing = false;
 
     public BasicRenderer(Context context, View view) {
         super(context);
@@ -100,17 +107,30 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     @Override
     public void onObjectPicked(Object3D object3D) {
 
+        if (analyzing)
+            return;
+
         if (object3D == null)
             return;
 
         if (getGame() == null)
             return;
 
-        if (PlayerVars.STATUS != PlayerVars.Status.Select && PlayerVars.STATUS != PlayerVars.Status.Promote)
-            return;
+        switch (PlayerVars.STATUS) {
+
+            case Select:
+            case Promote:
+                break;
+
+            default:
+                return;
+        }
 
         if (DEBUG)
             UtilityHelper.logEvent("OnObjectPicked");
+
+        //flag true
+        analyzing = true;
 
         //select our chess piece
         if (getGame().getSelected() == null) {
@@ -123,10 +143,17 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             //place at object (if possible)
             getGame().place(object3D);
         }
+
+        //flag false
+        analyzing = false;
     }
 
     @Override
     public void onTouchEvent(MotionEvent event){
+
+        //if analyzing action
+        if (analyzing)
+            return;
 
         //if not started don't do anything
         if (!INIT)
@@ -194,7 +221,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     @Override
     public void onOffsetsChanged(float x, float y, float z, float w, int i, int j) {
-
+        //do something here
     }
 
     @Override

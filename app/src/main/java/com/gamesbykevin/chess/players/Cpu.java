@@ -27,13 +27,13 @@ public class Cpu extends Player {
     private boolean player1Turn;
 
     //track how many moves were thought of
-    private int total = 0;
+    private int total = 0, analyzed = 0;
 
     public Cpu(final Direction direction, final int depth) {
         super(false, direction);
 
         //assign the depth (moves thinking ahead)
-        DEFAULT_DEPTH = 3;
+        DEFAULT_DEPTH = 2;
 
         //create new list of best moves
         this.bestMoves = new ArrayList<>();
@@ -59,10 +59,12 @@ public class Cpu extends Player {
 
         //reset back to 0
         this.total = 0;
+        this.analyzed = 0;
 
         //clear list
         this.bestMoves.clear();
 
+        //store for reference
         this.player1 = game.getPlayer1();
         this.player2 = game.getPlayer2();
         this.player1Turn = game.isPlayer1Turn();
@@ -78,6 +80,7 @@ public class Cpu extends Player {
 
         //keep track of total
         this.total += moves.size();
+        this.analyzed += moves.size();
 
         //create a thread for each move
         for (Move move : moves) {
@@ -114,8 +117,10 @@ public class Cpu extends Player {
             }
         }
 
-        if (DEBUG)
-            UtilityHelper.logEvent("Moves evaluated: " + total);
+        if (DEBUG) {
+            UtilityHelper.logEvent("Total moves: " + total);
+            UtilityHelper.logEvent("Moves analyzed: " + analyzed);
+        }
 
         final int index = getRandom().nextInt(bestMoves.size());
         Move bestMove = bestMoves.get(index);
@@ -164,6 +169,9 @@ public class Cpu extends Player {
             //check every valid move
             for (PlayerHelper.Move currentMove : currentMoves) {
 
+                //keep track that we analyzed a move
+                analyzed++;
+
                 //if we want to interrupt the game
                 if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
                     break;
@@ -181,8 +189,11 @@ public class Cpu extends Player {
                 alpha = Math.max(alpha, bestScore);
 
                 //if the max is less than the min, return score
-                if (beta <= alpha)
+                if (beta <= alpha) {
+                    currentMoves.clear();
+                    currentMoves = null;
                     return bestScore;
+                }
             }
 
             currentMoves.clear();
@@ -198,6 +209,9 @@ public class Cpu extends Player {
 
             //check every valid move
             for (PlayerHelper.Move currentMove : currentMoves) {
+
+                //keep track that we analyzed a move
+                analyzed++;
 
                 //if we want to interrupt the game
                 if (PlayerVars.STATUS == PlayerVars.Status.Interrupt)
@@ -216,8 +230,11 @@ public class Cpu extends Player {
                 beta = Math.min(beta, bestScore);
 
                 //if the max is less than the min, return score
-                if (beta <= alpha)
+                if (beta <= alpha) {
+                    currentMoves.clear();
+                    currentMoves = null;
                     return bestScore;
+                }
             }
 
             currentMoves.clear();

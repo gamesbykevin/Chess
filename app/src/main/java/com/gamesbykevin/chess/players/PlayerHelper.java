@@ -647,6 +647,12 @@ public class PlayerHelper {
                             rook.setJumping(true);
                         }
                     }
+
+                } else {
+
+                    //if the king has previously moved, it shouldn't be allowed to move 2 places and castle
+                    if (sourceCol - destCol > 1 || destCol - sourceCol > 1)
+                        throw new RuntimeException("King isn't allowed to castle");
                 }
                 break;
 

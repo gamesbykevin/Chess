@@ -182,16 +182,18 @@ public class Piece extends Cell implements Disposable {
                 //pawn can move forward as long as there is no piece in front of it
                 if (PlayerHelper.hasBounds(startCol, startRow + singleRow) &&
                         !player.hasPiece(startCol, startRow + singleRow) &&
-                        !opponent.hasPiece(startCol, startRow + singleRow))
+                        !opponent.hasPiece(startCol, startRow + singleRow)) {
                     options.add(new Cell(startCol, startRow + singleRow));
+                }
 
                 //if this is the first move the pawn can move 2 spaces as long as nothing is in front of it
                 if (!hasMoved() && PlayerHelper.hasBounds(startCol, startRow + doubleRow) &&
                         !player.hasPiece(startCol, startRow + doubleRow) &&
                         !opponent.hasPiece(startCol, startRow + doubleRow) &&
                         !player.hasPiece(startCol, startRow + singleRow) &&
-                        !opponent.hasPiece(startCol, startRow + singleRow))
+                        !opponent.hasPiece(startCol, startRow + singleRow)) {
                     options.add(new Cell(startCol, startRow + doubleRow));
+                }
 
                 //if there is an opponent piece diagonally we can capture
                 if (opponent.hasPiece(startCol - 1, startRow + singleRow))
