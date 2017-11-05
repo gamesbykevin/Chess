@@ -433,7 +433,7 @@ public class PlayerHelper {
     public static boolean hasPromotion(Game game) {
 
         //get the current player
-        Player player = game.isPlayer1Turn() ? game.getPlayer1() : game.getPlayer2();
+        Player player = game.getPlayer();
 
         boolean result = false;
 

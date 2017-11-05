@@ -222,10 +222,10 @@ public abstract class Player implements Disposable {
         return this.pieces;
     }
 
-    public float calculateScore() {
+    public int calculateScore() {
 
         //keep track of our score
-        float score = 0;
+        int score = 0;
 
         //check
         for (int index = 0; index < getPieceCount(); index++) {
@@ -239,7 +239,7 @@ public abstract class Player implements Disposable {
                 score += piece.getType().getScore();
 
                 //our bonus array based on our position
-                float[][] bonus;
+                int[][] bonus;
 
                 //add bonus score depending where the piece is located
                 switch (piece.getType()) {
@@ -278,7 +278,6 @@ public abstract class Player implements Disposable {
                 } else {
                     score += bonus[(ROWS-1) - (int)piece.getRow()][(int)piece.getCol()];
                 }
-
             }
         }
 

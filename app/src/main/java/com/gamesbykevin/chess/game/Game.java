@@ -574,6 +574,9 @@ public class Game implements IGame {
                     //un-select the piece
                     deselect();
 
+                    //update the state of the game (check, checkmate, stalemate)
+                    PlayerHelper.updateStatus(opponent, player);
+
                     //switch turns
                     switchTurns();
                 }
