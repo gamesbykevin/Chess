@@ -132,17 +132,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //flag true
         analyzing = true;
 
-        //select our chess piece
-        if (getGame().getSelected() == null) {
-
-            //set our selection
-            getGame().select(object3D);
-
-        } else {
-
-            //place at object (if possible)
-            getGame().place(object3D);
-        }
+        //set our selection
+        getGame().select(object3D);
 
         //flag false
         analyzing = false;

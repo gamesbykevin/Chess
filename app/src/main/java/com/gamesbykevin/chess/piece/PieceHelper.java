@@ -3,12 +3,16 @@ package com.gamesbykevin.chess.piece;
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.players.Player;
+import com.gamesbykevin.chess.players.PlayerHelper;
 
 import java.util.List;
 
 import static com.gamesbykevin.chess.piece.Piece.HEIGHT_MAX;
 import static com.gamesbykevin.chess.piece.Piece.VELOCITY;
+import static com.gamesbykevin.chess.players.Player.Direction.North;
+import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
+import static com.gamesbykevin.chess.players.PlayerHelper.reset;
 
 /**
  * Created by Kevin on 10/29/2017.
@@ -274,5 +278,78 @@ public class PieceHelper {
 
         //return our result
         return result;
+    }
+
+    public static int getOrderScore(Player player, Player opponent, PlayerHelper.Move move) {
+
+        int score = 0;
+
+        //get the piece at the source
+        Piece piece = player.getPiece(move.sourceCol, move.sourceRow);
+
+        //add score based on the chess piece type
+        score += piece.getType().getScore();
+
+        //get the scores for both moves so we can compare
+        final int score1 = getPositionScore(move.sourceCol, move.sourceRow, piece.getType(), player.getDirection());
+        final int score2 = getPositionScore(move.destCol, move.destRow, piece.getType(), player.getDirection());
+
+        //add or subtract bonus depending if we are moving to a better location
+        score += (score2 - score1);
+
+        //if a piece is captured, add that as a bonus as well
+        if (move.pieceCaptured != null)
+            score += move.pieceCaptured.getScore(opponent.getDirection());
+
+        //return the score
+        return score;
+    }
+
+    public static int getPositionScore(Piece piece, Player.Direction direction) {
+        return getPositionScore((int)piece.getCol(), (int)piece.getRow(), piece.getType(), direction);
+    }
+
+    public static int getPositionScore(int col, int row, Type type, Player.Direction direction) {
+
+        //our bonus array based on our position
+        int[][] bonus;
+
+        //add bonus score depending where the piece is located
+        switch (type) {
+
+            case Pawn:
+                bonus = PieceHelper.BONUS_PAWN;
+                break;
+
+            case Knight:
+                bonus = PieceHelper.BONUS_KNIGHT;
+                break;
+
+            case Rook:
+                bonus = PieceHelper.BONUS_ROOK;
+                break;
+
+            case Bishop:
+                bonus = PieceHelper.BONUS_BISHOP;
+                break;
+
+            case Queen:
+                bonus = PieceHelper.BONUS_QUEEN;
+                break;
+
+            case King:
+                bonus = PieceHelper.BONUS_KING;
+                break;
+
+            default:
+                throw new RuntimeException("Type not handled: " + type);
+        }
+
+        //flip the row index if the player is heading south
+        if (direction == North) {
+            return bonus[(int)row][col];
+        } else {
+            return bonus[(ROWS-1) - row][col];
+        }
     }
 }

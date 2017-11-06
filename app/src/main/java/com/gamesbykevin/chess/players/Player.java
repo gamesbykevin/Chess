@@ -84,6 +84,27 @@ public abstract class Player implements Disposable {
         clone = null;
     }
 
+    /**
+     * Correct the chess pieces based on the clone
+     */
+    protected void correct() {
+
+        //correct the location and type
+        for (int i = 0; i < clone.size(); i++) {
+
+            //get the current piece
+            Piece piece = getPiece(i, true);
+
+            //get the cloned piece
+            Piece tmp = clone.get(i);
+
+            //assign the values
+            piece.setCol(tmp);
+            piece.setRow(tmp);
+            piece.setType(tmp.getType());
+        }
+    }
+
     public void restore() {
 
         //clear the list
@@ -158,6 +179,10 @@ public abstract class Player implements Disposable {
 
     public boolean hasDirection(final Direction direction) {
         return (this.direction == direction);
+    }
+
+    public Direction getDirection() {
+        return this.direction;
     }
 
     public boolean isHuman() {
@@ -236,48 +261,7 @@ public abstract class Player implements Disposable {
             if (piece != null) {
 
                 //add to the score based on the piece type
-                score += piece.getType().getScore();
-
-                //our bonus array based on our position
-                int[][] bonus;
-
-                //add bonus score depending where the piece is located
-                switch (piece.getType()) {
-
-                    case Pawn:
-                        bonus = PieceHelper.BONUS_PAWN;
-                        break;
-
-                    case Knight:
-                        bonus = PieceHelper.BONUS_KNIGHT;
-                        break;
-
-                    case Rook:
-                        bonus = PieceHelper.BONUS_ROOK;
-                        break;
-
-                    case Bishop:
-                        bonus = PieceHelper.BONUS_BISHOP;
-                        break;
-
-                    case Queen:
-                        bonus = PieceHelper.BONUS_QUEEN;
-                        break;
-
-                    case King:
-                        bonus = PieceHelper.BONUS_KING;
-                        break;
-
-                    default:
-                        throw new RuntimeException("Type not handled: " + piece.getType());
-                }
-
-                //flip the row index if the player is heading south
-                if (hasDirection(North)) {
-                    score += bonus[(int)piece.getRow()][(int)piece.getCol()];
-                } else {
-                    score += bonus[(ROWS-1) - (int)piece.getRow()][(int)piece.getCol()];
-                }
+                score += piece.getScore(direction);
             }
         }
 

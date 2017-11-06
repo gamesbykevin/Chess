@@ -5,6 +5,7 @@ import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.piece.PieceHelper;
 import com.gamesbykevin.chess.piece.PieceHelper.Type;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
@@ -208,7 +209,7 @@ public class PlayerHelper {
      * @param opponent The opponent they are facing
      * @return List of available moves which don't put the player in check
      */
-    protected static List<Move> getMoves(Player player, Player opponent, final boolean checkForCheck) {
+    protected static List<Move> getMoves(Player player, Player opponent, final boolean checkForCheck, final boolean order) {
 
         //create a new list for all the moves
         List<Move> options = new ArrayList<>();
@@ -240,6 +241,34 @@ public class PlayerHelper {
             }
         }
 
+        //do we want to order the moves
+        if (order) {
+
+            //order moves in order to find the best move first
+            for (int i = 0; i < options.size(); i++) {
+                for (int j = i + 1; j < options.size(); j++) {
+
+                    //we can't check the same move (this shouldn't happen)
+                    if (i == j)
+                        continue;
+
+                    int score1 = PieceHelper.getOrderScore(player, opponent, options.get(j));
+                    int score2 = PieceHelper.getOrderScore(player, opponent, options.get(j - 1));
+
+                    //if score 1 is better move to the front of the list
+                    if (score1 > score2) {
+
+                        //get tmp reference
+                        Move move = options.get(j - 1).copy();
+
+                        //switch values
+                        options.set(j - 1, options.get(j));
+                        options.set(j + 0, move);
+                    }
+                }
+            }
+        }
+
         return options;
     }
 
@@ -251,8 +280,8 @@ public class PlayerHelper {
     public static void updateStatus(Player opposing, Player attacking) {
 
         //get list of all possible moves for players
-        List<Move> movesOpposingPlayer = getMoves(opposing, attacking, true);
-        List<Move> movesAttackingPlayer = getMoves(attacking, opposing, true);
+        List<Move> movesOpposingPlayer = getMoves(opposing, attacking, true, false);
+        List<Move> movesAttackingPlayer = getMoves(attacking, opposing, true, false);
 
         //get the king for opposing player
         Piece king = opposing.getPiece(Type.King);
@@ -264,7 +293,7 @@ public class PlayerHelper {
         for (int i = 0; i < movesAttackingPlayer.size(); i++) {
 
             //if the location matches the king, we have check
-            if (king.hasLocation(movesAttackingPlayer.get(i).destCol, movesAttackingPlayer.get(i).destRow)) {
+            if ((int)king.getCol() == movesAttackingPlayer.get(i).destCol && (int)king.getRow() == movesAttackingPlayer.get(i).destRow) {
                 hasCheck = true;
                 break;
             }
@@ -300,7 +329,7 @@ public class PlayerHelper {
                 king = opposing.getPiece(Type.King);
 
                 //get the new list of attacking player moves available
-                movesAttackingPlayer = getMoves(attacking, opposing, true);
+                movesAttackingPlayer = getMoves(attacking, opposing, true, false);
 
                 boolean tmpCheck = false;
 
@@ -697,6 +726,21 @@ public class PlayerHelper {
                     move.destCol == destCol &&
                     move.destRow == destRow
             );
+        }
+
+        public Move copy() {
+
+            //create new instance
+            Move move = new Move();
+
+            move.destCol = destCol;
+            move.destRow = destRow;
+            move.sourceCol = sourceCol;
+            move.sourceRow = sourceRow;
+            move.pieceCaptured = pieceCaptured;
+            move.promotion = promotion;
+
+            return move;
         }
     }
 }

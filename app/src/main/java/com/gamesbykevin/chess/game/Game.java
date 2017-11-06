@@ -55,11 +55,8 @@ public class Game implements IGame {
     //our highlighted selection to place for all valid moves
     private Object3D selection;
 
-    //list of targets to choose from
-    private List<Object3D> targets;
-
-    //list of valid moves
-    private List<Cell> moves;
+    //what object has the user picked
+    private Object3D picked;
 
     //maintain a list of moves
     private List<PlayerHelper.Move> history;
@@ -95,9 +92,6 @@ public class Game implements IGame {
 
         //assign game mode
         this.mode = Mode.HumVsCpu;
-
-        //create list of target destinations
-        this.targets = new ArrayList<>();
 
         //create list for move history
         this.history = new ArrayList<>();
@@ -155,6 +149,14 @@ public class Game implements IGame {
         }
     }
 
+    public void setPicked(final Object3D picked) {
+        this.picked = picked;
+    }
+
+    public Object3D getPicked() {
+        return this.picked;
+    }
+
     public void setReplay(final boolean replay) {
         this.replay = replay;
     }
@@ -187,6 +189,8 @@ public class Game implements IGame {
         setPlayer1Turn(!isPlayer1Turn());
         PLAYER_1_TURN = !PLAYER_1_TURN;
         PlayerVars.STATUS = Status.Select;
+        getPlayer1().copy();
+        getPlayer2().copy();
     }
 
     public void track(Piece piece) {
@@ -275,9 +279,6 @@ public class Game implements IGame {
                 //create the pieces and reload the models
                 PlayerHelper.reset(getPlayer1(), getActivity().getSurfaceView().getRenderer(), getTextureWhite());
                 PlayerHelper.reset(getPlayer2(), getActivity().getSurfaceView().getRenderer(), getTextureWood());
-
-                getPlayer1().copy();
-                getPlayer2().copy();
             }
 
             //register all the chess pieces as click-able so we can select if needed for the humans
@@ -333,6 +334,7 @@ public class Game implements IGame {
                 break;
 
             case Select:
+            case Promote:
 
                 //get the current player
                 Player player = PLAYER_1_TURN ? getPlayer1() : getPlayer2();
@@ -377,17 +379,6 @@ public class Game implements IGame {
             this.textureValid.unbindTextures();
         if (this.selection != null)
             this.selection.destroy();
-        if (this.targets != null) {
-
-            for (int i = 0; i < this.targets.size(); i++) {
-                if (this.targets.get(i) != null) {
-                    this.targets.get(i).destroy();
-                    this.targets.set(i, null);
-                }
-            }
-
-            this.targets.clear();
-        }
         if (this.selected != null)
             this.selected.dispose();
         if (this.promotions != null) {
@@ -401,8 +392,6 @@ public class Game implements IGame {
             this.promotions.clear();
         }
 
-        if (this.moves != null)
-            this.moves.clear();
         if (this.history != null)
             this.history.clear();
 
@@ -413,8 +402,6 @@ public class Game implements IGame {
         this.textureHighlight = null;
         this.textureValid = null;
         this.selection = null;
-        this.targets = null;
-        this.moves = null;
         this.selected = null;
         this.promotions = null;
         this.history = null;
@@ -508,7 +495,7 @@ public class Game implements IGame {
         this.selected = selected;
     }
 
-    protected void deselect() {
+    public void deselect() {
 
         //make sure we have a selected piece
         if (getSelected() != null) {
@@ -523,172 +510,8 @@ public class Game implements IGame {
 
     public void select(Object3D object3D) {
 
-        if (hasReplay())
-            return;
-
-        //if we previously have a selected piece don't interact with anything else
-        if (getSelected() != null)
-            return;
-
-        //is the game over
-        if (PlayerVars.isGameover())
-            return;
-
-        switch (PlayerVars.STATUS) {
-            case Select:
-            case Promote:
-                break;
-
-            //if not selecting or promoting, we can't continue
-            default:
-                return;
-        }
-
-        Player player = PLAYER_1_TURN ? getPlayer1() : getPlayer2();
-        Player opponent = PLAYER_1_TURN ? getPlayer2() : getPlayer1();
-
-        //if the current player isn't human
-        if (!player.isHuman())
-            return;
-
-        //have we found a piece?
-        boolean found = false;
-
-        //if we are promoting a pawn
-        if (PlayerVars.STATUS == PlayerVars.Status.Promote) {
-
-            //check all the promotion pieces
-            for (int index = 0; index < getPromotions().size(); index++) {
-
-                Piece piece = getPromotions().get(index);
-
-                //is this the piece we have selected?
-                if (piece.getObject3D().equals(object3D)) {
-
-                    //promote the piece
-                    PlayerHelper.promote(getActivity().getSurfaceView().getRenderer(), this, piece);
-
-                    //save the promotion piece selected
-                    track(piece.getType());
-
-                    //un-select the piece
-                    deselect();
-
-                    //update the state of the game (check, checkmate, stalemate)
-                    PlayerHelper.updateStatus(opponent, player);
-
-                    //switch turns
-                    switchTurns();
-                }
-            }
-
-            //don't continue
-            return;
-        }
-
-        //check all the pieces
-        for (int index = 0; index < player.getPieceCount(); index++) {
-
-            Piece piece = player.getPiece(index, false);
-
-            if (piece == null)
-                continue;
-
-            //if we select the piece or the floor the piece is on, this is our selected piece
-            if (piece.getObject3D().equals(object3D)) {
-                selected = piece;
-                object3D.setMaterial(getTextureHighlight());
-                found = true;
-                break;
-            }
-        }
-
-        //if we selected a piece we need to calculate the moves
-        if (found) {
-
-            //get list of valid moves that don't put us in check
-            this.moves = getSelected().getMoves(player, opponent, true);
-
-            //make sure moves exist for the chess piece
-            if (this.moves.isEmpty()) {
-
-                //if no moves, de-select the piece
-                deselect();
-
-                //go back to selecting
-                PlayerVars.STATUS = PlayerVars.Status.Select;
-
-            } else {
-
-                //clear the list if any exist
-                this.targets.clear();
-
-                //add a target for every possible move
-                for (int i = 0; i < this.moves.size(); i++) {
-
-                    Object3D obj = getBoardSelection().clone();
-
-                    //place at the correct location
-                    obj.setX(PlayerHelper.getCoordinate((int) moves.get(i).getCol()));
-                    obj.setY(PlayerHelper.Y + .001);
-                    obj.setZ(PlayerHelper.getCoordinate((int) moves.get(i).getRow()));
-
-                    //this will remove the texture
-                    if (1 == 0)
-                        obj.setMaterial(null);
-
-                    //add to targets list
-                    this.targets.add(obj);
-
-                    //add child to scene
-                    getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(obj);
-
-                    //register the object to be chosen
-                    getActivity().getSurfaceView().getRenderer().getObjectPicker().registerObject(obj);
-                }
-            }
-        }
-    }
-
-    /**
-     * Place our selected piece
-     */
-    public void place(Object3D object3D) {
-
-        if (hasReplay())
-            return;
-
-        //is the game over
-        if (PlayerVars.isGameover())
-            return;
-
-        //if not placing, don't continue
-        if (PlayerVars.STATUS != PlayerVars.Status.Select)
-            return;
-
-        //get the location where this object is at
-        final int col = PlayerHelper.getCol(object3D.getX());
-        final int row = PlayerHelper.getRow(object3D.getZ());
-
-        //check if we selected a valid move
-        for (int i = 0; i < this.moves.size(); i++) {
-
-            //make sure we are making a valid move
-            if (this.moves.get(i).hasLocation(col, row)) {
-
-                //setup the move
-                PlayerHelper.setupMove(this, (int)getSelected().getCol(), (int)getSelected().getRow(), col, row);
-
-                //remove all targets from the scene
-                for (int x = 0; x < targets.size(); x++) {
-                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(targets.get(x));
-                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(targets.get(x));
-                }
-
-                //clear list
-                targets.clear();
-            }
-        }
+        //assign our picked object
+        setPicked(object3D);
     }
 
     public Player getPlayer() {
@@ -782,6 +605,7 @@ public class Game implements IGame {
         track(getSelected());
 
         //update the state of the game (check, checkmate, stalemate)
+        //update the state of the game (check, checkmate, stalemate)
         PlayerHelper.updateStatus(opponent, player);
 
         //check for a draw (stalemate)
@@ -806,7 +630,7 @@ public class Game implements IGame {
                 default:
 
                     if (opponent.hasCheck() && !hasReplay()) {
-                        getActivity().displayMessage(isPlayer1Turn() ? "Player 2 is in check" : "Player 1 is in check");
+                        getActivity().displayMessage(PLAYER_1_TURN ? "Player 2 is in check" : "Player 1 is in check");
                     } else if (!opponent.isHuman()) {
                         //getActivity().displayMessage("Thinking...");
                     }
@@ -830,9 +654,5 @@ public class Game implements IGame {
 
         if (hasReplay())
             this.history.remove(0);
-
-        //copy the pieces in case the game is interrupted
-        getPlayer1().copy();
-        getPlayer2().copy();
     }
 }

@@ -11,6 +11,7 @@ import org.rajawali3d.Object3D;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.players.Player.Direction.North;
 import static com.gamesbykevin.chess.players.PlayerHelper.COLS;
 import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
 import static com.gamesbykevin.chess.players.PlayerHelper.Y;
@@ -525,5 +526,24 @@ public class Piece extends Cell implements Disposable {
 
     public boolean hasDestination() {
         return (getObject3D().getX() == destX && getObject3D().getZ() == destZ && getObject3D().getY() == Y);
+    }
+
+    /**
+     * Calculate the score
+     * @return The total score for the piece
+     */
+    public int getScore(Player.Direction direction) {
+
+        //keep track of total score
+        int score = 0;
+
+        //the type of piece will help determine the score
+        score += getType().getScore();
+
+        //add bonus score based on position
+        score += PieceHelper.getPositionScore(this, direction);
+
+        //return our score
+        return score;
     }
 }

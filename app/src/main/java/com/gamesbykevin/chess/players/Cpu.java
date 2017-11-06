@@ -2,6 +2,7 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.piece.PieceHelper;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import static com.gamesbykevin.chess.util.UtilityHelper.getRandom;
 public class Cpu extends Player {
 
     //number of moves we look into the future
-    private static int DEFAULT_DEPTH = 2;
+    private int DEFAULT_DEPTH = 2;
 
     //list of the best moves
     private List<PlayerHelper.Move> bestMoves;
@@ -34,6 +35,9 @@ public class Cpu extends Player {
 
         //assign the depth (moves thinking ahead)
         DEFAULT_DEPTH = 2;
+
+        if (DEBUG)
+            UtilityHelper.logEvent("Cpu depth = " + depth);
 
         //create new list of best moves
         this.bestMoves = new ArrayList<>();
@@ -70,7 +74,7 @@ public class Cpu extends Player {
         this.player1Turn = game.isPlayer1Turn();
 
         //get a new list for all the available moves
-        List<PlayerHelper.Move> moves = getMoves(getPlayer(), getOpponent(), true);
+        List<PlayerHelper.Move> moves = getMoves(getPlayer(), getOpponent(), true, true);
 
         if (DEBUG)
             UtilityHelper.logEvent("Thinking... size: " + moves.size());
@@ -115,6 +119,10 @@ public class Cpu extends Player {
                 //add best move to the list
                 bestMoves.add(move);
             }
+
+            //make sure board piece positions are correct
+            player1.correct();
+            player2.correct();
         }
 
         if (DEBUG) {
@@ -132,30 +140,34 @@ public class Cpu extends Player {
         game.getActivity().updateProgress(0);
     }
 
+    private int getScore() {
+
+        //get score for each player
+        int score1 = getPlayer().calculateScore();
+        int score2 = getOpponent().calculateScore();
+
+        //determine how the player score is calculated
+        if (getPlayer().getName().equalsIgnoreCase(getName())) {
+            score2 = -score2;
+        } else {
+            score1 = -score1;
+        }
+
+        //return result
+        return (score1 + score2);
+    }
+
     private int negaMax(int depth, float alpha, float beta) {
 
         Player player = getPlayer();
         Player opponent = getOpponent();
 
-        if (depth <= 0) {
-
-            //get score for each player
-            int score1 = player.calculateScore();
-            int score2 = opponent.calculateScore();
-
-            //determine how the player score is calculated
-            if (player.getName().equalsIgnoreCase(getName())) {
-                score2 = -score2;
-            } else {
-                score1 = -score1;
-            }
-
-            //return result
-            return score1 + score2;
-        }
+        //if done searching moves, return score
+        if (depth <= 0)
+            return getScore();
 
         //get list of all valid moves based on the current state of the board
-        List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, player.hasCheck() || DEFAULT_DEPTH < 2);
+        List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, false, true);// depth >= DEFAULT_DEPTH - 1);
 
         //keep track of total
         this.total += currentMoves.size();
@@ -189,11 +201,8 @@ public class Cpu extends Player {
                 alpha = Math.max(alpha, bestScore);
 
                 //if the max is less than the min, return score
-                if (beta <= alpha) {
-                    currentMoves.clear();
-                    currentMoves = null;
-                    return bestScore;
-                }
+                if (beta <= alpha)
+                    break;
             }
 
             currentMoves.clear();
@@ -230,11 +239,8 @@ public class Cpu extends Player {
                 beta = Math.min(beta, bestScore);
 
                 //if the max is less than the min, return score
-                if (beta <= alpha) {
-                    currentMoves.clear();
-                    currentMoves = null;
-                    return bestScore;
-                }
+                if (beta <= alpha)
+                    break;
             }
 
             currentMoves.clear();
