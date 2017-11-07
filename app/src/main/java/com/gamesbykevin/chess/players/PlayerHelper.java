@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
  * Created by Kevin on 10/15/2017.
@@ -236,6 +237,10 @@ public class PlayerHelper {
                 tmp.destCol = (int) move.getCol();
                 tmp.destRow = (int) move.getRow();
 
+                //update score of move (if ordering)
+                if (order)
+                    tmp.scoreOrder = PieceHelper.getOrderScore(player, opponent, tmp);
+
                 //add the move to the list
                 options.add(tmp);
             }
@@ -244,32 +249,82 @@ public class PlayerHelper {
         //do we want to order the moves
         if (order) {
 
-            //order moves in order to find the best move first
-            for (int i = 0; i < options.size(); i++) {
-                for (int j = i + 1; j < options.size(); j++) {
-
-                    //we can't check the same move (this shouldn't happen)
-                    if (i == j)
-                        continue;
-
-                    int score1 = PieceHelper.getOrderScore(player, opponent, options.get(j));
-                    int score2 = PieceHelper.getOrderScore(player, opponent, options.get(j - 1));
-
-                    //if score 1 is better move to the front of the list
-                    if (score1 > score2) {
-
-                        //get tmp reference
-                        Move move = options.get(j - 1).copy();
-
-                        //switch values
-                        options.set(j - 1, options.get(j));
-                        options.set(j + 0, move);
-                    }
-                }
-            }
+            //quickSortOrderMoves(options, 0, options.size() - 1);
+            bubbleSortOrderMoves(options);
         }
 
         return options;
+    }
+
+    private static void bubbleSortOrderMoves(List<Move> moves) {
+
+        //order moves in order to find the best move first
+        for (int i = 0; i < moves.size(); i++) {
+            for (int j = i + 1; j < moves.size(); j++) {
+
+                //we can't check the same move (this shouldn't happen)
+                //if (i == j)
+                //    continue;
+
+                int score1 = moves.get(j).scoreOrder;
+                int score2 = moves.get(j - 1).scoreOrder;
+
+                //if score 1 is better move to the front of the list
+                if (score1 > score2) {
+
+                    //get tmp reference
+                    Move move = moves.get(j - 1).copy();
+
+                    //switch values
+                    moves.set(j - 1, moves.get(j));
+                    moves.set(j + 0, move);
+                }
+            }
+        }
+    }
+
+    private static void quickSortOrderMoves(List<Move> moves, int lowerIndex, int higherIndex) {
+
+        int i = lowerIndex;
+        int j = higherIndex;
+
+        // calculate pivot number, I am taking pivot as middle index number
+        int pivot = moves.get(lowerIndex+(higherIndex-lowerIndex)/2).scoreOrder;
+
+        // Divide into two arrays
+        while (i <= j) {
+
+            /**
+             * In each iteration, we will identify a number from left side which
+             * is greater then the pivot value, and also we will identify a number
+             * from right side which is less then the pivot value. Once the search
+             * is done, then we exchange both numbers.
+             */
+            while (moves.get(i).scoreOrder < pivot) {
+                i++;
+            }
+            while (moves.get(j).scoreOrder > pivot) {
+                j--;
+            }
+            if (i <= j) {
+
+                //get tmp reference
+                Move move = moves.get(i).copy();
+
+                //switch values
+                moves.set(i, moves.get(j));
+                moves.set(j, move);
+
+                //move index to next position on both sides
+                i++;
+                j--;
+            }
+        }
+        // call quickSort() method recursively
+        if (lowerIndex < j)
+            quickSortOrderMoves(moves, lowerIndex, j);
+        if (i < higherIndex)
+            quickSortOrderMoves(moves, i, higherIndex);
     }
 
     /**
@@ -709,6 +764,8 @@ public class PlayerHelper {
         public int destCol, destRow;
         public int sourceCol, sourceRow;
 
+        public int scoreOrder = 0;
+
         //the piece captured during the move (if exists)
         public Piece pieceCaptured;
 
@@ -739,6 +796,7 @@ public class PlayerHelper {
             move.sourceRow = sourceRow;
             move.pieceCaptured = pieceCaptured;
             move.promotion = promotion;
+            move.scoreOrder = scoreOrder;
 
             return move;
         }

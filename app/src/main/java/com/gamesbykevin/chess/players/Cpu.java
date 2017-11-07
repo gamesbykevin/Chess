@@ -34,7 +34,7 @@ public class Cpu extends Player {
         super(false, direction);
 
         //assign the depth (moves thinking ahead)
-        DEFAULT_DEPTH = 2;
+        DEFAULT_DEPTH = 3;
 
         if (DEBUG)
             UtilityHelper.logEvent("Cpu depth = " + depth);
@@ -167,7 +167,7 @@ public class Cpu extends Player {
             return getScore();
 
         //get list of all valid moves based on the current state of the board
-        List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, false, true);// depth >= DEFAULT_DEPTH - 1);
+        List<PlayerHelper.Move> currentMoves = getMoves(player, opponent, false, true);
 
         //keep track of total
         this.total += currentMoves.size();
