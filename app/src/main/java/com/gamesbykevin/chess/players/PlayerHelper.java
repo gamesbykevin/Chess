@@ -251,20 +251,33 @@ public class PlayerHelper {
 
             //quickSortOrderMoves(options, 0, options.size() - 1);
             bubbleSortOrderMoves(options);
+            //selectionSortOrderMoves(options);
         }
 
         return options;
     }
 
+    private static void selectionSortOrderMoves(List<Move> moves) {
+
+        for (int i = 0; i < moves.size() - 1; i++) {
+
+            int min = i;
+
+            for (int j = i+1; j < moves.size(); j++) {
+
+                if (moves.get(j).scoreOrder > moves.get(min).scoreOrder)
+                    min = j;
+
+                swapValues(moves, i, min);
+            }
+        }
+    }
+
     private static void bubbleSortOrderMoves(List<Move> moves) {
 
         //order moves in order to find the best move first
-        for (int i = 0; i < moves.size(); i++) {
-            for (int j = i + 1; j < moves.size(); j++) {
-
-                //we can't check the same move (this shouldn't happen)
-                //if (i == j)
-                //    continue;
+        for (int i = (moves.size() - 1); i >= 0; i--) {
+            for (int j = 1; j <= i; j++) {
 
                 int score1 = moves.get(j).scoreOrder;
                 int score2 = moves.get(j - 1).scoreOrder;
@@ -272,12 +285,8 @@ public class PlayerHelper {
                 //if score 1 is better move to the front of the list
                 if (score1 > score2) {
 
-                    //get tmp reference
-                    Move move = moves.get(j - 1).copy();
-
-                    //switch values
-                    moves.set(j - 1, moves.get(j));
-                    moves.set(j + 0, move);
+                    //swap values
+                    swapValues(moves, j - 1, j);
                 }
             }
         }
@@ -308,12 +317,8 @@ public class PlayerHelper {
             }
             if (i <= j) {
 
-                //get tmp reference
-                Move move = moves.get(i).copy();
-
-                //switch values
-                moves.set(i, moves.get(j));
-                moves.set(j, move);
+                //swap values
+                swapValues(moves, i, j);
 
                 //move index to next position on both sides
                 i++;
@@ -325,6 +330,16 @@ public class PlayerHelper {
             quickSortOrderMoves(moves, lowerIndex, j);
         if (i < higherIndex)
             quickSortOrderMoves(moves, i, higherIndex);
+    }
+
+    private static void swapValues(List<Move> moves, int i, int j) {
+
+        //get tmp reference
+        Move move = moves.get(i).copy();
+
+        //switch values
+        moves.set(i, moves.get(j));
+        moves.set(j, move);
     }
 
     /**
