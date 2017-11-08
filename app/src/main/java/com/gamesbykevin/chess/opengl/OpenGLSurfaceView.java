@@ -21,6 +21,10 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
      */
     public static final int FPS = 90;
 
+    public static final int WIDTH = 800;
+
+    public static final int HEIGHT = 480;
+
     /**
      * The version of open GL we are using
      */

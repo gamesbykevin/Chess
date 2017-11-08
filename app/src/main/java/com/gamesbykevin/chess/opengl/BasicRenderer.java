@@ -10,11 +10,17 @@ import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
+import org.rajawali3d.cameras.Camera2D;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
+import org.rajawali3d.materials.Material;
+import org.rajawali3d.materials.textures.Texture;
+import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.renderer.Renderer;
 import org.rajawali3d.util.ObjectColorPicker;
 import org.rajawali3d.util.OnObjectPickedListener;
+
+import javax.microedition.khronos.opengles.GL10;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
@@ -26,6 +32,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     //arc ball camera to move around our target board
     private CustomArcballCamera camera;
+
+    //our 2d camera
+    private Camera2D camera2D;
 
     //store the context
     private Context context;
@@ -44,11 +53,22 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     private boolean analyzing = false;
 
+    private Plane plane;
+
+    private Material material;
+
     public BasicRenderer(Context context, View view) {
+
         super(context);
+        super.setFrameRate(60);
+
         this.context = context;
         this.view = view;
-        setFrameRate(60);
+
+        //create our camera
+        this.camera2D = new Camera2D();
+        this.camera2D.setZ(0);
+        this.camera2D.setLookAt(0, 0, 0);
     }
 
     private void addBoard() {
@@ -94,6 +114,27 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //create arc ball camera to rotate around the board
         resetCamera();
+
+        //add the 2d background
+        addBackground();
+    }
+
+    private void addBackground() {
+
+        try {
+
+            material = new Material();
+            material.setColorInfluence(0f);
+            material.addTexture(new Texture("game_background", R.drawable.game_background));
+
+            plane = new Plane(2,2,1,1,1);
+            plane.setDoubleSided(true);
+            plane.setMaterial(material);
+            plane.setZ(1);
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
     }
 
     @Override
@@ -216,6 +257,18 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     }
 
     @Override
+    public void onRenderFrame(GL10 unused) {
+        super.onRenderFrame(unused);
+    }
+
+    @Override
+    public void onRenderSurfaceSizeChanged(GL10 gl, int width, int height) {
+        super.onRenderSurfaceSizeChanged(gl, width, height);
+        //camera2D.setProjectionMatrix(width, height);
+    }
+
+
+    @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
 
         if (getGame().getPlayer() == null)
@@ -223,6 +276,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //call parent to render objects
         super.onRender(elapsedTime, deltaTime);
+
+        //render background
+        //GLES20.glViewport(0, 0, getViewportWidth(), getViewportHeight());
+        plane.render(camera2D, camera2D.getModelMatrix(), camera2D.getProjectionMatrix(), camera2D.getViewMatrix(), material);
 
         //flag that the board has been initialized
         INIT = true;
