@@ -10,6 +10,7 @@ import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
+import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.cameras.Camera2D;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
@@ -57,6 +58,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     private Material material;
 
+    //different camera angles
+    private int cameraAngle = 0;
+
     public BasicRenderer(Context context, View view) {
 
         super(context);
@@ -95,6 +99,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //flag analyze false
         PlayerVars.STATUS = PlayerVars.Status.Select;
+
+        //reset camera angle
+        this.cameraAngle = 0;
 
         //create our object picker to select the pieces
         this.objectPicker = new ObjectColorPicker(this);
@@ -229,26 +236,68 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         return this.objectPicker;
     }
 
+    public void changeCamera() {
+
+        //change the camera angle
+        cameraAngle++;
+
+        //keep it within range
+        if (cameraAngle > 3)
+            cameraAngle = 0;
+
+        //update the camera angle
+        resetCamera();
+    }
+
     public void resetCamera() {
 
-        if (camera == null) {
+        if (this.camera == null) {
+
+            //create our camera
             this.camera = new CustomArcballCamera(this, context, view, board);
-            this.camera.setPosition(1.75, 1.75, 0);
+
+            //update the camera angle
+            updateCameraAngle(this.camera);
+
+            //update the camera
             getCurrentScene().replaceAndSwitchCamera(getCurrentCamera(), this.camera);
+
         } else {
-            //initialize the camera again
-            ((CustomArcballCamera)getCurrentCamera()).initialize();
-            ((CustomArcballCamera)getCurrentCamera()).setPosition(1.75, 1.75, 0);
+
+            //re-initialize the camera again
+            ((CustomArcballCamera) getCurrentCamera()).initialize();
+
+            //update the camera angle
+            updateCameraAngle(getCurrentCamera());
         }
+    }
 
-        //this.camera.;
-        //white on left
-        //this.camera.setPosition(1.75, 1.75, 0);
+    private void updateCameraAngle(Camera tmpCamera) {
 
-        //black on left
-        //this.camera.setPosition(-1.75, 1.75, 0);
+        //alter based on the camera angle
+        switch(cameraAngle) {
 
-        //this.camera.setPosition(-1.75 / 2, 1.75, 0);
+            case 0:
+                tmpCamera.setPosition(0, 2, 1.25);
+                tmpCamera.setRotZ(60);
+                break;
+
+            case 1:
+                tmpCamera.setPosition(0,2,-1.25);
+                tmpCamera.setRotZ(60);
+                ((CustomArcballCamera)tmpCamera).initialize();
+                break;
+
+            //white on left
+            case 2:
+                tmpCamera.setPosition(1.75, 1.75, 0);
+                break;
+
+            //black on left
+            case 3:
+                tmpCamera.setPosition(-1.75, 1.75, 0);
+                break;
+        }
     }
 
     @Override

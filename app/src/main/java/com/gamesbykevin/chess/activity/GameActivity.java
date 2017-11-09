@@ -118,7 +118,7 @@ public class GameActivity extends BaseActivity implements Disposable {
     }
 
     public void onClickResetCamera(View view) {
-        getSurfaceView().getRenderer().resetCamera();
+        getSurfaceView().getRenderer().changeCamera();
     }
 
     public static Game getGame() {

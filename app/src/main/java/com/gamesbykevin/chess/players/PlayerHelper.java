@@ -614,13 +614,14 @@ public class PlayerHelper {
         }
     }
 
-    public static void addPromotionPieces(Game game, BasicRenderer renderer) {
+    public static void addPromotionPieces(Game game) {
 
         //if the pieces exist, remove existing
         if (game.getPromotions() != null && !game.getPromotions().isEmpty()) {
             for (Piece piece : game.getPromotions()) {
-                renderer.getCurrentScene().removeChild(piece.getObject3D());
-                renderer.getObjectPicker().unregisterObject(piece.getObject3D());
+
+                game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
+                game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
             }
         }
 
@@ -658,10 +659,10 @@ public class PlayerHelper {
                     promotions.add(piece);
 
                     //add object to the scene
-                    renderer.getCurrentScene().addChild(object3D);
+                    game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(object3D);
 
                     //make sure we can pick the model
-                    renderer.getObjectPicker().registerObject(object3D);
+                    game.getActivity().getSurfaceView().getRenderer().getObjectPicker().registerObject(object3D);
                     break;
             }
         }

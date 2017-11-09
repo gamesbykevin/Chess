@@ -297,7 +297,7 @@ public class Game implements IGame {
             }
 
             //add each chess piece so we can do piece promotion
-            PlayerHelper.addPromotionPieces(this, getActivity().getSurfaceView().getRenderer());
+            PlayerHelper.addPromotionPieces(this);
 
             //if we have promotion
             if (PlayerHelper.hasPromotion(this)) {

@@ -6,11 +6,12 @@
     android:visibility="invisible">
 
     <Button
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/camera"
         android:onClick="onClickResetCamera"
-        android:text="Reset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="48dp"
+        android:layout_height="48dp"/>
 
     <ProgressBar
         android:id="@+id/simpleProgressBar"
