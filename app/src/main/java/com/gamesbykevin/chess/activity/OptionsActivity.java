@@ -3,11 +3,15 @@ package com.gamesbykevin.chess.activity;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.util.UtilityHelper;
+
+import org.w3c.dom.Text;
 
 import static com.gamesbykevin.chess.util.UtilityHelper.AMAZON;
 
@@ -51,6 +55,60 @@ public class OptionsActivity extends BaseActivity {
             if (AMAZON && button.buttonId == R.id.toggleButtonGoogleLogin)
                 tmp.setChecked(false);
         }
+
+
+        //obtain our controls
+        SeekBar seekBar = findViewById(R.id.seekbarDifficulty);
+
+        //setup our saved values
+        seekBar.setProgress(getIntValue(R.string.difficulty_file_key));
+
+        //get our text view reference
+        final TextView textView = findViewById(R.id.textViewDifficulty);
+
+        //update the ui
+        updateTextView(textView, getIntValue(R.string.difficulty_file_key));
+
+        //add listener when the user changes the puzzle piece count
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                //update the ui
+                updateTextView(textView, progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //do we need to do anything here?
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //do we need to do anything here?
+            }
+        });
+    }
+
+    private void updateTextView(final TextView textView, final int progress) {
+
+        //update the display text
+        switch (progress) {
+
+            case 0:
+                textView.setText("Difficulty: Easy");
+                break;
+
+            case 1:
+                textView.setText("Difficulty: Medium");
+                break;
+
+            case 2:
+            default:
+                textView.setText("Difficulty: Hard");
+                break;
+        }
     }
 
     @Override
@@ -90,6 +148,10 @@ public class OptionsActivity extends BaseActivity {
                 //update the file setting with the according key and value
                 editor.putBoolean(getString(button.settingId), ((ToggleButton)findViewById(button.buttonId)).isChecked());
             }
+
+            //assign the difficulty
+            SeekBar seekBar = findViewById(R.id.seekbarDifficulty);
+            editor.putInt(getString(R.string.difficulty_file_key), seekBar.getProgress());
 
             //make it final by committing the change
             editor.apply();

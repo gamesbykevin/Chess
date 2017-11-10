@@ -10,6 +10,11 @@
     <TableLayout style="@style/tableMenu">
 
         <TableRow style="@style/rowMenu">
+            <SeekBar android:id="@+id/seekbarDifficulty" style="@style/seek_bar_difficulty" />
+            <TextView android:id="@+id/textViewDifficulty" />
+        </TableRow>
+
+        <TableRow style="@style/rowMenu">
             <ToggleButton
                 style="@style/buttonMenu"
                 android:id="@+id/toggleButtonVibrate"

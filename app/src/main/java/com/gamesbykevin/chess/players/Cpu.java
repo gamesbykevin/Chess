@@ -34,7 +34,7 @@ public class Cpu extends Player {
         super(false, direction);
 
         //assign the depth (moves thinking ahead)
-        DEFAULT_DEPTH = 3;
+        DEFAULT_DEPTH = depth;
 
         if (DEBUG)
             UtilityHelper.logEvent("Cpu depth = " + depth);

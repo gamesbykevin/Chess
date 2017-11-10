@@ -5,6 +5,7 @@
 
     <!-- keys for shared preferences -->
     <string name="open_gl_zoom_file_key" translatable="false">com.gamesbykevin.chess.OPEN_GL_ZOOM_FILE_KEY</string>
+    <string name="difficulty_file_key" translatable="false">com.gamesbykevin.chess.DIFFICULTY_FILE_KEY</string>
     <string name="timer_file_key" translatable="false">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
     <string name="google_play_auto_login_file_key" translatable="false">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
     <string name="saved_match_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_FILE_KEY</string>

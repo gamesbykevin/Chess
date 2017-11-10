@@ -98,9 +98,23 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
             }
         }
 
+        //default a difficulty if not yet set
+        if (!getSharedPreferences().contains(getString(R.string.difficulty_file_key))) {
+
+            //assign default value
+            editor.putInt(getString(R.string.difficulty_file_key), 0);
+
+            //flag change was made
+            dirty = true;
+        }
+
         //if any changes were made, make it final
         if (dirty)
             editor.commit();
+    }
+
+    public int getIntValue(final int resid) {
+        return getSharedPreferences().getInt(getString(resid), 0);
     }
 
     private void loadSound(final int resId) {

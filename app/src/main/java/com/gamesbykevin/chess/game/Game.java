@@ -99,6 +99,9 @@ public class Game implements IGame {
         //player 1 always starts first
         setPlayer1Turn(true);
 
+        //what is our difficulty setting
+        final int depth = (activity.getIntValue(R.string.difficulty_file_key)) + 1;
+
         switch (getMode()) {
 
             case HumVsHum:
@@ -108,12 +111,12 @@ public class Game implements IGame {
 
             case HumVsCpu:
                 this.player1 = new Human(Player.Direction.North);
-                this.player2 = new Cpu(Player.Direction.South, getRandom().nextInt(3) + 1);
+                this.player2 = new Cpu(Player.Direction.South, depth);
                 break;
 
             case CpuVsCpu:
-                this.player1 = new Cpu(Player.Direction.North, getRandom().nextInt(3) + 1);
-                this.player2 = new Cpu(Player.Direction.South, getRandom().nextInt(3) + 1);
+                this.player1 = new Cpu(Player.Direction.North, depth);
+                this.player2 = new Cpu(Player.Direction.South, depth);
                 break;
         }
 
