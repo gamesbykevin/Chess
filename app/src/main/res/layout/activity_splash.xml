@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     tools:context="com.gamesbykevin.chess.activity.SplashActivity"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/background"
+    style="@style/activity_page"
     android:visibility="visible">
 
-    <TableLayout style="@style/TableLayoutSplash">
+    <TableLayout style="@style/table_splash">
         <TableRow>
-            <ImageView android:contentDescription="@null" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/loading" />
+            <ImageView style="@style/splash_image" android:src="@drawable/website" />
         </TableRow>
 
         <TableRow>
-            <ImageView android:contentDescription="@null" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/website" />
+            <ImageView style="@style/splash_image" android:src="@drawable/loading" />
         </TableRow>
     </TableLayout>
-</LinearLayout>
+</RelativeLayout>

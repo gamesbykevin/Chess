@@ -4,7 +4,6 @@
     <string name="app_name" translatable="false">Chess</string>
 
     <!-- keys for shared preferences -->
-    <string name="open_gl_zoom_file_key" translatable="false">com.gamesbykevin.chess.OPEN_GL_ZOOM_FILE_KEY</string>
     <string name="difficulty_file_key" translatable="false">com.gamesbykevin.chess.DIFFICULTY_FILE_KEY</string>
     <string name="timer_file_key" translatable="false">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
     <string name="google_play_auto_login_file_key" translatable="false">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
@@ -31,12 +30,10 @@
     <string name="vibrate_off">Vibrate: Off</string>
     <string name="sound_on">Sound: On</string>
     <string name="sound_off">Sound: Off</string>
-    <string name="zoom_on">Zoom: On</string>
-    <string name="zoom_off">Zoom: Off</string>
     <string name="timer_on">Timer: On</string>
     <string name="timer_off">Timer: Off</string>
-    <string name="google_play_auto_enabled">Google Play Auto: On</string>
-    <string name="google_play_auto_disabled">Google Play Auto: Off</string>
+    <string name="google_play_auto_enabled">Auto Login: On</string>
+    <string name="google_play_auto_disabled">Auto Login: Off</string>
 
     <!-- text on prompt save page -->
     <string name="text_prompt_title">Save</string>

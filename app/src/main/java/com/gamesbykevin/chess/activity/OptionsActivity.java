@@ -23,7 +23,6 @@ public class OptionsActivity extends BaseActivity {
     public enum Buttons {
         Sound(R.id.toggleButtonSound, R.string.sound_file_key),
         Vibrate(R.id.toggleButtonVibrate, R.string.vibrate_file_key),
-        Zoom(R.id.toggleButtonZoom, R.string.open_gl_zoom_file_key),
         GoogleAutoLogin(R.id.toggleButtonGoogleLogin, R.string.google_play_auto_login_file_key),
         Timer(R.id.toggleButtonTimer, R.string.timer_file_key);
 
@@ -194,12 +193,6 @@ public class OptionsActivity extends BaseActivity {
             //if enabled play menu theme
             super.playMenu();
         }
-    }
-
-    public void onClickZoom(View view) {
-
-        //get the button
-        ToggleButton button = view.findViewById(R.id.toggleButtonZoom);
     }
 
     public void onClickTimer(View view) {

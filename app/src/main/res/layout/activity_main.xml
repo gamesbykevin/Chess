@@ -2,33 +2,32 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/ActivityPage"
+    style="@style/activity_page"
     tools:context="com.gamesbykevin.chess.activity.MainActivity">
 
     <include layout="@layout/layout_logo" />
 
-    <TableLayout style="@style/tableMenu">
-        <TableRow style="@style/rowMenu">
-            <Button style="@style/buttonMenu" android:text="@string/button_text_start" android:onClick="onClickStart" />
+    <TableLayout style="@style/table">
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_start" android:onClick="onClickStart" />
         </TableRow>
-        <TableRow style="@style/rowMenu">
-            <Button style="@style/buttonMenu" android:text="@string/button_text_options" android:onClick="onClickOptions" />
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_options" android:onClick="onClickOptions" />
         </TableRow>
-        <TableRow style="@style/rowMenu">
-            <Button style="@style/buttonMenu" android:text="@string/button_text_achievements" android:onClick="onClickAchievements" />
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_achievements" />
         </TableRow>
-        <TableRow style="@style/rowMenu">
-            <Button style="@style/buttonMenu" android:text="@string/button_text_leaderboard" android:onClick="onClickLeaderboards" />
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_leaderboard" android:onClick="onClickLeaderboards" />
         </TableRow>
-        <TableRow style="@style/rowMenu">
-            <!--suppress AndroidMissingOnClickHandler -->
-            <Button style="@style/buttonMenu" android:text="@string/button_text_rate" android:onClick="onClickRate" />
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_rate" android:onClick="onClickRate" />
         </TableRow>
-        <TableRow style="@style/rowMenu">
-            <Button style="@style/buttonMenu" android:text="@string/button_text_tutorial" android:onClick="onClickTutorial" />
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_tutorial" android:onClick="onClickTutorial" />
         </TableRow>
-        <TableRow style="@style/rowMenu">
-            <Button style="@style/buttonMenu" android:text="@string/button_text_more" android:onClick="onClickMore" />
+        <TableRow style="@style/row">
+            <Button style="@style/button" android:text="@string/button_text_more" android:onClick="onClickMore" />
         </TableRow>
     </TableLayout>
 

@@ -10,10 +10,17 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <style name="ActivityPage">
+    <style name="activity_page">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/background</item>
+    </style>
+
+    <style name="activity_game">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:orientation">horizontal</item>
         <item name="android:background">@drawable/background</item>
     </style>
 
@@ -49,10 +56,19 @@
         <item name="android:textColor">@color/colorWhite</item>
     </style>
 
-    <style name="buttonMenu">
+    <style name="splash_image">
+        <item name="android:contentDescription">@null</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginTop">15dp</item>
+    </style>
+
+    <style name="button">
         <item name="android:textSize">8pt</item>
         <item name="android:layout_gravity">center_horizontal</item>
-        <item name="android:layout_width">55dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:adjustViewBounds">true</item>
         <item name="android:layout_weight">1</item>
@@ -63,21 +79,21 @@
         <item name="android:soundEffectsEnabled">true</item>
     </style>
 
-    <style name="rowMenu">
+    <style name="row">
         <item name="android:paddingBottom">5dp</item>
         <item name="android:paddingTop">0dp</item>
     </style>
 
-    <style name="tableMenu">
+    <style name="table">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">50dp</item>
-        <item name="android:layout_marginRight">50dp</item>
+        <item name="android:layout_marginLeft">45dp</item>
+        <item name="android:layout_marginRight">45dp</item>
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginBottom">0dp</item>
     </style>
 
-    <style name="buttonSocial">
+    <style name="button_social">
         <item name="android:layout_width">60dp</item>
         <item name="android:layout_height">60dp</item>
         <item name="android:layout_weight">1</item>
@@ -86,7 +102,16 @@
         <item name="android:soundEffectsEnabled">true</item>
     </style>
 
-    <style name="tableSocial">
+    <style name="table_splash">
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:layout_marginTop">30dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="table_social">
         <item name="android:paddingTop">5dp</item>
         <item name="android:paddingBottom">15dp</item>
         <item name="android:paddingLeft">5dp</item>
@@ -112,6 +137,15 @@
         <item name="android:thumb">@drawable/custom_seekbar_thumb</item>
         <item name="android:layout_width">150dp</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="logo">
+        <item name="android:contentDescription">@null</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:src">@drawable/logo</item>
+        <item name="android:layout_margin">5dp</item>
     </style>
 
 </resources>

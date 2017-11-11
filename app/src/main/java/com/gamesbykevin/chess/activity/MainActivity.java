@@ -12,7 +12,7 @@ import com.gamesbykevin.chess.util.UtilityHelper;
 public class MainActivity extends BaseActivity {
 
     //did we prompt the user before exiting the app
-    private boolean promptExit = false;
+    private boolean exit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +65,7 @@ public class MainActivity extends BaseActivity {
         super.playMenu();
 
         //flag prompt false
-        promptExit = false;
+        exit = false;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class MainActivity extends BaseActivity {
         try {
 
             //if we already prompted the user, exit the app
-            if (promptExit) {
+            if (exit) {
 
                 //no need to bypass login in the future
                 //BYPASS_LOGIN = false;
@@ -94,7 +94,7 @@ public class MainActivity extends BaseActivity {
                 Toast.makeText(this, getString(R.string.exit_prompt), Toast.LENGTH_SHORT).show();
 
                 //flag that we have prompted the user
-                promptExit = true;
+                exit = true;
             }
 
         } catch (Exception e) {
