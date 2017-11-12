@@ -58,6 +58,13 @@
     <!-- text displayed -->
     <string name="game_over_text">Game Over</string>
 
+    <!-- different game modes -->
+    <string name="game_mode_single_player">Human vs Cpu</string>
+    <string name="game_mode_single_player_timed">Timed Human vs Cpu</string>
+    <string name="game_mode_two_player_offline">Human vs Human</string>
+    <string name="game_mode_two_player_online">Human vs Human (Online)</string>
+    <string name="game_mode_two_player_online_timed">Timed Human vs Human (Online)</string>
+
     <!-- text to display in  the tutorial -->
     <string name="tutorial_instructions_1">Tutorial Part 1 of 9\nSelect your image from the list</string>
 

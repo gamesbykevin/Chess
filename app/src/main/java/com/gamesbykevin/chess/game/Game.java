@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.activity.GameActivity;
 import com.gamesbykevin.chess.activity.GameActivity.Screen;
+import com.gamesbykevin.chess.activity.PagerActivity;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.players.Cpu;
 import com.gamesbykevin.chess.players.Human;
@@ -65,9 +66,11 @@ public class Game implements IGame {
      * These are the different kinds of game modes
      */
     public enum Mode {
-        HumVsHum,
         HumVsCpu,
-        CpuVsCpu
+        HumVsCpuTimed,
+        HumVsHumOffline,
+        HumVsHumOnline,
+        HumVsHumOnlineTimed
     }
 
     //store the game mode
@@ -87,8 +90,8 @@ public class Game implements IGame {
         //store activity reference
         this.activity = activity;
 
-        //assign game mode
-        this.mode = Mode.HumVsCpu;
+        //assign the correct mode
+        this.mode = Mode.values()[PagerActivity.CURRENT_PAGE];
 
         //create list for move history
         this.history = new ArrayList<>();
@@ -101,20 +104,21 @@ public class Game implements IGame {
 
         switch (getMode()) {
 
-            case HumVsHum:
+            case HumVsHumOffline:
+            case HumVsHumOnline:
+            case HumVsHumOnlineTimed:
                 this.player1 = new Human(Player.Direction.North);
                 this.player2 = new Human(Player.Direction.South);
                 break;
 
             case HumVsCpu:
+            case HumVsCpuTimed:
                 this.player1 = new Human(Player.Direction.North);
                 this.player2 = new Cpu(Player.Direction.South, depth);
                 break;
 
-            case CpuVsCpu:
-                this.player1 = new Cpu(Player.Direction.North, depth);
-                this.player2 = new Cpu(Player.Direction.South, depth);
-                break;
+            default:
+                throw new RuntimeException("Mode not handled: " + getMode().toString());
         }
 
         //give the object a name

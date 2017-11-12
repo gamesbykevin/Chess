@@ -10,9 +10,7 @@
     <TableLayout style="@style/table">
 
         <TableRow style="@style/row">
-
             <Spinner android:id="@+id/spinnerDifficulty" style="@style/spinner" />
-
         </TableRow>
 
         <TableRow style="@style/row">

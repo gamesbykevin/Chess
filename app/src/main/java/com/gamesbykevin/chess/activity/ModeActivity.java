@@ -1,23 +1,26 @@
 package com.gamesbykevin.chess.activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import com.gamesbykevin.chess.R;
 
-public class TutorialActivity extends PagerActivity {
+public class ModeActivity extends PagerActivity {
 
-    public TutorialActivity() {
-        super(true);
+    public ModeActivity() {
+        super(false);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         //set the total number of pages
-        PAGES = 1;
+        PAGES = 5;
 
         //inflate content view
-        setContentView(R.layout.activity_tutorial);
+        setContentView(R.layout.activity_mode);
 
         //call parent
         super.onCreate(savedInstanceState);
@@ -52,5 +55,11 @@ public class TutorialActivity extends PagerActivity {
 
         //call parent
         super.onDestroy();
+    }
+
+    public void onClickStartGame(View view) {
+
+        //start game activity
+        startActivity(new Intent(this, GameActivity.class));
     }
 }

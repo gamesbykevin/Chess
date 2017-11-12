@@ -11,9 +11,9 @@ import android.widget.TextView;
 
 import com.gamesbykevin.chess.R;
 
-public class TutorialPageFragment extends PageFragment {
+public class ModePageFragment extends PageFragment {
 
-    public TutorialPageFragment() {
+    public ModePageFragment() {
 
         //default constructor
         super();
@@ -23,7 +23,7 @@ public class TutorialPageFragment extends PageFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         //inflate the layout to access the ui elements
-        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tutorial_page, container, false);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_mode_page, container, false);
 
         ImageView imageView =   view.findViewById(R.id.tutorialImage);
         TextView textView =     view.findViewById(R.id.instructionsText);
@@ -34,8 +34,28 @@ public class TutorialPageFragment extends PageFragment {
         switch (getPageNumber()) {
 
             case 0:
-                resIdImage = R.drawable.tutorial1;
-                resIdText = R.string.tutorial_instructions_1;
+                resIdImage = R.drawable.versus_cpu;
+                resIdText = R.string.game_mode_single_player;
+                break;
+
+            case 1:
+                resIdImage = R.drawable.versus_cpu;
+                resIdText = R.string.game_mode_single_player_timed;
+                break;
+
+            case 2:
+                resIdImage = R.drawable.versus_human;
+                resIdText = R.string.game_mode_two_player_offline;
+                break;
+
+            case 3:
+                resIdImage = R.drawable.versus_human;
+                resIdText = R.string.game_mode_two_player_online;
+                break;
+
+            case 4:
+                resIdImage = R.drawable.versus_human;
+                resIdText = R.string.game_mode_two_player_online_timed;
                 break;
 
             default:

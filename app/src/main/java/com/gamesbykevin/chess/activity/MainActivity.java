@@ -134,7 +134,7 @@ public class MainActivity extends BaseActivity {
         SOUND_ENABLED = getBooleanValue(R.string.sound_file_key);
 
         //start game
-        openActivity(view, GameActivity.class);
+        openActivity(view, ModeActivity.class);
     }
 
     public void onClickTutorial(View view) {
