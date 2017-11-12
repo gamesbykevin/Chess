@@ -50,7 +50,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     private ObjectColorPicker objectPicker;
 
     //did we render our board at least once?
-    public static boolean INIT = false;
+    public static boolean RENDER = false;
+
+    //has the 3d models etc... been initialized
+    private static boolean INIT = false;
 
     private boolean analyzing = false;
 
@@ -95,6 +98,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     public void initScene() {
 
         //flag false until our first render
+        RENDER = false;
+
+        //flag false until init is complete
         INIT = false;
 
         //flag analyze false
@@ -124,6 +130,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //add the 2d background
         addBackground();
+
+        //we completed initialization
+        INIT = true;
     }
 
     private void addBackground() {
@@ -154,6 +163,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
     @Override
     public void onObjectPicked(Object3D object3D) {
+
+        //if not started don't do anything
+        if (!RENDER || !INIT)
+            return;
 
         if (analyzing)
             return;
@@ -195,7 +208,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
             return;
 
         //if not started don't do anything
-        if (!INIT)
+        if (!RENDER || !INIT)
             return;
 
         if (getGame() == null)
@@ -313,12 +326,14 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     @Override
     public void onRenderSurfaceSizeChanged(GL10 gl, int width, int height) {
         super.onRenderSurfaceSizeChanged(gl, width, height);
-        //camera2D.setProjectionMatrix(width, height);
     }
 
 
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
+
+        if (!INIT)
+            return;
 
         if (getGame().getPlayer() == null)
             getGame().reset();
@@ -327,10 +342,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         super.onRender(elapsedTime, deltaTime);
 
         //render background
-        //GLES20.glViewport(0, 0, getViewportWidth(), getViewportHeight());
         plane.render(camera2D, camera2D.getModelMatrix(), camera2D.getProjectionMatrix(), camera2D.getViewMatrix(), material);
 
         //flag that the board has been initialized
-        INIT = true;
+        RENDER = true;
     }
 }

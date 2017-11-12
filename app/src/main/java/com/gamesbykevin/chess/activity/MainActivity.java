@@ -4,10 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TableLayout;
 import android.widget.Toast;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.util.UtilityHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BaseActivity {
 
@@ -66,6 +71,22 @@ public class MainActivity extends BaseActivity {
 
         //flag prompt false
         exit = false;
+
+        //enable all buttons in container
+        enableChildren((ViewGroup)findViewById(R.id.table_menu));
+    }
+
+    private void enableChildren(ViewGroup viewGroup) {
+
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+
+            //enable the view group
+            viewGroup.getChildAt(i).setEnabled(true);
+
+            //recursive call in case there are additional children
+            if (viewGroup.getChildAt(i) instanceof ViewGroup)
+                enableChildren((ViewGroup)viewGroup.getChildAt(i));
+        }
     }
 
     @Override
@@ -112,28 +133,30 @@ public class MainActivity extends BaseActivity {
         //is sound enabled in the game?
         SOUND_ENABLED = getBooleanValue(R.string.sound_file_key);
 
-        //store our shape selection
-        //OptionsActivity.OPTION_BOARD_SHAPE = (Board.Shape)getObjectValue(R.string.game_shape_file_key, Board.Shape.class);
-
         //start game
-        startActivity(new Intent(this, GameActivity.class));
+        openActivity(view, GameActivity.class);
     }
 
     public void onClickTutorial(View view) {
-
-        //start the tutorial
-        startActivity(new Intent(this, TutorialActivity.class));
+        openActivity(view, TutorialActivity.class);
     }
 
     public void onClickOptions(View view) {
-
-        //start options activity
-        startActivity(new Intent(this, OptionsActivity.class));
+        openActivity(view, OptionsActivity.class);
     }
 
     public void onClickLeaderboards(View view) {
 
         //display all the leader boards
         //super.displayLeaderboardUI(null);
+    }
+
+    private void openActivity(View view, Class classObj) {
+
+        //disable view so it can't be clicked twice
+        view.setEnabled(false);
+
+        //start activity
+        startActivity(new Intent(this, classObj));
     }
 }

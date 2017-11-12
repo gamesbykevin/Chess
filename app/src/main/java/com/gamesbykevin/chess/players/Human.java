@@ -2,6 +2,7 @@ package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.game.Game;
+import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.piece.Piece;
 
 import org.rajawali3d.Object3D;
@@ -93,7 +94,7 @@ public class Human extends Player {
                 if (piece.getObject3D().equals(game.getPicked())) {
 
                     //promote the piece
-                    PlayerHelper.promote(game.getActivity().getSurfaceView().getRenderer(), game, piece);
+                    PlayerHelper.promote(game, piece);
 
                     //save the promotion piece selected
                     game.track(piece.getType());
@@ -103,6 +104,9 @@ public class Human extends Player {
 
                     //update the state of the game (check, checkmate, stalemate)
                     PlayerHelper.updateStatus(opponent, this);
+
+                    //display the game status
+                    GameHelper.displayStatus(game, opponent);
 
                     //switch turns
                     game.switchTurns();

@@ -20,4 +20,5 @@
 
     <!-- Splash page layout -->
     <include layout="@layout/activity_splash" android:id="@+id/layoutLoadingScreen" />
+
 </merge>

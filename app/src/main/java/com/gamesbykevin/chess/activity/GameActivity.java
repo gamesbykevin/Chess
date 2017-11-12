@@ -52,7 +52,7 @@ public class GameActivity extends BaseActivity implements Disposable {
     }
 
     //current screen we are on
-    private Screen screen = Screen.Ready;
+    private Screen screen = Screen.Loading;
 
     //keep track of game time
     private GameTimer timer;
@@ -88,6 +88,9 @@ public class GameActivity extends BaseActivity implements Disposable {
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameOver));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutLoadingScreen));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameControls));
+
+        //assign the current screen
+        setScreen(getScreen());
     }
 
     public void updateProgress(final int progress) {
@@ -98,6 +101,10 @@ public class GameActivity extends BaseActivity implements Disposable {
                 progressBar.setProgress(progress);
             }
         });
+    }
+
+    public void displayMessage(final int resid) {
+        displayMessage(getString(resid));
     }
 
     public void displayMessage(final String message) {
@@ -263,6 +270,9 @@ public class GameActivity extends BaseActivity implements Disposable {
 
         //determine what screen(s) are displayed
         setScreen(getScreen());
+
+        //update the progress bar
+        updateProgress(0);
     }
 
     public Screen getScreen() {

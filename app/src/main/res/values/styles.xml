@@ -2,8 +2,6 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-
-        <!-- Customize your theme here. -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
@@ -24,6 +22,42 @@
         <item name="android:background">@drawable/background</item>
     </style>
 
+    <style name="spinner">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="spinner_item">
+        <item name="android:textSize">8pt</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:soundEffectsEnabled">true</item>
+    </style>
+
+    <style name="spinner_dropdown_item">
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">8pt</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:soundEffectsEnabled">true</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
     <style name="GameOverPage">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
@@ -31,17 +65,7 @@
         <item name="android:background">@color/transparent50</item>
     </style>
 
-    <style name="TableLayoutSplash">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:gravity">center</item>
-        <item name="android:stretchColumns">*</item>
-        <item name="android:layout_marginLeft">10dp</item>
-        <item name="android:layout_marginRight">10dp</item>
-    </style>
-
-    <style name="TutorialText">
+    <style name="text_tutorial">
         <item name="android:background">@color/transparent50</item>
         <item name="android:textStyle">bold</item>
         <item name="android:layout_alignParentTop">true</item>
@@ -70,7 +94,9 @@
         <item name="android:textSize">8pt</item>
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:layout_height">40dp</item>
+        <!--
         <item name="android:adjustViewBounds">true</item>
+        -->
         <item name="android:layout_weight">1</item>
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:textIsSelectable">false</item>

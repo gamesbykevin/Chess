@@ -21,6 +21,13 @@
     <string name="button_text_leaderboard">Leaderboard</string>
     <string name="button_text_achievements">Achievements</string>
 
+    <!-- game status -->
+    <string name="game_status_player_1_check">Player 1 is in check</string>
+    <string name="game_status_player_2_check">Player 2 is in check</string>
+    <string name="game_status_player_1_checkmate">Player 1 Checkmate</string>
+    <string name="game_status_player_2_checkmate">Player 2 Checkmate</string>
+    <string name="game_status_stalemate">Stalemate</string>
+
     <!-- prompt to exit -->
     <string name="exit_prompt">Press again to exit</string>
 
@@ -32,8 +39,14 @@
     <string name="sound_off">Sound: Off</string>
     <string name="timer_on">Timer: On</string>
     <string name="timer_off">Timer: Off</string>
-    <string name="google_play_auto_enabled">Auto Login: On</string>
-    <string name="google_play_auto_disabled">Auto Login: Off</string>
+    <string name="google_play_auto_enabled">Google Login: On</string>
+    <string name="google_play_auto_disabled">Google Login: Off</string>
+
+    <string-array name="difficulty_arrays">
+        <item>SKILL: EASY</item>
+        <item>SKILL: MEDIUM</item>
+        <item>SKILL: HARD</item>
+    </string-array>
 
     <!-- text on prompt save page -->
     <string name="text_prompt_title">Save</string>

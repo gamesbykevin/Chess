@@ -7,7 +7,7 @@
 
     <include layout="@layout/layout_logo" />
 
-    <TableLayout style="@style/table">
+    <TableLayout style="@style/table" android:id="@+id/table_menu">
         <TableRow style="@style/row">
             <Button style="@style/button" android:text="@string/button_text_start" android:onClick="onClickStart" />
         </TableRow>
@@ -15,7 +15,7 @@
             <Button style="@style/button" android:text="@string/button_text_options" android:onClick="onClickOptions" />
         </TableRow>
         <TableRow style="@style/row">
-            <Button style="@style/button" android:text="@string/button_text_achievements" />
+            <Button style="@style/button" android:text="@string/button_text_achievements" android:id="@+id/achievements" />
         </TableRow>
         <TableRow style="@style/row">
             <Button style="@style/button" android:text="@string/button_text_leaderboard" android:onClick="onClickLeaderboards" />

@@ -102,7 +102,7 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
         if (!getSharedPreferences().contains(getString(R.string.difficulty_file_key))) {
 
             //assign default value
-            editor.putInt(getString(R.string.difficulty_file_key), 0);
+            editor.putInt(getString(R.string.difficulty_file_key), 1);
 
             //flag change was made
             dirty = true;

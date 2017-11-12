@@ -7,9 +7,13 @@
 
     <include layout="@layout/layout_logo" />
 
-    <SeekBar android:id="@+id/seekbarDifficulty" style="@style/seek_bar_difficulty" />
-    <TextView android:id="@+id/textViewDifficulty" android:layout_width="wrap_content" android:layout_height="wrap_content" />
     <TableLayout style="@style/table">
+
+        <TableRow style="@style/row">
+
+            <Spinner android:id="@+id/spinnerDifficulty" style="@style/spinner" />
+
+        </TableRow>
 
         <TableRow style="@style/row">
             <ToggleButton

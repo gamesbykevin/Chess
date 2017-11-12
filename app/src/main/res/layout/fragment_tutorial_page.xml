@@ -13,7 +13,7 @@
             android:layout_height="wrap_content"/>
 
         <TextView
-            style="@style/TutorialText"
+            style="@style/text_tutorial"
             android:id="@+id/instructionsText"/>
 
 </RelativeLayout>

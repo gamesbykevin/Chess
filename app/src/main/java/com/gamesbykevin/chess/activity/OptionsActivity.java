@@ -3,7 +3,10 @@ package com.gamesbykevin.chess.activity;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -28,7 +31,7 @@ public class OptionsActivity extends BaseActivity {
 
         public final int buttonId, settingId;
 
-        private Buttons(final int buttonId, final int settingId) {
+        Buttons(final int buttonId, final int settingId) {
             this.buttonId = buttonId;
             this.settingId = settingId;
         }
@@ -55,59 +58,13 @@ public class OptionsActivity extends BaseActivity {
                 tmp.setChecked(false);
         }
 
+        Spinner spinner = findViewById(R.id.spinnerDifficulty);
+        spinner.setSelection(getIntValue(R.string.difficulty_file_key));
 
-        //obtain our controls
-        SeekBar seekBar = findViewById(R.id.seekbarDifficulty);
-
-        //setup our saved values
-        seekBar.setProgress(getIntValue(R.string.difficulty_file_key));
-
-        //get our text view reference
-        final TextView textView = findViewById(R.id.textViewDifficulty);
-
-        //update the ui
-        updateTextView(textView, getIntValue(R.string.difficulty_file_key));
-
-        //add listener when the user changes the puzzle piece count
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                //update the ui
-                updateTextView(textView, progress);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //do we need to do anything here?
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //do we need to do anything here?
-            }
-        });
-    }
-
-    private void updateTextView(final TextView textView, final int progress) {
-
-        //update the display text
-        switch (progress) {
-
-            case 0:
-                textView.setText("Difficulty: Easy");
-                break;
-
-            case 1:
-                textView.setText("Difficulty: Medium");
-                break;
-
-            case 2:
-            default:
-                textView.setText("Difficulty: Hard");
-                break;
-        }
+        //assign custom spinner ui layout
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.difficulty_arrays, R.layout.spinner_item);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     @Override
@@ -149,8 +106,8 @@ public class OptionsActivity extends BaseActivity {
             }
 
             //assign the difficulty
-            SeekBar seekBar = findViewById(R.id.seekbarDifficulty);
-            editor.putInt(getString(R.string.difficulty_file_key), seekBar.getProgress());
+            Spinner spinner = findViewById(R.id.spinnerDifficulty);
+            editor.putInt(getString(R.string.difficulty_file_key), spinner.getSelectedItemPosition());
 
             //make it final by committing the change
             editor.apply();

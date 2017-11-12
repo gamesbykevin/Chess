@@ -438,7 +438,7 @@ public class PlayerHelper {
             PlayerVars.STATE = PlayerVars.State.Stalemate;
     }
 
-    public static void promote(BasicRenderer renderer, Game game, Piece selection) {
+    public static void promote(Game game, Piece selection) {
 
         //get the current player
         Player player = game.getPlayer();
@@ -499,10 +499,10 @@ public class PlayerHelper {
             promote.setType(selection.getType());
 
             //remove from scene
-            renderer.getCurrentScene().removeChild(promote.getObject3D());
+            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(promote.getObject3D());
 
             //unregister from object picker
-            renderer.getObjectPicker().unregisterObject(promote.getObject3D());
+            game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(promote.getObject3D());
 
             //get the object position
             Vector3 position = promote.getObject3D().getPosition();
@@ -517,10 +517,10 @@ public class PlayerHelper {
             promote.getObject3D().setMaterial(PLAYER_1_TURN ? game.getTextureWhite() : game.getTextureWood());
 
             //add new 3d model to the scene
-            renderer.getCurrentScene().addChild(promote.getObject3D());
+            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(promote.getObject3D());
 
             //register object picker
-            renderer.getObjectPicker().registerObject(promote.getObject3D());
+            game.getActivity().getSurfaceView().getRenderer().getObjectPicker().registerObject(promote.getObject3D());
 
             //hide the promotion pieces
             for (Piece tmp : game.getPromotions()) {
@@ -570,12 +570,12 @@ public class PlayerHelper {
         return result;
     }
 
-    public static void displayPromotion(Game game, BasicRenderer renderer) {
+    public static void displayPromotion(Game game) {
 
         if (!game.getPlayer().isHuman()) {
 
             //ai will always promote to queen
-            promote(renderer, game, null);
+            promote(game, null);
 
             //switch turns
             game.switchTurns();
@@ -590,7 +590,7 @@ public class PlayerHelper {
 
                     if (game.getPromotions().get(i).getType() == move.promotion) {
 
-                        promote(renderer, game, game.getPromotions().get(i));
+                        promote(game, game.getPromotions().get(i));
 
                         //switch turns
                         game.switchTurns();
