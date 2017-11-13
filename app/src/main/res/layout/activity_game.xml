@@ -16,7 +16,7 @@
     <include layout="@layout/layout_game_controls" android:id="@+id/layoutGameControls" />
 
     <!-- Game over layout(s) -->
-    <include layout="@layout/layout_game_over_default" android:id="@+id/layoutGameOver" />
+    <include layout="@layout/layout_game_settings" android:id="@+id/layoutGameSettings" />
 
     <!-- Splash page layout -->
     <include layout="@layout/activity_splash" android:id="@+id/layoutLoadingScreen" />

@@ -85,6 +85,9 @@ public class Game implements IGame {
     //list of promotional pieces when a pawn reaches the end
     private List<Piece> promotions;
 
+    //current list in our replay
+    public static int INDEX_REPLAY = 0;
+
     public Game(GameActivity activity) {
 
         //store activity reference
@@ -142,9 +145,11 @@ public class Game implements IGame {
             final String json = preferences.getString(getActivity().getString(R.string.saved_match_file_key), "");
             java.lang.reflect.Type listType = new TypeToken<List<Move>>(){}.getType();
 
-            List<Move> tmpHistory = (List<Move>)GSON.fromJson(json, listType);
+            //get our history and convert back into java object
+            List<Move> tmpHistory = GSON.fromJson(json, listType);
 
             if (tmpHistory != null) {
+                INDEX_REPLAY = 0;
                 setHistory(tmpHistory);
                 setReplay(true);
             } else {
@@ -211,6 +216,9 @@ public class Game implements IGame {
 
         //add to our history
         this.history.add(move);
+
+        //update list view
+        getActivity().updateListView(move.toString());
 
         if (DEBUG)
             UtilityHelper.logEvent("History saved (" + move.sourceCol +  "," + move.sourceRow + ") (" + move.destCol + "," + move.destRow + ")");
@@ -324,8 +332,10 @@ public class Game implements IGame {
     public void update() {
 
         //don't do anything if the game is over
-        if (PlayerVars.isGameover())
+        if (PlayerVars.isGameover()) {
+            GameHelper.updateGameOver(this);
             return;
+        }
 
         //if the open gl context has not yet rendered, don't continue
         if (!RENDER)
@@ -333,7 +343,7 @@ public class Game implements IGame {
 
         //if still loading display the game
         if (getActivity().getScreen() == Screen.Loading) {
-            getActivity().setScreen(Screen.Ready);
+            getActivity().setScreen(Screen.Ready, true);
             return;
         }
 
@@ -351,10 +361,13 @@ public class Game implements IGame {
 
                 if (hasReplay()) {
 
-                    if (!getHistory().isEmpty()) {
+                    if (INDEX_REPLAY < getHistory().size()) {
+
+                        //update to our current move
+                        getActivity().updateListView(INDEX_REPLAY);
 
                         //if we have replay get the current move
-                        Move move = getHistory().get(0);
+                        Move move = getHistory().get(INDEX_REPLAY);
 
                         //setup the move
                         PlayerHelper.setupMove(this, move);

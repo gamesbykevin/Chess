@@ -3,6 +3,7 @@ package com.gamesbykevin.chess.players;
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
+import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.piece.PieceHelper;
@@ -18,6 +19,7 @@ import org.rajawali3d.renderer.Renderer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.game.Game.INDEX_REPLAY;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
@@ -429,8 +431,10 @@ public class PlayerHelper {
             }
 
             //if the player is in check and there are no moves, checkmate
-            if (result)
+            if (result) {
+                GameHelper.GAME_OVER_FRAMES = 0;
                 PlayerVars.STATE = PLAYER_1_TURN ? PlayerVars.State.WinPlayer1 : PlayerVars.State.WinPlayer2;
+            }
         }
 
         //if we aren't in check / checkmate, but we have no more moves available
@@ -584,7 +588,7 @@ public class PlayerHelper {
 
             if (game.hasReplay()) {
 
-                Move move = game.getHistory().get(0);
+                Move move = game.getHistory().get(INDEX_REPLAY);
 
                 for (int i = 0; i < game.getPromotions().size(); i++) {
 
@@ -790,6 +794,34 @@ public class PlayerHelper {
 
         public Move() {
             //default constructor
+        }
+
+        public String toString() {
+            return getLetter(sourceRow) + "" + (sourceCol+1) + " - " + getLetter(destRow) + "" + (destCol+1);
+        }
+
+        private String getLetter(final int row) {
+            switch (row) {
+                case 0:
+                    return "A";
+                case 1:
+                    return "B";
+                case 2:
+                    return "C";
+                case 3:
+                    return "D";
+                case 4:
+                    return "E";
+                case 5:
+                    return "F";
+                case 6:
+                    return "G";
+                case 7:
+                    return "H";
+
+                default:
+                    throw new RuntimeException("Row not handled: " + row);
+            }
         }
 
         public boolean hasMatch(Move move) {

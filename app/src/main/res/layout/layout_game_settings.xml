@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="invisible">
+
+    <!-- in-game settings -->
+    <ImageView android:src="@drawable/settings" style="@style/image_settings" android:onClick="onClickSettings" android:id="@+id/buttonSettings" />
+
+    <!-- area to show info -->
+    <TableLayout style="@style/table_layout_settings">
+        <TableRow style="@style/table_row_layout_settings">
+            <ListView android:id="@+id/listViewHistory" style="@style/list_view_history" />
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>

@@ -5,14 +5,10 @@
     android:layout_height="match_parent"
     android:visibility="invisible">
 
-    <Button
-        android:layout_marginTop="15dp"
-        android:layout_marginLeft="10dp"
-        android:background="@drawable/camera"
-        android:onClick="onClickResetCamera"
-        android:layout_width="48dp"
-        android:layout_height="48dp"/>
+    <!-- change camera button -->
+    <Button style="@style/button_camera" android:onClick="onClickResetCamera" />
 
+    <!-- ai progress bar -->
     <ProgressBar
         android:id="@+id/simpleProgressBar"
         android:layout_width="fill_parent"
@@ -21,23 +17,22 @@
         android:progress="0"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
 
+    <!-- our game timer -->
     <TableLayout
-        android:visibility="invisible"
+        android:visibility="visible"
         android:id="@+id/tableGameTimer"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="5dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        style="@style/table_timer">
 
         <TableRow>
-            <ImageView android:id="@+id/clock1" android:src="@drawable/zero" />
-            <ImageView android:id="@+id/clock2" android:src="@drawable/zero" />
-            <ImageView android:src="@drawable/colon" />
-            <ImageView android:id="@+id/clock3" android:src="@drawable/zero" />
-            <ImageView android:id="@+id/clock4" android:src="@drawable/zero" />
+            <ImageView style="@style/image_timer" android:id="@+id/clock1" android:src="@drawable/zero" />
+            <ImageView style="@style/image_timer" android:id="@+id/clock2" android:src="@drawable/zero" />
+            <ImageView style="@style/image_timer" android:src="@drawable/colon" />
+            <ImageView style="@style/image_timer" android:id="@+id/clock3" android:src="@drawable/zero" />
+            <ImageView style="@style/image_timer" android:id="@+id/clock4" android:src="@drawable/zero" />
         </TableRow>
-
     </TableLayout>
+
+    <!-- in-game settings -->
+    <ImageView android:src="@drawable/settings" style="@style/image_settings" android:onClick="onClickSettings" />
 
 </RelativeLayout>

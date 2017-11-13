@@ -10,6 +10,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.gamesbykevin.androidframeworkv2.base.Entity;
+import com.gamesbykevin.chess.activity.GameActivity;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.cameras.ArcballCamera;

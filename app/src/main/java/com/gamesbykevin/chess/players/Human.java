@@ -4,8 +4,10 @@ import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.piece.PieceHelper;
 
 import org.rajawali3d.Object3D;
+import org.rajawali3d.math.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,16 +58,19 @@ public class Human extends Player {
     @Override
     public void update(Game game) {
 
-        //if we didn't pick anything, don't continue
-        if (game.getPicked() == null)
-            return;
-
         //is the game over
         if (PlayerVars.isGameover())
             return;
 
         //if replay mode, don't continue
         if (game.hasReplay())
+            return;
+
+        //update the game timer
+        game.getActivity().getTimer().update(game.getActivity());
+
+        //if we didn't pick anything, don't continue
+        if (game.getPicked() == null)
             return;
 
         //only continue if we are selecting or promoting

@@ -11,6 +11,8 @@ import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerHelper.Move;
 import com.gamesbykevin.chess.players.PlayerVars;
 
+import org.rajawali3d.math.vector.Vector3;
+
 import java.util.List;
 
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
@@ -23,6 +25,9 @@ import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
  * Created by Kevin on 10/30/2017.
  */
 public class GameHelper {
+
+    //how many frames have elapsed since game over
+    public static int GAME_OVER_FRAMES = 0;
 
     public static void checkDraw(Game game) {
 
@@ -203,8 +208,9 @@ public class GameHelper {
             game.switchTurns();
         }
 
+        //if we have replay enabled, change the index
         if (game.hasReplay())
-            game.getHistory().remove(0);
+            Game.INDEX_REPLAY++;
     }
 
     public static void displayStatus(Game game, Player opponent) {
@@ -233,6 +239,92 @@ public class GameHelper {
                         //getActivity().displayMessage("Thinking...");
                     }
                     break;
+            }
+        }
+    }
+
+    protected static void updateGameOver(Game game) {
+
+        //our chess piece reference
+        Piece piece = null;
+
+        //don't animate if 90 frames have passed
+        if (GAME_OVER_FRAMES >= 90)
+            return;
+
+        //get the appropriate king
+        switch (STATE) {
+
+            case WinPlayer1:
+                piece = game.getPlayer2().getPiece(PieceHelper.Type.King);
+                break;
+
+            case WinPlayer2:
+                piece = game.getPlayer1().getPiece(PieceHelper.Type.King);
+                break;
+        }
+
+        //if we have a king, topple it
+        if (piece != null) {
+
+            //keep track of time elapsed
+            GAME_OVER_FRAMES++;
+
+            final int col = (int)piece.getCol();
+            final int row = (int)piece.getRow();
+
+            //check north
+            if (!game.getPlayer1().hasPiece(col, row - 1) && !game.getPlayer1().hasPiece(col,row - 2) &&
+                !game.getPlayer2().hasPiece(col, row - 1) && !game.getPlayer2().hasPiece(col,row - 2)) {
+
+                //rotate north
+                piece.getObject3D().rotate(Vector3.X, 1);
+
+            } else if ( !game.getPlayer1().hasPiece(col, row + 1) && !game.getPlayer1().hasPiece(col,row + 2) &&
+                        !game.getPlayer2().hasPiece(col, row + 1) && !game.getPlayer2().hasPiece(col,row + 2)) {
+
+                //rotate south
+                piece.getObject3D().rotate(Vector3.X, -1);
+
+            } else if ( !game.getPlayer1().hasPiece(col - 1, row) && !game.getPlayer1().hasPiece(col - 2,row) &&
+                        !game.getPlayer2().hasPiece(col - 1, row) && !game.getPlayer2().hasPiece(col - 2,row)) {
+
+                //rotate west
+                piece.getObject3D().rotate(Vector3.Z, -1);
+
+            } else if ( !game.getPlayer1().hasPiece(col + 1, row) && !game.getPlayer1().hasPiece(col + 2,row) &&
+                        !game.getPlayer2().hasPiece(col + 1, row) && !game.getPlayer2().hasPiece(col + 2,row)) {
+
+                //rotate east
+                piece.getObject3D().rotate(Vector3.Z, 1);
+            } else {
+
+
+                //check north
+                if (!game.getPlayer1().hasPiece(col, row - 1) && !game.getPlayer2().hasPiece(col, row - 1)) {
+
+                    //rotate north
+                    piece.getObject3D().rotate(Vector3.X, .5);
+
+                } else if (!game.getPlayer1().hasPiece(col, row + 1) && !game.getPlayer2().hasPiece(col, row + 1)) {
+
+                    //rotate south
+                    piece.getObject3D().rotate(Vector3.X, -.5);
+
+                } else if (!game.getPlayer1().hasPiece(col - 1, row) && !game.getPlayer2().hasPiece(col - 1, row)) {
+
+                    //rotate west
+                    piece.getObject3D().rotate(Vector3.Z, -.5);
+
+                } else if (!game.getPlayer1().hasPiece(col + 1, row) && !game.getPlayer2().hasPiece(col + 1, row)) {
+
+                    //rotate east
+                    piece.getObject3D().rotate(Vector3.Z, .5);
+                } else {
+
+                    //rotate east by default
+                    piece.getObject3D().rotate(Vector3.Z, .25);
+                }
             }
         }
     }

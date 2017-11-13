@@ -4,8 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TableLayout;
 import android.widget.Toast;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
@@ -13,6 +17,7 @@ import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
+import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
@@ -48,11 +53,11 @@ public class GameActivity extends BaseActivity implements Disposable {
     public enum Screen {
         Loading,
         Ready,
-        GameOver,
+        Settings,
     }
 
     //current screen we are on
-    private Screen screen = Screen.Loading;
+    private static Screen SCREEN = Screen.Loading;
 
     //keep track of game time
     private GameTimer timer;
@@ -60,8 +65,20 @@ public class GameActivity extends BaseActivity implements Disposable {
     //our visual progress bar
     private ProgressBar progressBar;
 
+    //container for our game timer
+    private TableLayout tableTimer;
+
+    //our array adapter for the list view
+    private ArrayAdapter<String> adapter;
+
+    //what is the current selected item
+    private int selectedListItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //default to loading screen
+        SCREEN = Screen.Loading;
 
         if (DEBUG)
             UtilityHelper.logEvent("onCreate");
@@ -81,16 +98,90 @@ public class GameActivity extends BaseActivity implements Disposable {
         //obtain our open gl surface view object for reference
         this.glSurfaceView = findViewById(R.id.openGLView);
 
+        //obtain our progress bar
         this.progressBar = findViewById(R.id.simpleProgressBar);
+
+        //obtain our list view
+        final ListView listView = findViewById(R.id.listViewHistory);
+
+        //create our data array adapter, use ArrayList so we can make it dynamic
+        this.adapter = new ArrayAdapter<String>(this, R.layout.layout_history, new ArrayList<String>()) {
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                final View renderer = super.getView(position, convertView, parent);
+                if (position == selectedListItem) {
+                    renderer.setBackgroundResource(R.color.colorGray);
+                } else  {
+                    renderer.setBackgroundResource(R.color.colorLightGray);
+                }
+                return renderer;
+            }
+
+        };
+
+        //update our list view with the adapter
+        listView.setAdapter(this.adapter);
+
+        //add our history to the array adapter
+        for (int i = 0; i < GAME.getHistory().size(); i++) {
+            updateListView(GAME.getHistory().get(i).toString());
+        }
+
+        //obtain our game timer container reference
+        this.tableTimer = findViewById(R.id.tableGameTimer);
+
+        //display the timer according to the settings
+        this.tableTimer.setVisibility(getSharedPreferences().getBoolean(getString(R.string.timer_file_key), true) ? VISIBLE : View.INVISIBLE);
 
         //add the layouts to our list
         this.layouts = new ArrayList<>();
-        this.layouts.add((ViewGroup)findViewById(R.id.layoutGameOver));
+        this.layouts.add((ViewGroup)findViewById(R.id.layoutGameSettings));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutLoadingScreen));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameControls));
 
         //assign the current screen
-        setScreen(getScreen());
+        setScreen(getScreen(), true);
+    }
+
+    public void updateListView(final int position) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                //assign the current item
+                selectedListItem = position;
+
+                //position at the latest move
+                ListView listView = findViewById(R.id.listViewHistory);
+                listView.setSelection(position);
+                listView.setVerticalScrollBarEnabled(false);
+                listView.setHorizontalScrollBarEnabled(false);
+
+                if (position + 5 < listView.getCount() && position > 5) {
+                    listView.smoothScrollToPosition(position + 5);
+                } else {
+                    listView.smoothScrollToPosition(position);
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    public void updateListView(final String description) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run () {
+                adapter.add(description);
+
+                //position at the latest move
+                updateListView(adapter.getCount() - 1);
+            }
+        });
     }
 
     public void updateProgress(final int progress) {
@@ -195,6 +286,7 @@ public class GameActivity extends BaseActivity implements Disposable {
         glSurfaceView = null;
         layoutParams = null;
         GAME = null;
+        SCREEN = null;
     }
 
     @Override
@@ -269,21 +361,23 @@ public class GameActivity extends BaseActivity implements Disposable {
         }
 
         //determine what screen(s) are displayed
-        setScreen(getScreen());
+        setScreen(getScreen(), true);
 
         //update the progress bar
         updateProgress(0);
     }
 
-    public Screen getScreen() {
-        return this.screen;
+    public static Screen getScreen() {
+        return SCREEN;
     }
 
-    public void setScreen(final Screen screen) {
+    public void setScreen(final Screen screen, final boolean hide) {
 
         //default all layouts to hidden
-        for (int i = 0; i < layouts.size(); i++) {
-            setLayoutVisibility(layouts.get(i), false);
+        if (hide) {
+            for (int i = 0; i < layouts.size(); i++) {
+                setLayoutVisibility(layouts.get(i), false);
+            }
         }
 
         //only display the correct screens
@@ -295,18 +389,21 @@ public class GameActivity extends BaseActivity implements Disposable {
                 break;
 
             //decide which game over screen is displayed
-            case GameOver:
-                setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameOver), true);
+            case Settings:
+                setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameSettings), true);
                 break;
 
             //don't re-enable anything
             case Ready:
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameControls), true);
                 break;
+
+            default:
+                throw new RuntimeException("Screen not handled: " + screen.toString());
         }
 
         //assign screen to view
-        this.screen = screen;
+        this.SCREEN = screen;
     }
 
     private LinearLayout.LayoutParams getLayoutParams() {
@@ -323,12 +420,24 @@ public class GameActivity extends BaseActivity implements Disposable {
         if (DEBUG)
             UtilityHelper.logEvent("onBackPressed");
 
+        //if on the settings page, go back to the game
+        if (getScreen() == Screen.Settings) {
+
+            //go to ready
+            setScreen(Screen.Ready, true);
+
+            //no need to continue
+            return;
+        }
+
         //save current game to shared preferences
         GameHelper.saveHistory(this, getGame());
 
+        //call parent
         super.onBackPressed();
-        finish();
 
+        //end the activity
+        finish();
     }
 
     public void onClickMenu(View view) {
@@ -353,5 +462,20 @@ public class GameActivity extends BaseActivity implements Disposable {
 
     public void onClickShowTimer(View view) {
         //show timer
+    }
+
+    public void onClickSettings(View view) {
+
+        //toggle between screens
+        switch (getScreen()) {
+            case Ready:
+                setScreen(Screen.Settings, false);
+                break;
+
+            case Settings:
+            default:
+                setScreen(Screen.Ready, true);
+                break;
+        }
     }
 }

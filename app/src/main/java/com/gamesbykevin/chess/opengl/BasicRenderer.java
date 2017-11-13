@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.activity.GameActivity;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.UtilityHelper;

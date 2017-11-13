@@ -13,5 +13,6 @@
     <color name="colorPink">#FA798D</color>
     <color name="colorPurple">#5B005D</color>
     <color name="colorTurquoise">#1BA086</color>
+    <color name="colorLightGray">#EEEEEE</color>
 
 </resources>
