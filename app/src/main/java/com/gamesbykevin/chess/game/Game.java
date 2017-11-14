@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
+import static com.gamesbykevin.chess.game.GameHelper.createMaterials;
+import static com.gamesbykevin.chess.game.GameHelper.displayPositions;
+import static com.gamesbykevin.chess.game.GameHelper.loadPositions;
 import static com.gamesbykevin.chess.opengl.BasicRenderer.RENDER;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
@@ -45,10 +48,11 @@ public class Game implements IGame {
     private Player player2;
 
     //our texture materials for the pieces
-    private Material textureWhite;
-    private Material textureWood;
-    private Material textureHighlight;
-    private Material textureValid;
+    protected Material textureWhite;
+    protected Material textureWood;
+    protected Material textureHighlight;
+    protected Material textureValid;
+    protected Material texturePosition;
 
     //our highlighted selection to place for all valid moves
     private Object3D selection;
@@ -58,6 +62,9 @@ public class Game implements IGame {
 
     //maintain a list of moves
     private List<PlayerHelper.Move> history;
+
+    //the list of positions on the board
+    protected List<Object3D> positions;
 
     //is this game a replay
     private boolean replay = false;
@@ -270,7 +277,13 @@ public class Game implements IGame {
             setSelected(null);
 
             //create our textures for the pieces
-            createMaterials();
+            createMaterials(this);
+
+            //load the letter positions for the board
+            loadPositions(this);
+
+            //do we show / hide the positions
+            displayPositions(this, GameActivity.getScreen() == Screen.Settings);
 
             //load the board selection visible / non-visible
             PlayerHelper.loadBoardSelection(this, getActivity().getSurfaceView().getRenderer(), getTextureValid());
@@ -319,7 +332,6 @@ public class Game implements IGame {
                     PlayerHelper.displayPromotion(this);
             }
 
-
         } catch (Exception e) {
             UtilityHelper.handleException(e);
         }
@@ -344,6 +356,24 @@ public class Game implements IGame {
         //if still loading display the game
         if (getActivity().getScreen() == Screen.Loading) {
             getActivity().setScreen(Screen.Ready, true);
+
+            //we only want to display the timer if we aren't watching a replay
+            if (hasReplay()) {
+
+                //hide timer
+                getActivity().displayTimer(false);
+
+                //display history
+                getActivity().toggleSettings(true);
+
+            } else {
+
+                //show timer
+                getActivity().displayTimer(true);
+
+                //hide history
+                getActivity().toggleSettings(false);
+            }
             return;
         }
 
@@ -400,6 +430,8 @@ public class Game implements IGame {
             this.textureHighlight.unbindTextures();
         if (this.textureValid != null)
             this.textureValid.unbindTextures();
+        if (this.texturePosition != null)
+            this.texturePosition.unbindTextures();
         if (this.selection != null)
             this.selection.destroy();
         if (this.selected != null)
@@ -414,16 +446,29 @@ public class Game implements IGame {
 
             this.promotions.clear();
         }
+        if (this.positions != null) {
+            for (int i = 0; i < positions.size(); i++) {
+                if (this.positions.get(i) != null)
+                    this.positions.get(i).destroy();
+
+                this.positions.set(i, null);
+            }
+
+            this.positions.clear();
+        }
+
 
         if (this.history != null)
             this.history.clear();
 
+        this.positions = null;
         this.player1 = null;
         this.player2 = null;
         this.textureWhite = null;
         this.textureWood = null;
         this.textureHighlight = null;
         this.textureValid = null;
+        this.texturePosition = null;
         this.selection = null;
         this.selected = null;
         this.promotions = null;
@@ -436,39 +481,6 @@ public class Game implements IGame {
 
     public Object3D getBoardSelection() {
         return this.selection;
-    }
-
-    public void createMaterials() {
-
-        try {
-
-            this.textureWhite = new Material();
-            this.textureWhite.enableLighting(true);
-            this.textureWhite.setDiffuseMethod(new DiffuseMethod.Lambert());
-            this.textureWhite.setColorInfluence(0);
-            this.textureWhite.addTexture(new Texture("textureWhite", R.drawable.white));
-
-            this.textureWood = new Material();
-            this.textureWood.enableLighting(true);
-            this.textureWood.setDiffuseMethod(new DiffuseMethod.Lambert());
-            this.textureWood.setColorInfluence(0);
-            this.textureWood.addTexture(new Texture("textureWood", R.drawable.wood));
-
-            this.textureHighlight = new Material();
-            this.textureHighlight.enableLighting(true);
-            this.textureHighlight.setDiffuseMethod(new DiffuseMethod.Lambert());
-            this.textureHighlight.setColorInfluence(0);
-            this.textureHighlight.addTexture(new Texture("textureHighlighted", R.drawable.highlighted));
-
-            this.textureValid = new Material();
-            this.textureValid.enableLighting(true);
-            this.textureValid.setDiffuseMethod(new DiffuseMethod.Lambert());
-            this.textureValid.setColorInfluence(0);
-            this.textureValid.addTexture(new Texture("textureValid", R.drawable.valid));
-
-        } catch (Exception e) {
-            UtilityHelper.handleException(e);
-        }
     }
 
     public Mode getMode() {

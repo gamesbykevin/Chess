@@ -10,13 +10,22 @@ import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerHelper.Move;
 import com.gamesbykevin.chess.players.PlayerVars;
+import com.gamesbykevin.chess.util.UtilityHelper;
 
+import org.rajawali3d.Object3D;
+import org.rajawali3d.loader.LoaderSTL;
+import org.rajawali3d.materials.Material;
+import org.rajawali3d.materials.methods.DiffuseMethod;
+import org.rajawali3d.materials.textures.Texture;
 import org.rajawali3d.math.vector.Vector3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.getSharedPreferences;
+import static com.gamesbykevin.chess.players.PlayerHelper.Y;
+import static com.gamesbykevin.chess.players.PlayerHelper.getCoordinate;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.players.PlayerVars.STATE;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
@@ -326,6 +335,176 @@ public class GameHelper {
                     piece.getObject3D().rotate(Vector3.Z, .25);
                 }
             }
+        }
+    }
+
+    protected static void createMaterials(Game game) {
+        try {
+
+            game.textureWhite = new Material();
+            game.textureWhite.enableLighting(true);
+            game.textureWhite.setDiffuseMethod(new DiffuseMethod.Lambert());
+            game.textureWhite.setColorInfluence(0);
+            game.textureWhite.addTexture(new Texture("textureWhite", R.drawable.white));
+
+            game.textureWood = new Material();
+            game.textureWood.enableLighting(true);
+            game.textureWood.setDiffuseMethod(new DiffuseMethod.Lambert());
+            game.textureWood.setColorInfluence(0);
+            game.textureWood.addTexture(new Texture("textureWood", R.drawable.wood));
+
+            game.textureHighlight = new Material();
+            game.textureHighlight.enableLighting(true);
+            game.textureHighlight.setDiffuseMethod(new DiffuseMethod.Lambert());
+            game.textureHighlight.setColorInfluence(0);
+            game.textureHighlight.addTexture(new Texture("textureHighlighted", R.drawable.highlighted));
+
+            game.textureValid = new Material();
+            game.textureValid.enableLighting(true);
+            game.textureValid.setDiffuseMethod(new DiffuseMethod.Lambert());
+            game.textureValid.setColorInfluence(0);
+            game.textureValid.addTexture(new Texture("textureValid", R.drawable.valid));
+
+            game.texturePosition = new Material();
+            game.texturePosition.setColorInfluence(0f);
+            game.texturePosition.addTexture(new Texture("number_texture", R.drawable.number));
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
+    }
+
+    protected static void loadPositions(Game game) {
+
+        if (game.positions != null) {
+
+            for (int i = 0; i < game.positions.size(); i++) {
+
+                //remove any existing children
+                game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(game.positions.get(i));
+            }
+
+        } else {
+
+            //create a new list
+            game.positions = new ArrayList<>();
+        }
+
+        try {
+
+            //load the letters
+            loadLetter(game, R.raw.letter_a_stl, -1, 0);
+            loadLetter(game, R.raw.letter_b_stl, -1, 1);
+            loadLetter(game, R.raw.letter_c_stl, -1, 2);
+            loadLetter(game, R.raw.letter_d_stl, -1, 3);
+            loadLetter(game, R.raw.letter_e_stl, -1, 4);
+            loadLetter(game, R.raw.letter_f_stl, -1, 5);
+            loadLetter(game, R.raw.letter_g_stl, -1, 6);
+            loadLetter(game, R.raw.letter_h_stl, -1, 7);
+
+            //load the numbers
+            loadNumber(game, R.raw.number1_stl, 0, -1);
+            loadNumber(game, R.raw.number2_stl, 1, -1);
+            loadNumber(game, R.raw.number3_stl, 2, -1);
+            loadNumber(game, R.raw.number4_stl, 3, -1);
+            loadNumber(game, R.raw.number5_stl, 4, -1);
+            loadNumber(game, R.raw.number6_stl, 5, -1);
+            loadNumber(game, R.raw.number7_stl, 6, -1);
+            loadNumber(game, R.raw.number8_stl, 7, -1);
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
+    }
+
+    public static void displayPositions(Game game, final boolean visible) {
+
+        for (int i = 0; i < game.positions.size(); i++) {
+            game.positions.get(i).setVisible(visible);
+        }
+    }
+
+    private static void loadLetter(final Game game, final int resId, final int col, final int row) {
+
+        try {
+
+            //parse our 3d model
+            LoaderSTL stlParser = new LoaderSTL(
+                game.getActivity().getSurfaceView().getRenderer().getContext().getResources(),
+                game.getActivity().getSurfaceView().getRenderer().getTextureManager(),
+                resId);
+            stlParser.parse();
+
+            //get our 3d object
+            Object3D obj = stlParser.getParsedObject();
+
+            //figure out where to render the 3d object
+            final double x = getCoordinate(col) - .1;
+            final double y = Y;
+            final double z = getCoordinate(row) - .05;
+
+            //rotate piece 90 degrees so it is standing up
+            obj.rotate(Vector3.Axis.X, 90);
+
+            //assign the location
+            obj.setPosition(x, y, z);
+
+            //our model is too large so we need to shrink it
+            obj.setScale(.003);
+
+            //assign texture to 3d object
+            obj.setMaterial(game.texturePosition);
+
+            //add to the scene
+            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(obj);
+
+            //add to our array list
+            game.positions.add(obj);
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
+    }
+
+    private static void loadNumber(final Game game, final int resid, final int col, final int row) {
+
+        try {
+
+            //parse our 3d model
+            LoaderSTL stlParser = new LoaderSTL(
+                game.getActivity().getSurfaceView().getRenderer().getContext().getResources(),
+                game.getActivity().getSurfaceView().getRenderer().getTextureManager(),
+                resid);
+            stlParser.parse();
+
+            //get our 3d object
+            Object3D obj = stlParser.getParsedObject();
+
+            //figure out where to render the 3d object
+            final double x = getCoordinate(col) - .025;
+            final double y = Y;
+            final double z = getCoordinate(row);
+
+            //rotate piece 90 degrees so it is standing up
+            obj.rotate(Vector3.Axis.X, 90);
+
+            //assign the location
+            obj.setPosition(x, y, z);
+
+            //our model is too large so we need to shrink it
+            obj.setScale(.2);
+
+            //assign texture to 3d object
+            obj.setMaterial(game.texturePosition);
+
+            //add to the scene
+            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(obj);
+
+            //add to our array list
+            game.positions.add(obj);
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
         }
     }
 }

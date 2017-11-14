@@ -5,7 +5,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.activity.GameActivity;
 import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.UtilityHelper;
@@ -15,8 +14,10 @@ import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.cameras.Camera2D;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
+import org.rajawali3d.loader.LoaderSTL;
 import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.textures.Texture;
+import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.renderer.Renderer;
 import org.rajawali3d.util.ObjectColorPicker;
@@ -25,6 +26,9 @@ import org.rajawali3d.util.OnObjectPickedListener;
 import javax.microedition.khronos.opengles.GL10;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
+import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
+import static com.gamesbykevin.chess.players.PlayerHelper.Y;
+import static com.gamesbykevin.chess.players.PlayerHelper.getCoordinate;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -56,10 +60,13 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     //has the 3d models etc... been initialized
     private static boolean INIT = false;
 
+    //are we making changes
     private boolean analyzing = false;
 
+    //background
     private Plane plane;
 
+    //texture to apply to 2d background
     private Material material;
 
     //different camera angles
@@ -77,22 +84,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         this.camera2D = new Camera2D();
         this.camera2D.setZ(0);
         this.camera2D.setLookAt(0, 0, 0);
-    }
-
-    private void addBoard() {
-
-        try {
-
-            LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, R.raw.board_obj);
-            objParser.parse();
-
-            board = objParser.getParsedObject();
-            board.setScale(.2);
-            getCurrentScene().addChild(board);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -114,26 +105,53 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         this.objectPicker = new ObjectColorPicker(this);
         this.objectPicker.setOnObjectPickedListener(this);
 
-        //create light so we can see the pieces
-        DirectionalLight light = new DirectionalLight(1f, 10f, 1f);
-        light.setColor(1.0f, 1.0f, 1.0f);
-        light.setPower(1);
-        getCurrentScene().addLight(light);
+        //add light to the scene
+        addLight();
+
+        //add the 2d background
+        addBackground();
 
         //add the board to the scene
         addBoard();
 
+        //reset our game (if exists)
         if (getGame() != null)
             getGame().reset();
 
         //create arc ball camera to rotate around the board
         resetCamera();
 
-        //add the 2d background
-        addBackground();
-
         //we completed initialization
         INIT = true;
+    }
+
+    private void addLight() {
+
+        //create light so we can see the pieces
+        DirectionalLight light = new DirectionalLight(1f, 10f, 1f);
+        light.setColor(1.0f, 1.0f, 1.0f);
+        light.setPower(1);
+        getCurrentScene().addLight(light);
+    }
+
+    private void addBoard() {
+
+        try {
+
+            //remove if already existing
+            if (board != null)
+                getCurrentScene().removeChild(board);
+
+            LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, R.raw.board_obj);
+            objParser.parse();
+
+            board = objParser.getParsedObject();
+            board.setScale(.2);
+            getCurrentScene().addChild(board);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void addBackground() {

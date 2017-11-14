@@ -233,6 +233,16 @@ public class GameActivity extends BaseActivity implements Disposable {
         return this.timer;
     }
 
+    public void displayTimer(final boolean visible) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.tableGameTimer).setVisibility(visible ? VISIBLE : View.INVISIBLE);
+            }
+        });
+
+    }
+
     @Override
     protected void onStart() {
 
@@ -420,16 +430,6 @@ public class GameActivity extends BaseActivity implements Disposable {
         if (DEBUG)
             UtilityHelper.logEvent("onBackPressed");
 
-        //if on the settings page, go back to the game
-        if (getScreen() == Screen.Settings) {
-
-            //go to ready
-            setScreen(Screen.Ready, true);
-
-            //no need to continue
-            return;
-        }
-
         //save current game to shared preferences
         GameHelper.saveHistory(this, getGame());
 
@@ -466,16 +466,19 @@ public class GameActivity extends BaseActivity implements Disposable {
 
     public void onClickSettings(View view) {
 
-        //toggle between screens
-        switch (getScreen()) {
-            case Ready:
-                setScreen(Screen.Settings, false);
-                break;
+        //switch our current choice
+        toggleSettings(getScreen() != Screen.Settings);
+    }
 
-            case Settings:
-            default:
-                setScreen(Screen.Ready, true);
-                break;
+    public void toggleSettings(final boolean visible) {
+
+        if (visible) {
+            setScreen(Screen.Settings, getScreen() == Screen.Loading);
+        } else {
+            setScreen(Screen.Ready, true);
         }
+
+        //we display the positions if we are viewing the settings screen
+        GameHelper.displayPositions(GAME, getScreen() == Screen.Settings);
     }
 }
