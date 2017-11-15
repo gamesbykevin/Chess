@@ -1,6 +1,5 @@
 package com.gamesbykevin.chess.fragment;
 
-import android.app.Fragment;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,8 +24,8 @@ public class ModePageFragment extends PageFragment {
         //inflate the layout to access the ui elements
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_mode_page, container, false);
 
-        ImageView imageView =   view.findViewById(R.id.tutorialImage);
-        TextView textView =     view.findViewById(R.id.instructionsText);
+        ImageView imageView =   view.findViewById(R.id.modeImage);
+        TextView textView =     view.findViewById(R.id.modeText);
 
         final int resIdImage;
         final int resIdText;
@@ -56,6 +55,11 @@ public class ModePageFragment extends PageFragment {
             case 4:
                 resIdImage = R.drawable.versus_human;
                 resIdText = R.string.game_mode_two_player_online_timed;
+                break;
+
+            case 5:
+                resIdImage = R.drawable.versus_human;
+                resIdText = R.string.game_mode_replay;
                 break;
 
             default:

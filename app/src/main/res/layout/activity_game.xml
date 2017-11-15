@@ -15,8 +15,11 @@
     <!-- in game controls -->
     <include layout="@layout/layout_game_controls" android:id="@+id/layoutGameControls" />
 
-    <!-- Game over layout(s) -->
+    <!-- settings layout -->
     <include layout="@layout/layout_game_settings" android:id="@+id/layoutGameSettings" />
+
+    <!-- game save prompt -->
+    <include layout="@layout/layout_game_replay_prompt" android:id="@+id/layoutGameReplayPrompt" />
 
     <!-- Splash page layout -->
     <include layout="@layout/activity_splash" android:id="@+id/layoutLoadingScreen" />

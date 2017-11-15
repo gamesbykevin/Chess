@@ -1,11 +1,15 @@
 package com.gamesbykevin.chess.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -16,6 +20,7 @@ import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
+import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
 import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerVars;
@@ -54,6 +59,7 @@ public class GameActivity extends BaseActivity implements Disposable {
         Loading,
         Ready,
         Settings,
+        ReplayPrompt
     }
 
     //current screen we are on
@@ -68,7 +74,7 @@ public class GameActivity extends BaseActivity implements Disposable {
     //container for our game timer
     private TableLayout tableTimer;
 
-    //our array adapter for the list view
+    //our array adapter for the list views
     private ArrayAdapter<String> adapter;
 
     //what is the current selected item
@@ -77,7 +83,7 @@ public class GameActivity extends BaseActivity implements Disposable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //default to loading screen
+        //assign screen value
         SCREEN = Screen.Loading;
 
         if (DEBUG)
@@ -140,6 +146,7 @@ public class GameActivity extends BaseActivity implements Disposable {
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameSettings));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutLoadingScreen));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameControls));
+        this.layouts.add((ViewGroup)findViewById(R.id.layoutGameReplayPrompt));
 
         //assign the current screen
         setScreen(getScreen(), true);
@@ -320,6 +327,12 @@ public class GameActivity extends BaseActivity implements Disposable {
         //flag for recycling
         glSurfaceView = null;
 
+        //go back to loading screen
+        setScreen(Screen.Loading, true);
+
+        //flag render false
+        BasicRenderer.RENDER = false;
+
         //stop all sound
         stopSound();
     }
@@ -408,6 +421,10 @@ public class GameActivity extends BaseActivity implements Disposable {
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameControls), true);
                 break;
 
+            case ReplayPrompt:
+                setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameReplayPrompt), true);
+                break;
+
             default:
                 throw new RuntimeException("Screen not handled: " + screen.toString());
         }
@@ -430,38 +447,25 @@ public class GameActivity extends BaseActivity implements Disposable {
         if (DEBUG)
             UtilityHelper.logEvent("onBackPressed");
 
-        //save current game to shared preferences
-        GameHelper.saveHistory(this, getGame());
+        //if the game is over and not a replay, ask if they want to save the replay
+        if (PlayerVars.isGameover() && !getGame().hasReplay()) {
 
-        //call parent
-        super.onBackPressed();
+            //ask the player if they want to save the replay
+            setScreen(Screen.ReplayPrompt, false);
 
-        //end the activity
-        finish();
-    }
+        } else {
 
-    public void onClickMenu(View view) {
+            //call parent
+            super.onBackPressed();
 
-        //go back to the main game menu
-        startActivity(new Intent(this, MainActivity.class));
+            //end the activity
+            finish();
+        }
     }
 
     public void onClickLeaderboard(View view) {
 
         //displayLeaderboardUI(getString(LeaderboardHelper.getResId(getGame().getBoard())));
-    }
-
-    public void onClickHome(View view) {
-
-        //start the activity
-        startActivity(new Intent(GameActivity.this, MainActivity.class));
-
-        //remove this activity from the back stack
-        finish();
-    }
-
-    public void onClickShowTimer(View view) {
-        //show timer
     }
 
     public void onClickSettings(View view) {
@@ -480,5 +484,77 @@ public class GameActivity extends BaseActivity implements Disposable {
 
         //we display the positions if we are viewing the settings screen
         GameHelper.displayPositions(GAME, getScreen() == Screen.Settings);
+    }
+
+    public void onClickNo(View view) {
+
+        //go back to the previous page
+        super.onBackPressed();
+    }
+
+    public void onClickYes(View view) {
+
+        //flag save true
+        ReplayActivity.SAVE = true;
+
+        startActivity(new Intent(this, ReplayActivity.class));
+    }
+
+    private class CustomList extends ArrayAdapter<String> {
+
+        private final Activity context;
+
+        public CustomList(Activity context) {
+            super(context, R.layout.layout_replay_selection, "1,2,3,4,5".split(","));
+            this.context = context;
+        }
+
+        @Override
+        public View getView(int position, View view, ViewGroup parent) {
+
+            LayoutInflater inflater = context.getLayoutInflater();
+            View rowView = inflater.inflate(R.layout.layout_replay_selection, null, true);
+
+            ImageView imageView = rowView.findViewById(R.id.imageViewReplaySelection);
+
+            //assign the correct image
+            imageView.setImageResource(getSharedPreferences().contains(getString(getResid(position))) ? R.mipmap.ic_launcher : R.drawable.white);
+
+            //return the view
+            return rowView;
+        }
+    }
+
+    public static final int getResid(final int position) {
+
+        final int resId;
+
+        switch (position) {
+
+            case 0:
+                resId = R.string.saved_match_1_file_key;
+                break;
+
+            case 1:
+                resId = R.string.saved_match_2_file_key;
+                break;
+
+            case 2:
+                resId = R.string.saved_match_3_file_key;
+                break;
+
+            case 3:
+                resId = R.string.saved_match_4_file_key;
+                break;
+
+            case 4:
+                resId = R.string.saved_match_5_file_key;
+                break;
+
+            default:
+                throw new RuntimeException("Position not handled: " + position);
+        }
+
+        return resId;
     }
 }

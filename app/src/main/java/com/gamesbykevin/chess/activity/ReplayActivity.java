@@ -1,29 +1,43 @@
 package com.gamesbykevin.chess.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.game.Game;
+import com.gamesbykevin.chess.game.GameHelper;
 
-public class ModeActivity extends PagerActivity {
+import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 
-    public ModeActivity() {
-        super(Type.ModeSelection);
+public class ReplayActivity extends PagerActivity {
+
+    //do we save the replay
+    public static boolean SAVE = false;
+
+    public ReplayActivity() {
+        super(Type.ReplaySelection);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         //set the total number of pages
-        PAGES = 6;
+        PAGES = 5;
 
         //inflate content view
-        setContentView(R.layout.activity_mode);
+        setContentView(R.layout.activity_replay);
 
         //call parent
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        PAGES = 6;
+
+        super.onBackPressed();
     }
 
     @Override
@@ -57,19 +71,26 @@ public class ModeActivity extends PagerActivity {
         super.onDestroy();
     }
 
-    public void onClickStartGame(View view) {
+    public void onClickStartReplay(View view) {
 
-        if (CURRENT_PAGE == 5) {
+        if (SAVE) {
 
-            PAGES = 5;
+            //determine where to save our game
+            GameHelper.saveHistory(getGame(), GameActivity.getResid(CURRENT_PAGE));
 
-            //start replay activity
-            startActivity(new Intent(this, ReplayActivity.class));
+            //go back kto mode activity
+            startActivity(new Intent(this, ModeActivity.class));
 
         } else {
+
+            //flag we want to watch a replay
+            Game.REPLAY = true;
 
             //start game activity
             startActivity(new Intent(this, GameActivity.class));
         }
+
+        //flag save false
+        SAVE = false;
     }
 }

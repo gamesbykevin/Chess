@@ -51,10 +51,17 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
-        <activity android:name=".activity.ModeActivity"
+        <activity
+            android:name=".activity.ModeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".activity.ReplayActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@style/AppTheme">
+        </activity>
     </application>
 
 </manifest>

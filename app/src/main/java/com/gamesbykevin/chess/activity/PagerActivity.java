@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.fragment.PageFragment;
+import com.gamesbykevin.chess.game.Game;
 
 /**
  * Created by Kevin on 11/12/2017.
@@ -37,15 +38,21 @@ public class PagerActivity extends BaseActivity {
     //temp value to check if we tried to scroll out of bounds
     protected static int TMP_CURRENT_PAGE = 0;
 
+    public enum Type {
+        ReplaySelection,
+        ModeSelection,
+        TutorialSelection
+    }
+
     /**
      * The total number of pages
      */
     public static int PAGES = 1;
 
-    private final boolean tutorial;
+    private final Type type;
 
-    public PagerActivity(final boolean tutorial) {
-        this.tutorial = tutorial;
+    public PagerActivity(final Type type) {
+        this.type = type;
     }
 
     @Override
@@ -95,6 +102,9 @@ public class PagerActivity extends BaseActivity {
 
     @Override
     public void onResume() {
+
+        //default to false
+        Game.REPLAY = false;
 
         //call parent
         super.onResume();
@@ -255,7 +265,7 @@ public class PagerActivity extends BaseActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return PageFragment.create(position, tutorial);
+            return PageFragment.create(position, type);
         }
 
         @Override

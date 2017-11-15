@@ -84,25 +84,17 @@ public class GameHelper {
         }
     }
 
-    public static void saveHistory(GameActivity activity, Game game) {
+    public static void saveHistory(Game game, final int resId) {
 
         //obtain editor
         SharedPreferences.Editor editor = getSharedPreferences().edit();
 
-        if (game.hasReplay()) {
+        //get our history
+        List<Move> history = game.getHistory();
 
-            //assign setting
-            editor.putString(activity.getString(R.string.saved_match_file_key), "");
-
-        } else {
-
-            //get our history
-            List<Move> history = game.getHistory();
-
-            //assign setting
-            if (history != null)
-                editor.putString(activity.getString(R.string.saved_match_file_key), GSON.toJson(history));
-        }
+        //assign setting
+        if (history != null)
+            editor.putString(game.getActivity().getString(resId), GSON.toJson(history));
 
         //save setting
         editor.apply();

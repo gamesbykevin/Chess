@@ -9,12 +9,12 @@
             android:onClick="onClickStartGame"
             android:layout_centerInParent="true"
             android:contentDescription="@null"
-            android:id="@+id/tutorialImage"
+            android:id="@+id/modeImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <TextView
             style="@style/text_tutorial"
-            android:id="@+id/instructionsText"/>
+            android:id="@+id/modeText"/>
 
 </RelativeLayout>

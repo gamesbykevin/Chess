@@ -14,6 +14,8 @@ import com.gamesbykevin.chess.util.UtilityHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.activity.GameActivity.getGame;
+
 public class MainActivity extends BaseActivity {
 
     //did we prompt the user before exiting the app

@@ -14,10 +14,8 @@ import org.rajawali3d.cameras.Camera;
 import org.rajawali3d.cameras.Camera2D;
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.loader.LoaderOBJ;
-import org.rajawali3d.loader.LoaderSTL;
 import org.rajawali3d.materials.Material;
 import org.rajawali3d.materials.textures.Texture;
-import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Plane;
 import org.rajawali3d.renderer.Renderer;
 import org.rajawali3d.util.ObjectColorPicker;
@@ -26,9 +24,6 @@ import org.rajawali3d.util.OnObjectPickedListener;
 import javax.microedition.khronos.opengles.GL10;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
-import static com.gamesbykevin.chess.players.PlayerHelper.ROWS;
-import static com.gamesbykevin.chess.players.PlayerHelper.Y;
-import static com.gamesbykevin.chess.players.PlayerHelper.getCoordinate;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**

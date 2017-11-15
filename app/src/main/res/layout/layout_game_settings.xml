@@ -5,6 +5,9 @@
     android:layout_height="match_parent"
     android:visibility="invisible">
 
+    <!-- change camera button -->
+    <Button style="@style/button_camera" android:onClick="onClickResetCamera" />
+
     <!-- in-game settings -->
     <ImageView android:src="@drawable/settings" style="@style/image_settings" android:onClick="onClickSettings" android:id="@+id/buttonSettings" />
 

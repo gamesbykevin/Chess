@@ -7,7 +7,7 @@ import com.gamesbykevin.chess.R;
 public class TutorialActivity extends PagerActivity {
 
     public TutorialActivity() {
-        super(true);
+        super(Type.TutorialSelection);
     }
 
     @Override

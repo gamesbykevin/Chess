@@ -7,7 +7,15 @@
     <string name="difficulty_file_key" translatable="false">com.gamesbykevin.chess.DIFFICULTY_FILE_KEY</string>
     <string name="timer_file_key" translatable="false">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
     <string name="google_play_auto_login_file_key" translatable="false">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
+
+    <!--
     <string name="saved_match_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_FILE_KEY</string>
+    -->
+    <string name="saved_match_1_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_1_FILE_KEY</string>
+    <string name="saved_match_2_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_2_FILE_KEY</string>
+    <string name="saved_match_3_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_3_FILE_KEY</string>
+    <string name="saved_match_4_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_4_FILE_KEY</string>
+    <string name="saved_match_5_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_5_FILE_KEY</string>
 
     <!-- button text -->
     <string name="button_text_next">Continue</string>
@@ -64,6 +72,7 @@
     <string name="game_mode_two_player_offline">Human vs Human</string>
     <string name="game_mode_two_player_online">Human vs Human (Online)</string>
     <string name="game_mode_two_player_online_timed">Timed Human vs Human (Online)</string>
+    <string name="game_mode_replay">Watch Replay</string>
 
     <!-- text to display in  the tutorial -->
     <string name="tutorial_instructions_1">Tutorial Part 1 of 9\nSelect your image from the list</string>

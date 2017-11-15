@@ -3,6 +3,8 @@ package com.gamesbykevin.chess.fragment;
 import android.app.Fragment;
 import android.os.Bundle;
 
+import com.gamesbykevin.chess.activity.PagerActivity;
+
 /**
  * Created by Kevin on 11/11/2017.
  */
@@ -29,16 +31,24 @@ public abstract class PageFragment extends Fragment {
         this.pageNumber = getArguments().getInt(ARG_PAGE);
     }
 
-    public static PageFragment create(int pageNumber, boolean tutorial) {
+    public static PageFragment create(int pageNumber, PagerActivity.Type type) {
 
         //our page fragment
         PageFragment fragment = null;
 
         //create the appropriate instance
-        if (tutorial) {
-            fragment = new TutorialPageFragment();
-        } else {
-            fragment = new ModePageFragment();
+        switch (type) {
+            case ModeSelection:
+                fragment = new ModePageFragment();
+                break;
+
+            case ReplaySelection:
+                fragment = new ReplayPageFragment();
+                break;
+
+            case TutorialSelection:
+                fragment = new TutorialPageFragment();
+                break;
         }
 
         Bundle args = new Bundle();

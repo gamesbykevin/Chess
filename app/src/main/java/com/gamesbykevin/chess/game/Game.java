@@ -77,7 +77,8 @@ public class Game implements IGame {
         HumVsCpuTimed,
         HumVsHumOffline,
         HumVsHumOnline,
-        HumVsHumOnlineTimed
+        HumVsHumOnlineTimed,
+        WatchReplay
     }
 
     //store the game mode
@@ -95,13 +96,13 @@ public class Game implements IGame {
     //current list in our replay
     public static int INDEX_REPLAY = 0;
 
+    //are we watching a replay
+    public static boolean REPLAY = false;
+
     public Game(GameActivity activity) {
 
         //store activity reference
         this.activity = activity;
-
-        //assign the correct mode
-        this.mode = Mode.values()[PagerActivity.CURRENT_PAGE];
 
         //create list for move history
         this.history = new ArrayList<>();
@@ -112,23 +113,35 @@ public class Game implements IGame {
         //what is our difficulty setting
         final int depth = (activity.getIntValue(R.string.difficulty_file_key)) + 1;
 
-        switch (getMode()) {
+        if (REPLAY) {
 
-            case HumVsHumOffline:
-            case HumVsHumOnline:
-            case HumVsHumOnlineTimed:
-                this.player1 = new Human(Player.Direction.North);
-                this.player2 = new Human(Player.Direction.South);
-                break;
+            this.mode = Mode.WatchReplay;
+            this.player1 = new Human(Player.Direction.North);
+            this.player2 = new Human(Player.Direction.South);
 
-            case HumVsCpu:
-            case HumVsCpuTimed:
-                this.player1 = new Human(Player.Direction.North);
-                this.player2 = new Cpu(Player.Direction.South, depth);
-                break;
+        } else {
 
-            default:
-                throw new RuntimeException("Mode not handled: " + getMode().toString());
+            //assign the correct mode
+            this.mode = Mode.values()[PagerActivity.CURRENT_PAGE];
+
+            switch (getMode()) {
+
+                case HumVsHumOffline:
+                case HumVsHumOnline:
+                case HumVsHumOnlineTimed:
+                    this.player1 = new Human(Player.Direction.North);
+                    this.player2 = new Human(Player.Direction.South);
+                    break;
+
+                case HumVsCpu:
+                case HumVsCpuTimed:
+                    this.player1 = new Human(Player.Direction.North);
+                    this.player2 = new Cpu(Player.Direction.South, depth);
+                    break;
+
+                default:
+                    throw new RuntimeException("Mode not handled: " + getMode().toString());
+            }
         }
 
         //give the object a name
@@ -145,23 +158,33 @@ public class Game implements IGame {
         PlayerVars.STATE = State.Playing;
         PlayerVars.STATUS = Status.Select;
 
-        //get the shared preferences
-        SharedPreferences preferences = getActivity().getSharedPreferences();
+        if (getMode() == Mode.WatchReplay) {
 
-        if (preferences.contains(getActivity().getString(R.string.saved_match_file_key))) {
-            final String json = preferences.getString(getActivity().getString(R.string.saved_match_file_key), "");
-            java.lang.reflect.Type listType = new TypeToken<List<Move>>(){}.getType();
+            //get the shared preferences
+            SharedPreferences preferences = getActivity().getSharedPreferences();
 
-            //get our history and convert back into java object
-            List<Move> tmpHistory = GSON.fromJson(json, listType);
+            //get the selected saved replay
+            final int resId = GameActivity.getResid(PagerActivity.CURRENT_PAGE);
 
-            if (tmpHistory != null) {
-                INDEX_REPLAY = 0;
-                setHistory(tmpHistory);
-                setReplay(true);
-            } else {
-                setReplay(false);
+            if (preferences.contains(getActivity().getString(resId))) {
+                final String json = preferences.getString(getActivity().getString(resId), "");
+                java.lang.reflect.Type listType = new TypeToken<List<Move>>() {}.getType();
+
+                //get our history and convert back into java object
+                List<Move> tmpHistory = GSON.fromJson(json, listType);
+
+                if (tmpHistory != null) {
+                    INDEX_REPLAY = 0;
+                    setHistory(tmpHistory);
+                    setReplay(true);
+                } else {
+                    setReplay(false);
+                }
             }
+
+        } else {
+
+            setReplay(false);
         }
     }
 
@@ -374,6 +397,7 @@ public class Game implements IGame {
                 //hide history
                 getActivity().toggleSettings(false);
             }
+
             return;
         }
 
