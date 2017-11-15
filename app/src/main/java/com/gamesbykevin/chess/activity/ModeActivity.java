@@ -72,4 +72,14 @@ public class ModeActivity extends PagerActivity {
             startActivity(new Intent(this, GameActivity.class));
         }
     }
+
+    @Override
+    public void onBackPressed() {
+
+        //start game activity
+        startActivity(new Intent(this, MainActivity.class));
+
+        //close this activity
+        finish();
+    }
 }
