@@ -19,7 +19,9 @@ import org.rajawali3d.materials.methods.DiffuseMethod;
 import org.rajawali3d.materials.textures.Texture;
 import org.rajawali3d.math.vector.Vector3;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
@@ -84,20 +86,98 @@ public class GameHelper {
         }
     }
 
-    public static void saveHistory(Game game, final int resId) {
+    public static void saveHistory(Game game, final int position) {
 
-        //obtain editor
-        SharedPreferences.Editor editor = getSharedPreferences().edit();
+        try {
+            //obtain editor
+            SharedPreferences.Editor editor = getSharedPreferences().edit();
 
-        //get our history
-        List<Move> history = game.getHistory();
+            //get our history
+            List<Move> history = game.getHistory();
 
-        //assign setting
-        if (history != null)
-            editor.putString(game.getActivity().getString(resId), GSON.toJson(history));
+            //assign setting
+            if (history != null) {
 
-        //save setting
-        editor.apply();
+                //our desired date format
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+                //store our game history and time description
+                editor.putString(game.getActivity().getString(getResidFile(position)), GSON.toJson(history));
+                editor.putString(game.getActivity().getString(getResidDesc(position)), dateFormat.format(Calendar.getInstance().getTime()));
+            }
+
+            //save setting
+            editor.apply();
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
+    }
+
+    public static final int getResidDesc(final int position) {
+
+        final int resId;
+
+        switch (position) {
+
+            case 0:
+                resId = R.string.saved_match_1_desc_key;
+                break;
+
+            case 1:
+                resId = R.string.saved_match_2_desc_key;
+                break;
+
+            case 2:
+                resId = R.string.saved_match_3_desc_key;
+                break;
+
+            case 3:
+                resId = R.string.saved_match_4_desc_key;
+                break;
+
+            case 4:
+                resId = R.string.saved_match_5_desc_key;
+                break;
+
+            default:
+                throw new RuntimeException("Position not handled: " + position);
+        }
+
+        return resId;
+    }
+
+    public static final int getResidFile(final int position) {
+
+        final int resId;
+
+        switch (position) {
+
+            case 0:
+                resId = R.string.saved_match_1_file_key;
+                break;
+
+            case 1:
+                resId = R.string.saved_match_2_file_key;
+                break;
+
+            case 2:
+                resId = R.string.saved_match_3_file_key;
+                break;
+
+            case 3:
+                resId = R.string.saved_match_4_file_key;
+                break;
+
+            case 4:
+                resId = R.string.saved_match_5_file_key;
+                break;
+
+            default:
+                throw new RuntimeException("Position not handled: " + position);
+        }
+
+        return resId;
     }
 
     protected static void move(Game game) {
@@ -187,13 +267,13 @@ public class GameHelper {
         game.track(game.getSelected());
 
         //update the state of the game (check, checkmate, stalemate)
-        PlayerHelper.updateStatus(opponent, player);
+        PlayerHelper.updateState(opponent, player);
 
         //check for a draw (stalemate)
         checkDraw(game);
 
-        //display status
-        displayStatus(game, opponent);
+        //display state
+        displayState(game, opponent);
 
         //we are at our destination, de-select the chess piece
         game.deselect();
@@ -214,7 +294,7 @@ public class GameHelper {
             Game.INDEX_REPLAY++;
     }
 
-    public static void displayStatus(Game game, Player opponent) {
+    public static void displayState(Game game, Player opponent) {
 
         if (DEBUG) {
 
@@ -230,6 +310,14 @@ public class GameHelper {
 
                 case Stalemate:
                     game.getActivity().displayMessage(R.string.game_status_stalemate);
+                    break;
+
+                case Player1TimeUp:
+                    game.getActivity().displayMessage(R.string.game_status_player_1_time);
+                    break;
+
+                case Player2TimeUp:
+                    game.getActivity().displayMessage(R.string.game_status_player_2_time);
                     break;
 
                 default:

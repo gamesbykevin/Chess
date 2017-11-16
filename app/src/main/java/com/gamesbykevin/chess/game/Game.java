@@ -16,6 +16,7 @@ import com.gamesbykevin.chess.players.PlayerHelper.Move;
 import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.players.PlayerVars.Status;
 import com.gamesbykevin.chess.players.PlayerVars.State;
+import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
 import com.google.gson.reflect.TypeToken;
 
@@ -30,6 +31,7 @@ import java.util.List;
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
 import static com.gamesbykevin.chess.game.GameHelper.createMaterials;
 import static com.gamesbykevin.chess.game.GameHelper.displayPositions;
+import static com.gamesbykevin.chess.game.GameHelper.getResidFile;
 import static com.gamesbykevin.chess.game.GameHelper.loadPositions;
 import static com.gamesbykevin.chess.opengl.BasicRenderer.RENDER;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
@@ -119,7 +121,34 @@ public class Game implements IGame {
             this.player1 = new Human(Player.Direction.North);
             this.player2 = new Human(Player.Direction.South);
 
+            //get the shared preferences
+            SharedPreferences preferences = getActivity().getSharedPreferences();
+
+            //get the selected saved replay
+            final int resId = getResidFile(PagerActivity.CURRENT_PAGE);
+
+            if (preferences.contains(getActivity().getString(resId))) {
+                final String json = preferences.getString(getActivity().getString(resId), "");
+                java.lang.reflect.Type listType = new TypeToken<List<Move>>() {}.getType();
+
+                //get our history and convert back into java object
+                List<Move> tmpHistory = GSON.fromJson(json, listType);
+
+                if (tmpHistory != null) {
+                    INDEX_REPLAY = 0;
+                    setHistory(tmpHistory);
+                    setReplay(true);
+                } else {
+                    setReplay(false);
+                }
+            } else {
+                setReplay(false);
+            }
+
         } else {
+
+            //we aren't watching a replay
+            setReplay(false);
 
             //assign the correct mode
             this.mode = Mode.values()[PagerActivity.CURRENT_PAGE];
@@ -157,35 +186,6 @@ public class Game implements IGame {
         PlayerVars.PLAYER_1_TURN = true;
         PlayerVars.STATE = State.Playing;
         PlayerVars.STATUS = Status.Select;
-
-        if (getMode() == Mode.WatchReplay) {
-
-            //get the shared preferences
-            SharedPreferences preferences = getActivity().getSharedPreferences();
-
-            //get the selected saved replay
-            final int resId = GameActivity.getResid(PagerActivity.CURRENT_PAGE);
-
-            if (preferences.contains(getActivity().getString(resId))) {
-                final String json = preferences.getString(getActivity().getString(resId), "");
-                java.lang.reflect.Type listType = new TypeToken<List<Move>>() {}.getType();
-
-                //get our history and convert back into java object
-                List<Move> tmpHistory = GSON.fromJson(json, listType);
-
-                if (tmpHistory != null) {
-                    INDEX_REPLAY = 0;
-                    setHistory(tmpHistory);
-                    setReplay(true);
-                } else {
-                    setReplay(false);
-                }
-            }
-
-        } else {
-
-            setReplay(false);
-        }
     }
 
     public void setPicked(final Object3D picked) {
@@ -396,6 +396,20 @@ public class Game implements IGame {
 
                 //hide history
                 getActivity().toggleSettings(false);
+
+                //setup the timer right
+                switch (getMode()) {
+                    case HumVsCpuTimed:
+                    case HumVsHumOnlineTimed:
+                        activity.getTimer().setAscending(false);
+                        activity.getTimer().restoreTime(GameTimer.DEFAULT_COUNTDOWN_DURATION);
+                        break;
+
+                    default:
+                        activity.getTimer().setAscending(true);
+                        activity.getTimer().restoreTime(GameTimer.DEFAULT_STARTUP_DURATION);
+                        break;
+                }
             }
 
             return;

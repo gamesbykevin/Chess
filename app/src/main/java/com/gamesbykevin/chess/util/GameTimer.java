@@ -33,7 +33,20 @@ public class GameTimer implements Disposable {
     /**
      * Character to separate the timer
      */
-    private static final String TIMER_SEPARATOR = ",";
+    public static final String TIMER_SEPARATOR = ",";
+
+    //are we counting up / down ?
+    private boolean ascending = true;
+
+    /**
+     * Default duration for our countdown timer 5 minutes 05:00
+     */
+    public static final String DEFAULT_COUNTDOWN_DURATION = "0" + TIMER_SEPARATOR + "5" + TIMER_SEPARATOR + "0" + TIMER_SEPARATOR + "0" + TIMER_SEPARATOR + "0";
+
+    /**
+     * Default duration for our count up timer 00:00
+     */
+    public static final String DEFAULT_STARTUP_DURATION = "0" + TIMER_SEPARATOR + "0" + TIMER_SEPARATOR + "0" + TIMER_SEPARATOR + "0" + TIMER_SEPARATOR + "0";
 
     /**
      * Default constructor
@@ -64,6 +77,14 @@ public class GameTimer implements Disposable {
 
         //reset timer progress
         reset();
+    }
+
+    public void setAscending(final boolean ascending) {
+        this.ascending = ascending;
+    }
+
+    public boolean isAscending() {
+        return this.ascending;
     }
 
     @Override
@@ -137,46 +158,106 @@ public class GameTimer implements Disposable {
             boolean flag3 = false;
             boolean flag4 = true;
 
-            //increase the seconds
-            clock4++;
+            if (isAscending()) {
 
-            //10 seconds
-            if (clock4 > 9) {
+                //increase the seconds
+                clock4++;
 
-                //reset
-                clock4 = 0;
+                //10 seconds
+                if (clock4 > 9) {
 
-                //increase the tens (seconds)
-                clock3++;
+                    //reset
+                    clock4 = 0;
 
-                //flag change
-                flag3 = true;
-            }
+                    //increase the tens (seconds)
+                    clock3++;
 
-            //60 seconds
-            if (clock3 > 5) {
+                    //flag change
+                    flag3 = true;
+                }
 
-                //reset
-                clock3 = 0;
+                //60 seconds
+                if (clock3 > 5) {
 
-                //increase the minutes
-                clock2++;
+                    //reset
+                    clock3 = 0;
 
-                //flag change
-                flag2 = true;
-            }
+                    //increase the minutes
+                    clock2++;
 
-            //10 minutes
-            if (clock2 > 9) {
+                    //flag change
+                    flag2 = true;
+                }
 
-                //reset
-                clock2 = 0;
+                //10 minutes
+                if (clock2 > 9) {
 
-                //increase the tens (minutes)
-                clock1++;
+                    //reset
+                    clock2 = 0;
 
-                //flag change
-                flag1 = true;
+                    //increase the tens (minutes)
+                    clock1++;
+
+                    //flag change
+                    flag1 = true;
+                }
+
+            } else {
+
+                //decrease the seconds
+                clock4--;
+
+                //10 seconds
+                if (clock4 < 0) {
+
+                    //reset
+                    if (clock3 > 0 || clock2 > 0 || clock1 > 0) {
+                        clock4 = 9;
+                    } else {
+                        clock4 = 0;
+                    }
+
+                    //decrease the tens (seconds)
+                    clock3--;
+                    flag3 = true;
+                }
+
+                //60 seconds
+                if (clock3 < 0) {
+
+                    //reset back to 59
+                    if (clock2 > 0 || clock1 > 0) {
+                        clock3 = 5;
+                    } else {
+                        clock3 = 0;
+                    }
+
+                    //decrease the minutes
+                    clock2--;
+
+                    //flag change
+                    flag2 = true;
+                }
+
+                //10 minutes
+                if (clock2 < 0) {
+
+                    //reset
+                    if (clock1 > 0) {
+                        clock2 = 9;
+                    } else {
+                        clock2 = 0;
+                    }
+
+                    //decrease the tens (minutes)
+                    clock1--;
+
+                    //flag change
+                    flag1 = true;
+                }
+
+                if (clock1 < 0)
+                    clock1 = 0;
             }
 
             //update any changes
@@ -193,7 +274,7 @@ public class GameTimer implements Disposable {
 
     private void updateImageView(Activity activity, int value, final ImageView imageView) {
 
-        //assign the appropriate index value, if >= 100 minutes time will remain 99:99
+        //assign the index value, if >= 100 minutes time will remain 99:99
         final int index = (clock1 > 9) ? 9 : value;
 
         //run on ui thread
@@ -226,5 +307,14 @@ public class GameTimer implements Disposable {
 
     public String getTimeDesc() {
         return clock1 + "" + clock2 + ":" + clock3 + "" + clock4;
+    }
+
+    public boolean hasExpired() {
+
+        if (isAscending()) {
+            return false;
+        } else {
+            return (clock1 <= 0 && clock2 <= 0 && clock3 <= 0 && clock4 <= 0);
+        }
     }
 }

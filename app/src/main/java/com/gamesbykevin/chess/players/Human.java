@@ -69,10 +69,6 @@ public class Human extends Player {
         //update the game timer
         game.getActivity().getTimer().update(game.getActivity());
 
-        //if we didn't pick anything, don't continue
-        if (game.getPicked() == null)
-            return;
-
         //only continue if we are selecting or promoting
         switch (PlayerVars.STATUS) {
             case Select:
@@ -86,6 +82,23 @@ public class Human extends Player {
 
         //the other player is our opponent
         Player opponent = PLAYER_1_TURN ? game.getPlayer2() : game.getPlayer1();
+
+        //if time expired, the game is over
+        if (game.getActivity().getTimer().hasExpired()) {
+
+            //assign the correct status
+            PlayerVars.STATE = PLAYER_1_TURN ? PlayerVars.State.Player1TimeUp : PlayerVars.State.Player2TimeUp;
+
+            //display the game state
+            GameHelper.displayState(game, opponent);
+
+            //don't continue
+            return;
+        }
+
+        //if we didn't pick anything, don't continue
+        if (game.getPicked() == null)
+            return;
 
         //if we are promoting a pawn
         if (PlayerVars.STATUS == PlayerVars.Status.Promote) {
@@ -108,10 +121,10 @@ public class Human extends Player {
                     game.deselect();
 
                     //update the state of the game (check, checkmate, stalemate)
-                    PlayerHelper.updateStatus(opponent, this);
+                    PlayerHelper.updateState(opponent, this);
 
-                    //display the game status
-                    GameHelper.displayStatus(game, opponent);
+                    //display the game state
+                    GameHelper.displayState(game, opponent);
 
                     //switch turns
                     game.switchTurns();

@@ -38,6 +38,7 @@ public abstract class PageFragment extends Fragment {
 
         //create the appropriate instance
         switch (type) {
+
             case ModeSelection:
                 fragment = new ModePageFragment();
                 break;
@@ -46,9 +47,8 @@ public abstract class PageFragment extends Fragment {
                 fragment = new ReplayPageFragment();
                 break;
 
-            case TutorialSelection:
-                fragment = new TutorialPageFragment();
-                break;
+            default:
+                throw new RuntimeException("Type not handled: " + type.toString());
         }
 
         Bundle args = new Bundle();

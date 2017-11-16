@@ -22,7 +22,9 @@ public class PlayerVars {
         Playing,
         WinPlayer1,
         WinPlayer2,
-        Stalemate
+        Stalemate,
+        Player1TimeUp,
+        Player2TimeUp
     }
 
     public static boolean isGameover() {

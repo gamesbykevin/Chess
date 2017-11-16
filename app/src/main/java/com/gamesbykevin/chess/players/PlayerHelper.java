@@ -349,7 +349,7 @@ public class PlayerHelper {
      * @param opposing
      * @param attacking
      */
-    public static void updateStatus(Player opposing, Player attacking) {
+    public static void updateState(Player opposing, Player attacking) {
 
         //get list of all possible moves for players
         List<Move> movesOpposingPlayer = getMoves(opposing, attacking, true, false);

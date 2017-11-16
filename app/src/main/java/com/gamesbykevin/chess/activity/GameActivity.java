@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,7 +20,6 @@ import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
-import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
@@ -183,7 +180,12 @@ public class GameActivity extends BaseActivity implements Disposable {
         runOnUiThread(new Runnable() {
             @Override
             public void run () {
-                adapter.add(description);
+
+                //display who executed the move
+                final String bonus = (adapter.getCount() % 2 == 0) ? "W: " : "B: ";
+
+                //add our content
+                adapter.add(bonus + description);
 
                 //position at the latest move
                 updateListView(adapter.getCount() - 1);
@@ -498,63 +500,5 @@ public class GameActivity extends BaseActivity implements Disposable {
         ReplayActivity.SAVE = true;
 
         startActivity(new Intent(this, ReplayActivity.class));
-    }
-
-    private class CustomList extends ArrayAdapter<String> {
-
-        private final Activity context;
-
-        public CustomList(Activity context) {
-            super(context, R.layout.layout_replay_selection, "1,2,3,4,5".split(","));
-            this.context = context;
-        }
-
-        @Override
-        public View getView(int position, View view, ViewGroup parent) {
-
-            LayoutInflater inflater = context.getLayoutInflater();
-            View rowView = inflater.inflate(R.layout.layout_replay_selection, null, true);
-
-            ImageView imageView = rowView.findViewById(R.id.imageViewReplaySelection);
-
-            //assign the correct image
-            imageView.setImageResource(getSharedPreferences().contains(getString(getResid(position))) ? R.mipmap.ic_launcher : R.drawable.white);
-
-            //return the view
-            return rowView;
-        }
-    }
-
-    public static final int getResid(final int position) {
-
-        final int resId;
-
-        switch (position) {
-
-            case 0:
-                resId = R.string.saved_match_1_file_key;
-                break;
-
-            case 1:
-                resId = R.string.saved_match_2_file_key;
-                break;
-
-            case 2:
-                resId = R.string.saved_match_3_file_key;
-                break;
-
-            case 3:
-                resId = R.string.saved_match_4_file_key;
-                break;
-
-            case 4:
-                resId = R.string.saved_match_5_file_key;
-                break;
-
-            default:
-                throw new RuntimeException("Position not handled: " + position);
-        }
-
-        return resId;
     }
 }

@@ -139,10 +139,6 @@ public class MainActivity extends BaseActivity {
         openActivity(view, ModeActivity.class);
     }
 
-    public void onClickTutorial(View view) {
-        openActivity(view, TutorialActivity.class);
-    }
-
     public void onClickOptions(View view) {
         openActivity(view, OptionsActivity.class);
     }

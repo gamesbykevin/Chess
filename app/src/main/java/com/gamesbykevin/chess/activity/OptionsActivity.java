@@ -58,13 +58,16 @@ public class OptionsActivity extends BaseActivity {
                 tmp.setChecked(false);
         }
 
+        //obtain the spinner object reference
         Spinner spinner = findViewById(R.id.spinnerDifficulty);
-        spinner.setSelection(getIntValue(R.string.difficulty_file_key));
 
         //assign custom spinner ui layout
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.difficulty_arrays, R.layout.spinner_item);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        //pre-populate the difficulty setting
+        spinner.setSelection(getIntValue(R.string.difficulty_file_key));
     }
 
     @Override

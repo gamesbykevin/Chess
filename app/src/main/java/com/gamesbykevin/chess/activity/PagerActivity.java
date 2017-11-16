@@ -30,7 +30,7 @@ public class PagerActivity extends BaseActivity {
     /**
      * Spacing between each pager dot
      */
-    public static final int PAGE_DOT_PADDING = 5;
+    public static final int PAGE_DOT_PADDING = 15;
 
     //the current page index
     public static int CURRENT_PAGE = 0;
@@ -40,19 +40,19 @@ public class PagerActivity extends BaseActivity {
 
     public enum Type {
         ReplaySelection,
-        ModeSelection,
-        TutorialSelection
+        ModeSelection
     }
 
     /**
      * The total number of pages
      */
-    public static int PAGES = 1;
+    private final int pages;
 
     private final Type type;
 
-    public PagerActivity(final Type type) {
+    public PagerActivity(final Type type, final int pages) {
         this.type = type;
+        this.pages = pages;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class PagerActivity extends BaseActivity {
         customPager = findViewById(R.id.customPager);
 
         //cache all pages to prevent memory leak
-        getCustomPager().setOffscreenPageLimit(PAGES);
+        getCustomPager().setOffscreenPageLimit(this.pages);
 
         //setup the page dots on the bottom
         setupPagerIndicatorDots();
@@ -131,7 +131,7 @@ public class PagerActivity extends BaseActivity {
     private void setupPagerIndicatorDots() {
 
         //the array size will match the number of pages we have
-        listPageImages = new ImageView[PAGES];
+        listPageImages = new ImageView[this.pages];
 
         //create our layout parameters
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -217,8 +217,8 @@ public class PagerActivity extends BaseActivity {
 
                             //scroll to the other side
                             if (CURRENT_PAGE == 0) {
-                                getCustomPager().setCurrentItem(PAGES - 1, true);
-                            } else if (CURRENT_PAGE == PAGES - 1) {
+                                getCustomPager().setCurrentItem(pages - 1, true);
+                            } else if (CURRENT_PAGE == pages - 1) {
                                 getCustomPager().setCurrentItem(0, true);
                             }
                         }
@@ -270,7 +270,7 @@ public class PagerActivity extends BaseActivity {
 
         @Override
         public int getCount() {
-            return PAGES;
+            return pages;
         }
     }
 }

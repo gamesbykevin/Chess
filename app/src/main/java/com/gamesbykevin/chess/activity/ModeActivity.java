@@ -9,15 +9,14 @@ import com.gamesbykevin.chess.R;
 
 public class ModeActivity extends PagerActivity {
 
+    private static final int PAGES = 6;
+
     public ModeActivity() {
-        super(Type.ModeSelection);
+        super(Type.ModeSelection, PAGES);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        //set the total number of pages
-        PAGES = 6;
 
         //inflate content view
         setContentView(R.layout.activity_mode);
@@ -59,9 +58,7 @@ public class ModeActivity extends PagerActivity {
 
     public void onClickStartGame(View view) {
 
-        if (CURRENT_PAGE == 5) {
-
-            PAGES = 5;
+        if (CURRENT_PAGE == PAGES - 1) {
 
             //start replay activity
             startActivity(new Intent(this, ReplayActivity.class));

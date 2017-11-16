@@ -24,9 +24,6 @@
             <Button style="@style/button" android:text="@string/button_text_rate" android:onClick="onClickRate" />
         </TableRow>
         <TableRow style="@style/row">
-            <Button style="@style/button" android:text="@string/button_text_tutorial" android:onClick="onClickTutorial" />
-        </TableRow>
-        <TableRow style="@style/row">
             <Button style="@style/button" android:text="@string/button_text_more" android:onClick="onClickMore" />
         </TableRow>
     </TableLayout>

@@ -15,15 +15,14 @@ public class ReplayActivity extends PagerActivity {
     //do we save the replay
     public static boolean SAVE = false;
 
+    private static final int PAGES = 5;
+
     public ReplayActivity() {
-        super(Type.ReplaySelection);
+        super(Type.ReplaySelection, PAGES);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        //set the total number of pages
-        PAGES = 5;
 
         //inflate content view
         setContentView(R.layout.activity_replay);
@@ -34,8 +33,6 @@ public class ReplayActivity extends PagerActivity {
 
     @Override
     public void onBackPressed() {
-
-        PAGES = 6;
 
         super.onBackPressed();
     }
@@ -76,7 +73,7 @@ public class ReplayActivity extends PagerActivity {
         if (SAVE) {
 
             //determine where to save our game
-            GameHelper.saveHistory(getGame(), GameActivity.getResid(CURRENT_PAGE));
+            GameHelper.saveHistory(getGame(), CURRENT_PAGE);
 
             //go back kto mode activity
             startActivity(new Intent(this, ModeActivity.class));
