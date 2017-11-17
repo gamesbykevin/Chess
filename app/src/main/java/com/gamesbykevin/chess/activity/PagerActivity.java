@@ -12,11 +12,12 @@ import android.widget.LinearLayout;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.fragment.PageFragment;
 import com.gamesbykevin.chess.game.Game;
+import com.gamesbykevin.chess.services.BaseGameActivity;
 
 /**
  * Created by Kevin on 11/12/2017.
  */
-public class PagerActivity extends BaseActivity {
+public class PagerActivity extends BaseGameActivity {
 
     //our pager object that allows horizontal swiping
     private ViewPager customPager;

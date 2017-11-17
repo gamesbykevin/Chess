@@ -1,17 +1,15 @@
 package com.gamesbykevin.chess.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TableLayout;
 import android.widget.Toast;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
@@ -21,18 +19,17 @@ import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
 import com.gamesbykevin.chess.players.PlayerVars;
+import com.gamesbykevin.chess.services.BaseTurnGameActivity;
 import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
-public class GameActivity extends BaseActivity implements Disposable {
+public class GameActivity extends BaseTurnGameActivity implements Disposable {
 
     //our open GL surface view
     private OpenGLSurfaceView glSurfaceView;
@@ -67,9 +64,6 @@ public class GameActivity extends BaseActivity implements Disposable {
 
     //our visual progress bar
     private ProgressBar progressBar;
-
-    //container for our game timer
-    private TableLayout tableTimer;
 
     //our array adapter for the list views
     private ArrayAdapter<String> adapter;
@@ -132,11 +126,8 @@ public class GameActivity extends BaseActivity implements Disposable {
             updateListView(GAME.getHistory().get(i).toString());
         }
 
-        //obtain our game timer container reference
-        this.tableTimer = findViewById(R.id.tableGameTimer);
-
-        //display the timer according to the settings
-        this.tableTimer.setVisibility(getSharedPreferences().getBoolean(getString(R.string.timer_file_key), true) ? VISIBLE : View.INVISIBLE);
+        //default start at top
+        listView.setSelection(0);
 
         //add the layouts to our list
         this.layouts = new ArrayList<>();
@@ -368,7 +359,7 @@ public class GameActivity extends BaseActivity implements Disposable {
 
             //remove layouts from the parent view
             for (int i = 0; i < layouts.size(); i++) {
-                ((ViewGroup)layouts.get(i).getParent()).removeView(layouts.get(i));
+                ((ViewGroup) layouts.get(i).getParent()).removeView(layouts.get(i));
             }
 
             //set the content view for our open gl surface view
@@ -498,7 +489,6 @@ public class GameActivity extends BaseActivity implements Disposable {
 
         //flag save true
         ReplayActivity.SAVE = true;
-
         startActivity(new Intent(this, ReplayActivity.class));
     }
 }

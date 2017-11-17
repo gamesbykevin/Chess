@@ -8,4 +8,8 @@
     <!-- package_name -->
     <string name="package_name" translatable="false">com.gamesbykevin.chess</string>
 
+    <!-- application id -->
+    <string name="app_id" translatable="false">883343446197</string>
+
+
 </resources>

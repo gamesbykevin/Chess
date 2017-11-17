@@ -63,6 +63,11 @@ public class ModeActivity extends PagerActivity {
             //start replay activity
             startActivity(new Intent(this, ReplayActivity.class));
 
+        } else if (CURRENT_PAGE == PAGES - 2 || CURRENT_PAGE == PAGES - 3) {
+
+            //start game activity
+            startActivity(new Intent(this, SkeletonActivity.class));
+
         } else {
 
             //start game activity

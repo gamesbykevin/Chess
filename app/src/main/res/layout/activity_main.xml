@@ -15,7 +15,7 @@
             <Button style="@style/button" android:text="@string/button_text_options" android:onClick="onClickOptions" />
         </TableRow>
         <TableRow style="@style/row">
-            <Button style="@style/button" android:text="@string/button_text_achievements" android:id="@+id/achievements" />
+            <Button style="@style/button" android:text="@string/button_text_achievements" android:id="@+id/achievements" android:onClick="onClickAchievements" />
         </TableRow>
         <TableRow style="@style/row">
             <Button style="@style/button" android:text="@string/button_text_leaderboard" android:onClick="onClickLeaderboards" />

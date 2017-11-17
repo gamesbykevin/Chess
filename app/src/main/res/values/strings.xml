@@ -5,7 +5,6 @@
 
     <!-- keys for shared preferences -->
     <string name="difficulty_file_key" translatable="false">com.gamesbykevin.chess.DIFFICULTY_FILE_KEY</string>
-    <string name="timer_file_key" translatable="false">com.gamesbykevin.chess.TIMER_FILE_KEY</string>
     <string name="google_play_auto_login_file_key" translatable="false">com.gamesbykevin.chess.GOOGLE_PLAY_AUTO_LOGIN_FILE_KEY</string>
 
     <string name="saved_match_1_file_key" translatable="false">com.gamesbykevin.chess.SAVED_MATCH_1_FILE_KEY</string>
@@ -50,8 +49,6 @@
     <string name="vibrate_off">Vibrate: Off</string>
     <string name="sound_on">Sound: On</string>
     <string name="sound_off">Sound: Off</string>
-    <string name="timer_on">Timer: On</string>
-    <string name="timer_off">Timer: Off</string>
     <string name="google_play_auto_enabled">Google Login: On</string>
     <string name="google_play_auto_disabled">Google Login: Off</string>
 
@@ -92,5 +89,32 @@
     <string name="gamehelper_app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
     <string name="gamehelper_license_failed">License check failed.</string>
     <string name="gamehelper_unknown_error">Unknown error.</string>
+
+
+    <string name="hello_world">Hello world!</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="match_instructions">Type in a new word for the data in this game, then hit done.</string>
+    <string name="quick_match">Quick match</string>
+    <string name="done">Done</string>
+    <string name="leave">Leave</string>
+    <string name="cancel">Cancel</string>
+    <string name="finish">Finish</string>
+    <string name="welcome_to_our_skeleton_app_">Welcome to our skeleton app!</string>
+    <string name="check_games">Check games</string>
+    <string name="start_match">Start Match</string>
+    <string name="turn_counter">Turn counter</string>
+    <string name="signin_other_error">There was an issue with sign in.  Please try again later.</string>
+    <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
+    <string name="error_get_inbox_intent">There was a problem getting the inbox intent!</string>
+    <string name="error_get_select_opponents">There was a problem getting the select opponents intent!</string>
+    <string name="turn_label">Turn %1$d</string>
+    <string name="status_multiplayer_error_not_trusted_tester">Anyone you invite must be a trusted tester</string>
+    <string name="match_error_already_rematched">This rematch has already been started!</string>
+    <string name="client_reconnect_required">Games client reconnect required</string>
+    <string name="network_error_operation_failed">Network error: Operation failed</string>
+    <string name="internal_error">Internal error</string>
+    <string name="unexpected_status">Unexpected status</string>
+    <string name="match_error_inactive_match">This match is inactive.</string>
+    <string name='match_error_locally_modified'>This match has locally-modified data. This operation cannot be performed until the match is sent to the server.</string>
 
 </resources>

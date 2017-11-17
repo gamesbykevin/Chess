@@ -22,8 +22,6 @@ import com.google.gson.reflect.TypeToken;
 
 import org.rajawali3d.Object3D;
 import org.rajawali3d.materials.Material;
-import org.rajawali3d.materials.methods.DiffuseMethod;
-import org.rajawali3d.materials.textures.Texture;
 
 import java.util.ArrayList;
 import java.util.List;

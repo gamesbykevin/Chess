@@ -36,16 +36,6 @@
         <TableRow style="@style/row">
             <ToggleButton
                 style="@style/button"
-                android:id="@+id/toggleButtonTimer"
-                android:textOn="@string/timer_on"
-                android:textOff="@string/timer_off"
-                android:onClick="onClickTimer"
-                android:checked="true" />
-        </TableRow>
-
-        <TableRow style="@style/row">
-            <ToggleButton
-                style="@style/button"
                 android:id="@+id/toggleButtonGoogleLogin"
                 android:textOn="@string/google_play_auto_enabled"
                 android:textOff="@string/google_play_auto_disabled"

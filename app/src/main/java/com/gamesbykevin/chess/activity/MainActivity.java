@@ -9,6 +9,7 @@ import android.widget.TableLayout;
 import android.widget.Toast;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseGameActivity {
 
     //did we prompt the user before exiting the app
     private boolean exit = false;
@@ -146,7 +147,7 @@ public class MainActivity extends BaseActivity {
     public void onClickLeaderboards(View view) {
 
         //display all the leader boards
-        //super.displayLeaderboardUI(null);
+        super.displayLeaderboardUI(null);
     }
 
     private void openActivity(View view, Class classObj) {

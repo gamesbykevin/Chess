@@ -3,22 +3,17 @@ package com.gamesbykevin.chess.activity;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
-import org.w3c.dom.Text;
-
 import static com.gamesbykevin.chess.util.UtilityHelper.AMAZON;
 
-public class OptionsActivity extends BaseActivity {
+public class OptionsActivity extends BaseGameActivity {
 
     /**
      * List of toggle buttons in the options
@@ -26,8 +21,7 @@ public class OptionsActivity extends BaseActivity {
     public enum Buttons {
         Sound(R.id.toggleButtonSound, R.string.sound_file_key),
         Vibrate(R.id.toggleButtonVibrate, R.string.vibrate_file_key),
-        GoogleAutoLogin(R.id.toggleButtonGoogleLogin, R.string.google_play_auto_login_file_key),
-        Timer(R.id.toggleButtonTimer, R.string.timer_file_key);
+        GoogleAutoLogin(R.id.toggleButtonGoogleLogin, R.string.google_play_auto_login_file_key);
 
         public final int buttonId, settingId;
 
@@ -153,15 +147,6 @@ public class OptionsActivity extends BaseActivity {
             //if enabled play menu theme
             super.playMenu();
         }
-    }
-
-    public void onClickTimer(View view) {
-
-        //get the button
-        ToggleButton button = view.findViewById(R.id.toggleButtonTimer);
-
-        //update the timer display
-        //GameHelper.TIMER = button.isChecked();
     }
 
     public void onClickGoogleLogin(View view) {
