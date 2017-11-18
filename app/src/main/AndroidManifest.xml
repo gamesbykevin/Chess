@@ -64,7 +64,16 @@
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme">
         </activity>
-        <activity android:name=".activity.SkeletonActivity">
+        <activity
+            android:name=".activity.SkeletonActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@style/AppTheme">
+        </activity>
+        <activity android:name=".activity.RealTimeActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/AppTheme">
         </activity>
     </application>
 

@@ -66,7 +66,7 @@ public class ModeActivity extends PagerActivity {
         } else if (CURRENT_PAGE == PAGES - 2 || CURRENT_PAGE == PAGES - 3) {
 
             //start game activity
-            startActivity(new Intent(this, SkeletonActivity.class));
+            startActivity(new Intent(this, RealTimeActivity.class));
 
         } else {
 
