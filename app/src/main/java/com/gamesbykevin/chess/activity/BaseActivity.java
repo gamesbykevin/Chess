@@ -21,6 +21,8 @@ import static com.gamesbykevin.chess.util.UtilityHelper.displayDensity;
  */
 public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.activity.BaseActivity {
 
+    public static final String TAG = "gamesbykevin";
+
     //our social media urls etc....
     protected static final String URL_YOUTUBE = "https://youtube.com/gamesbykevin";
     protected static final String URL_FACEBOOK = "https://facebook.com/gamesbykevin";

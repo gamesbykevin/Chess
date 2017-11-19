@@ -2,8 +2,6 @@ package com.gamesbykevin.chess.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -19,9 +17,11 @@ import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
 import com.gamesbykevin.chess.players.PlayerVars;
-import com.gamesbykevin.chess.services.BaseTurnGameActivity;
+import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
+import com.google.android.gms.games.InvitationsClient;
+import com.google.android.gms.games.RealTimeMultiplayerClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.List;
 import static android.view.View.VISIBLE;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
-public class GameActivity extends BaseTurnGameActivity implements Disposable {
+public class GameActivity extends BaseGameActivity implements Disposable {
 
     //our open GL surface view
     private OpenGLSurfaceView glSurfaceView;
@@ -46,19 +46,6 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
     //a list of layouts on the game screen, separate from open gl layout
     private List<ViewGroup> layouts;
 
-    /**
-     * Different steps in the game
-     */
-    public enum Screen {
-        Loading,
-        Ready,
-        Settings,
-        ReplayPrompt
-    }
-
-    //current screen we are on
-    private static Screen SCREEN = Screen.Loading;
-
     //keep track of game time
     private GameTimer timer;
 
@@ -71,11 +58,25 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
     //what is the current selected item
     private int selectedListItem;
 
+    // Request codes for the UIs that we show with startActivityForResult:
+    private final static int RC_SELECT_PLAYERS = 10000;
+    private final static int RC_INVITATION_INBOX = 10001;
+    private final static int RC_WAITING_ROOM = 10002;
+
+    // Client used to interact with the real time multiplayer system.
+    private RealTimeMultiplayerClient mRealTimeMultiplayerClient = null;
+
+    // Client used to interact with the Invitation system.
+    private InvitationsClient mInvitationsClient = null;
+
+    //the current screen we are on
+    private static int SCREEN = R.id.layoutLoadingScreen;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //assign screen value
-        SCREEN = Screen.Loading;
+        //loading the game
+        SCREEN = R.id.layoutLoadingScreen;
 
         if (DEBUG)
             UtilityHelper.logEvent("onCreate");
@@ -115,7 +116,6 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
                 }
                 return renderer;
             }
-
         };
 
         //update our list view with the adapter
@@ -296,7 +296,6 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
         glSurfaceView = null;
         layoutParams = null;
         GAME = null;
-        SCREEN = null;
     }
 
     @Override
@@ -321,7 +320,7 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
         glSurfaceView = null;
 
         //go back to loading screen
-        setScreen(Screen.Loading, true);
+        setScreen(R.id.layoutLoadingScreen, true);
 
         //flag render false
         BasicRenderer.RENDER = false;
@@ -383,11 +382,11 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
         updateProgress(0);
     }
 
-    public static Screen getScreen() {
+    public static int getScreen() {
         return SCREEN;
     }
 
-    public void setScreen(final Screen screen, final boolean hide) {
+    public void setScreen(final int screen, final boolean hide) {
 
         //default all layouts to hidden
         if (hide) {
@@ -400,26 +399,26 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
         switch (screen) {
 
             //show loading screen
-            case Loading:
+            case R.id.layoutLoadingScreen:
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutLoadingScreen), true);
                 break;
 
             //decide which game over screen is displayed
-            case Settings:
+            case R.id.layoutGameSettings:
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameSettings), true);
                 break;
 
             //don't re-enable anything
-            case Ready:
+            case R.id.layoutGameControls:
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameControls), true);
                 break;
 
-            case ReplayPrompt:
+            case R.id.layoutGameReplayPrompt:
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameReplayPrompt), true);
                 break;
 
             default:
-                throw new RuntimeException("Screen not handled: " + screen.toString());
+                throw new RuntimeException("Screen not handled: " + screen);
         }
 
         //assign screen to view
@@ -444,7 +443,7 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
         if (PlayerVars.isGameover() && !getGame().hasReplay()) {
 
             //ask the player if they want to save the replay
-            setScreen(Screen.ReplayPrompt, false);
+            setScreen(R.id.layoutGameReplayPrompt, false);
 
         } else {
 
@@ -464,19 +463,19 @@ public class GameActivity extends BaseTurnGameActivity implements Disposable {
     public void onClickSettings(View view) {
 
         //switch our current choice
-        toggleSettings(getScreen() != Screen.Settings);
+        toggleSettings(getScreen() != R.id.layoutGameSettings);
     }
 
     public void toggleSettings(final boolean visible) {
 
         if (visible) {
-            setScreen(Screen.Settings, getScreen() == Screen.Loading);
+            setScreen(R.id.layoutGameSettings, getScreen() == R.id.layoutLoadingScreen);
         } else {
-            setScreen(Screen.Ready, true);
+            setScreen(R.id.layoutGameControls, true);
         }
 
         //we display the positions if we are viewing the settings screen
-        GameHelper.displayPositions(GAME, getScreen() == Screen.Settings);
+        GameHelper.displayPositions(GAME, getScreen() == R.id.layoutGameSettings);
     }
 
     public void onClickNo(View view) {

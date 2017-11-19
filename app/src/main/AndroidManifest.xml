@@ -65,15 +65,12 @@
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name=".activity.SkeletonActivity"
+            android:name=".activity.RealTimeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
         </activity>
-        <activity android:name=".activity.RealTimeActivity"
-                  android:configChanges="orientation|keyboardHidden|screenSize"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme">
+        <activity android:name=".activity.MultiplayerActivity">
         </activity>
     </application>
 

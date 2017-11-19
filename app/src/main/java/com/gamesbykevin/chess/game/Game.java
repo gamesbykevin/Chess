@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.activity.GameActivity;
-import com.gamesbykevin.chess.activity.GameActivity.Screen;
 import com.gamesbykevin.chess.activity.PagerActivity;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.players.Cpu;
@@ -304,7 +303,7 @@ public class Game implements IGame {
             loadPositions(this);
 
             //do we show / hide the positions
-            displayPositions(this, GameActivity.getScreen() == Screen.Settings);
+            displayPositions(this, GameActivity.getScreen() == R.id.layoutGameSettings);
 
             //load the board selection visible / non-visible
             PlayerHelper.loadBoardSelection(this, getActivity().getSurfaceView().getRenderer(), getTextureValid());
@@ -375,8 +374,8 @@ public class Game implements IGame {
             return;
 
         //if still loading display the game
-        if (getActivity().getScreen() == Screen.Loading) {
-            getActivity().setScreen(Screen.Ready, true);
+        if (getActivity().getScreen() == R.id.layoutLoadingScreen) {
+            getActivity().setScreen(R.id.layoutGameControls, true);
 
             //we only want to display the timer if we aren't watching a replay
             if (hasReplay()) {

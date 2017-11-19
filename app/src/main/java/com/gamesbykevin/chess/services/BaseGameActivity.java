@@ -30,8 +30,6 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
     // Requested clients. By default, that's just the games client.
     private int mRequestedClients = CLIENT_GAMES;
 
-    private final static String TAG = "BaseGameActivity";
-
     /**
      * Did we want to access the achievements
      */

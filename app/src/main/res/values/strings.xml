@@ -72,10 +72,10 @@
 
     <!-- different game modes -->
     <string name="game_mode_single_player">Human vs Computer</string>
-    <string name="game_mode_single_player_timed">Human vs Computer (5 min)</string>
+    <string name="game_mode_single_player_timed">Human vs Computer (Speed 5 minutes)</string>
     <string name="game_mode_two_player_offline">Human vs Human (Offline)</string>
     <string name="game_mode_two_player_online">Human vs Human (Online)</string>
-    <string name="game_mode_two_player_online_timed">Human vs Human (Online, 5 min)</string>
+    <string name="game_mode_two_player_online_timed">Human vs Human (Online, Speed 5 minutes)</string>
     <string name="game_mode_replay">Watch Game Replay</string>
 
     <!-- ui messages for google play services -->
@@ -89,8 +89,6 @@
     <string name="gamehelper_app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
     <string name="gamehelper_license_failed">License check failed.</string>
     <string name="gamehelper_unknown_error">Unknown error.</string>
-
-
 
 
     <string name="hello_world">Hello world!</string>
@@ -107,7 +105,6 @@
     <string name="error_get_inbox_intent">There was a problem getting the inbox intent!</string>
     <string name="error_get_select_opponents">There was a problem getting the select opponents intent!</string>
     <string name="turn_label">Turn %1$d</string>
-
 
 
     <string name="game_title">Button Clicker 2000!</string>

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -13,7 +12,9 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.services.BaseGameUtils;
+import com.gamesbykevin.chess.util.UtilityHelper;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -50,19 +51,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class RealTimeActivity extends Activity implements View.OnClickListener {
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
-    /*
-     * API INTEGRATION SECTION. This section contains the code that integrates
-     * the game with the Google Play game services API.
-     */
-
-    final static String TAG = "gamesbykevin";
+public class MultiplayerActivity extends BaseGameActivity {
 
     // Request codes for the UIs that we show with startActivityForResult:
-    final static int RC_SELECT_PLAYERS = 10000;
-    final static int RC_INVITATION_INBOX = 10001;
-    final static int RC_WAITING_ROOM = 10002;
+    private final static int RC_SELECT_PLAYERS = 10000;
+    private final static int RC_INVITATION_INBOX = 10001;
+    private final static int RC_WAITING_ROOM = 10002;
 
     // Request code used to invoke sign in user interactions.
     private static final int RC_SIGN_IN = 9001;
@@ -70,7 +66,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     // Client used to sign in with Google APIs
     private GoogleSignInClient mGoogleSignInClient = null;
 
-    // Client used to interact with the real time multiplayer system.
+    // Client used to interact with the real time multi-player system.
     private RealTimeMultiplayerClient mRealTimeMultiplayerClient = null;
 
     // Client used to interact with the Invitation system.
@@ -83,11 +79,8 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     // Holds the configuration of the current room.
     RoomConfig mRoomConfig;
 
-    // Are we playing in multiplayer mode?
+    // Are we playing in multi-player mode?
     boolean mMultiplayer = false;
-
-    // The participants in the currently active game
-    ArrayList<Participant> mParticipants = null;
 
     // My participant ID in the currently active game
     String mMyId = null;
@@ -99,26 +92,29 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     // Message buffer for sending messages
     byte[] mMsgBuf = new byte[2];
 
+    // This array lists all the individual screens our game has.
+    final static int[] SCREENS = {
+        R.id.screen_main, R.id.screen_wait
+    };
+
+    // The participants in the currently active game
+    ArrayList<Participant> mParticipants = null;
+
+    int mCurScreen = -1;
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_real_time);
+        setContentView(R.layout.activity_multiplayer);
 
         // Create the client used to sign in.
         mGoogleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
-
-        // set up a click listener for everything we care about
-        for (int id : CLICKABLES) {
-            findViewById(id).setOnClickListener(this);
-        }
-
-        switchToMainScreen();
     }
 
     @Override
     protected void onResume() {
+
         super.onResume();
-        Log.d(TAG, "onResume()");
 
         // Since the state of the signed in user can change when the activity is not active
         // it is recommended to try and sign in silently from when the app resumes.
@@ -135,117 +131,56 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    public void onClickInvite(View view) {
+        switchToScreen(R.id.screen_wait);
 
-            case R.id.button_single_player:
-            case R.id.button_single_player_2:
-                // play a single-player game
-                resetGameVars();
-                startGame(true);
-                break;
-
-            case R.id.button_sign_in:
-                // user wants to sign in
-                // Check to see the developer who's running this sample code read the instructions :-)
-                // NOTE: this check is here only because this is a sample! Don't include this
-                // check in your actual production app.
-                if (!BaseGameUtils.verifySampleSetup(this, R.string.app_id)) {
-                    Log.w(TAG, "*** Warning: setup problems detected. Sign in may not work!");
+        // show list of players who can be invited
+        mRealTimeMultiplayerClient.getSelectOpponentsIntent(1, 1).addOnSuccessListener(
+            new OnSuccessListener<Intent>() {
+                @Override
+                public void onSuccess(Intent intent) {
+                    startActivityForResult(intent, RC_SELECT_PLAYERS);
                 }
-
-                // start the sign-in flow
-                Log.d(TAG, "Sign-in button clicked");
-                startSignInIntent();
-                break;
-
-            case R.id.button_sign_out:
-                // user wants to sign out
-                // sign out.
-                Log.d(TAG, "Sign-out button clicked");
-                signOut();
-                switchToScreen(R.id.screen_sign_in);
-                break;
-
-            case R.id.button_invite_players:
-                switchToScreen(R.id.screen_wait);
-
-                // show list of players who can be invited
-                mRealTimeMultiplayerClient.getSelectOpponentsIntent(1, 3).addOnSuccessListener(
-                    new OnSuccessListener<Intent>() {
-                        @Override
-                        public void onSuccess(Intent intent) {
-                            startActivityForResult(intent, RC_SELECT_PLAYERS);
-                        }
-                    }
-                ).addOnFailureListener(createFailureListener("There was a problem selecting opponents."));
-                break;
-
-            case R.id.button_see_invitations:
-                switchToScreen(R.id.screen_wait);
-
-                // show list of pending invitations
-                mInvitationsClient.getInvitationInboxIntent().addOnSuccessListener(
-                        new OnSuccessListener<Intent>() {
-                            @Override
-                            public void onSuccess(Intent intent) {
-                                startActivityForResult(intent, RC_INVITATION_INBOX);
-                            }
-                        }
-                ).addOnFailureListener(createFailureListener("There was a problem getting the inbox."));
-                break;
-
-            case R.id.button_accept_popup_invitation:
-                // user wants to accept the invitation shown on the invitation popup
-                // (the one we got through the OnInvitationReceivedListener).
-                acceptInviteToRoom(mIncomingInvitationId);
-                mIncomingInvitationId = null;
-                break;
-
-            case R.id.button_quick_game:
-                // user wants to play against a random opponent right now
-                startQuickGame();
-                break;
-
-            case R.id.button_click_me:
-                // (gameplay) user clicked the "click me" button
-                scoreOnePoint();
-                break;
-        }
+            }
+        ).addOnFailureListener(createFailureListener("There was a problem selecting opponents."));
     }
 
-    void startQuickGame() {
+    public void onClickViewInvitations(View view) {
+        switchToScreen(R.id.screen_wait);
 
-        Log.d(TAG, "startQuickGame: 0");
+        // show list of pending invitations
+        mInvitationsClient.getInvitationInboxIntent().addOnSuccessListener(
+            new OnSuccessListener<Intent>() {
+                @Override
+                public void onSuccess(Intent intent) {
+                    startActivityForResult(intent, RC_INVITATION_INBOX);
+                }
+            }
+        ).addOnFailureListener(createFailureListener("There was a problem getting the inbox."));
+    }
+
+    public void onClickAcceptInvitation(View view) {
+
+        // user wants to accept the invitation shown on the invitation popup
+        // (the one we got through the OnInvitationReceivedListener).
+        acceptInviteToRoom(mIncomingInvitationId);
+        mIncomingInvitationId = null;
+    }
+
+    public void onClickQuickMatch(View view) {
 
         // quick-start a game with 1 randomly selected opponent
         final int MIN_OPPONENTS = 1, MAX_OPPONENTS = 1;
         Bundle autoMatchCriteria = RoomConfig.createAutoMatchCriteria(MIN_OPPONENTS, MAX_OPPONENTS, 0);
-        Log.d(TAG, "startQuickGame: 1");
         switchToScreen(R.id.screen_wait);
-        Log.d(TAG, "startQuickGame: 2");
         keepScreenOn();
-        Log.d(TAG, "startQuickGame: 3");
-        resetGameVars();
-        Log.d(TAG, "startQuickGame: 4");
 
         mRoomConfig = RoomConfig.builder(mRoomUpdateCallback)
-            .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
-            .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback)
-            .setAutoMatchCriteria(autoMatchCriteria)
-            .build();
-        Log.d(TAG, "startQuickGame: 5");
+                .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
+                .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback)
+                .setAutoMatchCriteria(autoMatchCriteria)
+                .build();
         mRealTimeMultiplayerClient.create(mRoomConfig);
-        Log.d(TAG, "startQuickGame: 6");
-    }
-
-    /**
-     * Start a sign in activity.  To properly handle the result, call tryHandleSignInResult from
-     * your Activity's onActivityResult function
-     */
-    public void startSignInIntent() {
-        startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
     }
 
     /**
@@ -257,93 +192,42 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         Log.d(TAG, "signInSilently()");
 
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
-                new OnCompleteListener<GoogleSignInAccount>() {
-                    @Override
-                    public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signInSilently(): success");
-                            onConnected(task.getResult());
-                        } else {
-                            Log.d(TAG, "signInSilently(): failure", task.getException());
-                            onDisconnected();
-                        }
-                    }
-                });
-    }
-
-    public void signOut() {
-        Log.d(TAG, "signOut()");
-
-        mGoogleSignInClient.signOut().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signOut(): success");
-                        } else {
-                            handleException(task.getException(), "signOut() failed!");
-                        }
-
+            new OnCompleteListener<GoogleSignInAccount>() {
+                @Override
+                public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "signInSilently(): success");
+                        onConnected(task.getResult());
+                    } else {
+                        Log.d(TAG, "signInSilently(): failure", task.getException());
                         onDisconnected();
                     }
-                });
+                }
+        });
     }
 
-    /**
-     * Since a lot of the operations use tasks, we can use a common handler for whenever one fails.
-     *
-     * @param exception The exception to evaluate.  Will try to display a more descriptive reason for the exception.
-     * @param details   Will display alongside the exception if you wish to provide more details for why the exception
-     *                  happened
-     */
-    private void handleException(Exception exception, String details) {
-        int status = 0;
 
-        if (exception instanceof ApiException) {
-            ApiException apiException = (ApiException) exception;
-            status = apiException.getStatusCode();
+    void switchToScreen(int screenId) {
+
+        // make the requested screen visible; hide all others.
+        for (int id : SCREENS) {
+            findViewById(id).setVisibility(screenId == id ? View.VISIBLE : View.GONE);
         }
+        mCurScreen = screenId;
 
-        String errorString = null;
-
-        switch (status) {
-            case GamesCallbackStatusCodes.OK:
-                break;
-            case GamesClientStatusCodes.MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER:
-                errorString = getString(R.string.status_multiplayer_error_not_trusted_tester);
-                break;
-            case GamesClientStatusCodes.MATCH_ERROR_ALREADY_REMATCHED:
-                errorString = getString(R.string.match_error_already_rematched);
-                break;
-            case GamesClientStatusCodes.NETWORK_ERROR_OPERATION_FAILED:
-                errorString = getString(R.string.network_error_operation_failed);
-                break;
-            case GamesClientStatusCodes.INTERNAL_ERROR:
-                errorString = getString(R.string.internal_error);
-                break;
-            case GamesClientStatusCodes.MATCH_ERROR_INACTIVE_MATCH:
-                errorString = getString(R.string.match_error_inactive_match);
-                break;
-            case GamesClientStatusCodes.MATCH_ERROR_LOCALLY_MODIFIED:
-                errorString = getString(R.string.match_error_locally_modified);
-                break;
-            default:
-                errorString = getString(R.string.unexpected_status, GamesClientStatusCodes.getStatusCodeString(status));
-                break;
+        // should we show the invitation popup?
+        boolean showInvPopup;
+        if (mIncomingInvitationId == null) {
+            // no invitation, so no popup
+            showInvPopup = false;
+        } else if (mMultiplayer) {
+            // if in multiplayer, only show invitation on main screen
+            showInvPopup = (mCurScreen == R.id.screen_main);
+        } else {
+            // single-player: show on main screen and gameplay screen
+            showInvPopup = (mCurScreen == R.id.screen_main || mCurScreen == R.id.screen_game);
         }
-
-        if (errorString == null) {
-            return;
-        }
-
-        String message = getString(R.string.status_exception_error, details, status, exception);
-
-        new AlertDialog.Builder(RealTimeActivity.this)
-                .setTitle("Error")
-                .setMessage(message + "\n" + errorString)
-                .setNeutralButton(android.R.string.ok, null)
-                .show();
+        findViewById(R.id.invitation_popup).setVisibility(showInvPopup ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -384,7 +268,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
             if (resultCode == Activity.RESULT_OK) {
                 // ready to start playing
                 Log.d(TAG, "Starting game (waiting room returned OK).");
-                startGame(true);
+                //startGame(true);
             } else if (resultCode == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
                 // player indicated that they want to leave the room
                 leaveRoom();
@@ -404,7 +288,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** select players UI cancelled, " + response);
-            switchToMainScreen();
+            switchToScreen(R.id.screen_main);
             return;
         }
 
@@ -428,7 +312,6 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         Log.d(TAG, "Creating room...");
         switchToScreen(R.id.screen_wait);
         keepScreenOn();
-        resetGameVars();
 
         mRoomConfig = RoomConfig.builder(mRoomUpdateCallback)
                 .addPlayersToInvite(invitees)
@@ -444,7 +327,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     private void handleInvitationInboxResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
-            switchToMainScreen();
+            switchToScreen(R.id.screen_main);
             return;
         }
 
@@ -470,7 +353,6 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
 
         switchToScreen(R.id.screen_wait);
         keepScreenOn();
-        resetGameVars();
 
         mRealTimeMultiplayerClient.join(mRoomConfig)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -492,7 +374,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         // stop trying to keep the screen on
         stopKeepingScreenOn();
 
-        switchToMainScreen();
+        switchToScreen(R.id.screen_main);
 
         super.onStop();
     }
@@ -510,7 +392,6 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     // Leave the room.
     void leaveRoom() {
         Log.d(TAG, "Leaving room.");
-        mSecondsLeft = 0;
         stopKeepingScreenOn();
         if (mRoomId != null) {
             mRealTimeMultiplayerClient.leave(mRoomConfig, mRoomId)
@@ -523,7 +404,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
                     });
             switchToScreen(R.id.screen_wait);
         } else {
-            switchToMainScreen();
+            switchToScreen(R.id.screen_main);
         }
     }
 
@@ -569,6 +450,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         }
     };
 
+
     /*
      * CALLBACKS SECTION. This section shows how we implement the several games
      * API callbacks.
@@ -587,7 +469,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
 
             // update the clients
             mRealTimeMultiplayerClient = Games.getRealTimeMultiplayerClient(this, googleSignInAccount);
-            mInvitationsClient = Games.getInvitationsClient(RealTimeActivity.this, googleSignInAccount);
+            mInvitationsClient = Games.getInvitationsClient(MultiplayerActivity.this, googleSignInAccount);
 
             // get the playerId from the PlayersClient
             PlayersClient playersClient = Games.getPlayersClient(this, googleSignInAccount);
@@ -607,7 +489,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
 
         // get the invitation from the connection hint
         // Retrieve the TurnBasedMatch from the connectionHint
-        GamesClient gamesClient = Games.getGamesClient(RealTimeActivity.this, googleSignInAccount);
+        GamesClient gamesClient = Games.getGamesClient(MultiplayerActivity.this, googleSignInAccount);
         gamesClient.getActivationHint()
                 .addOnSuccessListener(new OnSuccessListener<Bundle>() {
                     @Override
@@ -626,7 +508,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
                 })
                 .addOnFailureListener(createFailureListener("There was a problem getting the activation hint!"));
 
-        switchToMainScreen();
+        switchToScreen(R.id.screen_main);
     }
 
     private OnFailureListener createFailureListener(final String string) {
@@ -644,7 +526,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         mRealTimeMultiplayerClient = null;
         mInvitationsClient = null;
 
-        switchToMainScreen();
+        switchToScreen(R.id.screen_main);
     }
 
     private RoomStatusUpdateCallback mRoomStatusUpdateCallback = new RoomStatusUpdateCallback() {
@@ -734,7 +616,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     // Show error message about game being cancelled and return to main screen.
     void showGameError() {
         BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
-        switchToMainScreen();
+        switchToScreen(R.id.screen_main);
     }
 
     private RoomUpdateCallback mRoomUpdateCallback = new RoomUpdateCallback() {
@@ -787,7 +669,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         public void onLeftRoom(int statusCode, @NonNull String roomId) {
             // we have left the room; return to main screen.
             Log.d(TAG, "onLeftRoom, code " + statusCode);
-            switchToMainScreen();
+            switchToScreen(R.id.screen_main);
         }
     };
 
@@ -796,83 +678,8 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
             mParticipants = room.getParticipants();
         }
         if (mParticipants != null) {
-            updatePeerScoresDisplay();
+            //updatePeerScoresDisplay();
         }
-    }
-
-    /*
-     * GAME LOGIC SECTION. Methods that implement the game's rules.
-     */
-
-    // Current state of the game:
-    int mSecondsLeft = -1; // how long until the game ends (seconds)
-    final static int GAME_DURATION = 20; // game duration, seconds.
-    int mScore = 0; // user's current score
-
-    // Reset game variables in preparation for a new game.
-    void resetGameVars() {
-        mSecondsLeft = GAME_DURATION;
-        mScore = 0;
-        mParticipantScore.clear();
-        mFinishedParticipants.clear();
-    }
-
-    // Start the gameplay phase of the game.
-    void startGame(boolean multiplayer) {
-
-        Log.d(TAG, "startGame");
-
-        Log.d(TAG, "multiplayer: " + multiplayer);
-        mMultiplayer = new Boolean(multiplayer);
-        Log.d(TAG, "mMultiplayer: " + mMultiplayer);
-
-        updateScoreDisplay();
-        broadcastScore(false);
-        switchToScreen(R.id.screen_game);
-
-        findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
-
-        // run the gameTick() method every second to update the game.
-        final Handler h = new Handler();
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mSecondsLeft <= 0) {
-                    return;
-                }
-                gameTick();
-                h.postDelayed(this, 1000);
-            }
-        }, 1000);
-    }
-
-    // Game tick -- update countdown, check if game ended.
-    void gameTick() {
-        if (mSecondsLeft > 0) {
-            --mSecondsLeft;
-        }
-
-        // update countdown
-        ((TextView)findViewById(R.id.countdown)).setText("0:" + (mSecondsLeft < 10 ? "0" : "") + String.valueOf(mSecondsLeft));
-
-        if (mSecondsLeft <= 0) {
-            // finish game
-            findViewById(R.id.button_click_me).setVisibility(View.GONE);
-            broadcastScore(true);
-        }
-    }
-
-    // indicates the player scored one point
-    void scoreOnePoint() {
-        if (mSecondsLeft <= 0) {
-            return; // too late!
-        }
-        ++mScore;
-        updateScoreDisplay();
-        updatePeerScoresDisplay();
-
-        // broadcast our new score to our peers
-        broadcastScore(false);
     }
 
     /*
@@ -917,9 +724,6 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
                     mParticipantScore.put(sender, thisScore);
                 }
 
-                // update the scores on the screen
-                updatePeerScoresDisplay();
-
                 // if it's a final score, mark this participant as having finished
                 // the game
                 if ((char) buf[0] == 'F') {
@@ -950,7 +754,7 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
         mMsgBuf[0] = (byte) (finalScore ? 'F' : 'U');
 
         // Second byte is the score.
-        mMsgBuf[1] = (byte) mScore;
+        //mMsgBuf[1] = (byte) mScore;
 
         // Send to every other participant.
         for (Participant p : mParticipants) {
@@ -981,130 +785,10 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
             } else {
                 // it's an interim score notification, so we can use unreliable
                 mRealTimeMultiplayerClient.sendUnreliableMessage(mMsgBuf, mRoomId, p.getParticipantId());
-                Log.d(TAG, "Seny unreliable message");
+                Log.d(TAG, "Send unreliable message");
             }
         }
     }
-
-    /*
-     * UI SECTION. Methods that implement the game's UI.
-     */
-
-    // This array lists everything that's clickable, so we can install click
-    // event handlers.
-    final static int[] CLICKABLES = {
-            R.id.button_accept_popup_invitation, R.id.button_invite_players,
-            R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
-            R.id.button_sign_out, R.id.button_click_me, R.id.button_single_player,
-            R.id.button_single_player_2
-    };
-
-    // This array lists all the individual screens our game has.
-    final static int[] SCREENS = {
-            R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
-            R.id.screen_wait
-    };
-    int mCurScreen = -1;
-
-    void switchToScreen(int screenId) {
-
-        // make the requested screen visible; hide all others.
-        for (int id : SCREENS) {
-            findViewById(id).setVisibility(screenId == id ? View.VISIBLE : View.GONE);
-        }
-        mCurScreen = screenId;
-
-
-        Log.d(TAG, "switchToScreen: " + screenId);
-
-        // should we show the invitation popup?
-        boolean showInvPopup;
-        if (mIncomingInvitationId == null) {
-            // no invitation, so no popup
-            showInvPopup = false;
-            Log.d(TAG, "switchToScreen - 1");
-        } else if (mMultiplayer) {
-            // if in multiplayer, only show invitation on main screen
-            showInvPopup = (mCurScreen == R.id.screen_main);
-            Log.d(TAG, "switchToScreen - 2");
-        } else {
-            // single-player: show on main screen and gameplay screen
-            showInvPopup = (mCurScreen == R.id.screen_main || mCurScreen == R.id.screen_game);
-            Log.d(TAG, "switchToScreen - 3");
-        }
-        findViewById(R.id.invitation_popup).setVisibility(showInvPopup ? View.VISIBLE : View.GONE);
-    }
-
-    void switchToMainScreen() {
-        if (mRealTimeMultiplayerClient != null) {
-            switchToScreen(R.id.screen_main);
-        } else {
-            switchToScreen(R.id.screen_sign_in);
-        }
-    }
-
-    // updates the label that shows my score
-    void updateScoreDisplay() {
-        ((TextView) findViewById(R.id.my_score)).setText(formatScore(mScore));
-    }
-
-    // formats a score as a three-digit number
-    String formatScore(int i) {
-        if (i < 0) {
-            i = 0;
-        }
-        String s = String.valueOf(i);
-        return s.length() == 1 ? "00" + s : s.length() == 2 ? "0" + s : s;
-    }
-
-    // updates the screen with the scores from our peers
-    void updatePeerScoresDisplay() {
-        ((TextView)findViewById(R.id.score0)).setText(getString(R.string.score_label, formatScore(mScore)));
-        int[] arr = {
-                R.id.score1, R.id.score2, R.id.score3
-        };
-        int i = 0;
-
-        if (mRoomId != null) {
-
-            Log.d(TAG, "mMyId: " + mMyId);
-            Log.d(TAG, "mRoomId: " + mRoomId);
-
-            for (Participant p : mParticipants) {
-                String pid = p.getParticipantId();
-
-                Log.d(TAG, "Participant id: " + pid);
-                Log.d(TAG, "Participant name: " + p.getDisplayName());
-                Log.d(TAG, "Participant status: " + p.getStatus());
-
-                if (pid.equals(mMyId)) {
-                    continue;
-                }
-                if (p.getStatus() != Participant.STATUS_JOINED) {
-                    continue;
-                }
-
-                int score = mParticipantScore.containsKey(pid) ? mParticipantScore.get(pid) : 0;
-                Log.d(TAG, "Participant score: " + score);
-
-                ((TextView)findViewById(arr[i])).setText(formatScore(score) + " - " + p.getDisplayName());
-                ++i;
-            }
-        } else {
-            Log.d(TAG, "No room id");
-        }
-
-        for (; i < arr.length; ++i) {
-
-            Log.d(TAG, "Any missing: " + i);
-            ((TextView) findViewById(arr[i])).setText("");
-        }
-    }
-
-    /*
-     * MISC SECTION. Miscellaneous methods.
-     */
-
 
     // Sets the flag to keep this screen on. It's recommended to do that during
     // the
@@ -1119,4 +803,61 @@ public class RealTimeActivity extends Activity implements View.OnClickListener {
     void stopKeepingScreenOn() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
+
+    /**
+     * Since a lot of the operations use tasks, we can use a common handler for whenever one fails.
+     *
+     * @param exception The exception to evaluate.  Will try to display a more descriptive reason for the exception.
+     * @param details   Will display alongside the exception if you wish to provide more details for why the exception
+     *                  happened
+     */
+    private void handleException(Exception exception, String details) {
+        int status = 0;
+
+        if (exception instanceof ApiException) {
+            ApiException apiException = (ApiException) exception;
+            status = apiException.getStatusCode();
+        }
+
+        String errorString = null;
+
+        switch (status) {
+            case GamesCallbackStatusCodes.OK:
+                break;
+            case GamesClientStatusCodes.MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER:
+                errorString = getString(R.string.status_multiplayer_error_not_trusted_tester);
+                break;
+            case GamesClientStatusCodes.MATCH_ERROR_ALREADY_REMATCHED:
+                errorString = getString(R.string.match_error_already_rematched);
+                break;
+            case GamesClientStatusCodes.NETWORK_ERROR_OPERATION_FAILED:
+                errorString = getString(R.string.network_error_operation_failed);
+                break;
+            case GamesClientStatusCodes.INTERNAL_ERROR:
+                errorString = getString(R.string.internal_error);
+                break;
+            case GamesClientStatusCodes.MATCH_ERROR_INACTIVE_MATCH:
+                errorString = getString(R.string.match_error_inactive_match);
+                break;
+            case GamesClientStatusCodes.MATCH_ERROR_LOCALLY_MODIFIED:
+                errorString = getString(R.string.match_error_locally_modified);
+                break;
+            default:
+                errorString = getString(R.string.unexpected_status, GamesClientStatusCodes.getStatusCodeString(status));
+                break;
+        }
+
+        if (errorString == null) {
+            return;
+        }
+
+        String message = getString(R.string.status_exception_error, details, status, exception);
+
+        new AlertDialog.Builder(MultiplayerActivity.this)
+                .setTitle("Error")
+                .setMessage(message + "\n" + errorString)
+                .setNeutralButton(android.R.string.ok, null)
+                .show();
+    }
+
 }
