@@ -66,11 +66,16 @@ public class Human extends Player {
         if (game.hasReplay())
             return;
 
+        //if the player is an opponent online, we won't update here
+        if (isOnline())
+            return;
+
         //update the game timer
         game.getActivity().getTimer().update(game.getActivity());
 
         //only continue if we are selecting or promoting
         switch (PlayerVars.STATUS) {
+
             case Select:
             case Promote:
                 break;

@@ -24,4 +24,7 @@
     <!-- Splash page layout -->
     <include layout="@layout/activity_splash" android:id="@+id/layoutLoadingScreen" />
 
+    <!-- multi player lobby -->
+    <include layout="@layout/layout_game_multiplayer" android:id="@+id/layoutGameMultiplayer" />
+
 </merge>

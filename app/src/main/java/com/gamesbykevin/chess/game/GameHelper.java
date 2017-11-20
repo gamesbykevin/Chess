@@ -209,8 +209,8 @@ public class GameHelper {
                 continue;
 
             //if the opponents piece is at the same location, we can capture
-            if ((int) piece.getCol() == (int)game.getSelected().getCol() &&
-                    (int) piece.getRow() == (int)game.getSelected().getRow()) {
+            if ((int)piece.getCol() == (int)game.getSelected().getCol() &&
+                (int)piece.getRow() == (int)game.getSelected().getRow()) {
 
                 //remove from object picker
                 game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
@@ -287,6 +287,16 @@ public class GameHelper {
 
             //if we aren't promoting a piece, switch turns
             game.switchTurns();
+        }
+
+        //if our opponent is online let's send the move to our opponent
+        if (opponent.isOnline()) {
+
+            //get the last move
+            Move move = game.getHistory().get(game.getHistory().size() - 1);
+
+            //send move to our opponent
+            game.getActivity().sendMove(move.sourceCol, move.sourceRow, move.destCol, move.destRow);
         }
 
         //if we have replay enabled, change the index

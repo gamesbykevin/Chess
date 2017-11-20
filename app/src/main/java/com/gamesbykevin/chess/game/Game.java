@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.activity.GameActivity;
+import com.gamesbykevin.chess.activity.GameActivityHelper;
 import com.gamesbykevin.chess.activity.PagerActivity;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.players.Cpu;
@@ -26,6 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
+import static com.gamesbykevin.chess.activity.MultiplayerActivity.MULTI_PLAYER;
+import static com.gamesbykevin.chess.activity.MultiplayerActivity.PLAYER_1;
+import static com.gamesbykevin.chess.activity.MultiplayerActivity.STARTED;
 import static com.gamesbykevin.chess.game.GameHelper.createMaterials;
 import static com.gamesbykevin.chess.game.GameHelper.displayPositions;
 import static com.gamesbykevin.chess.game.GameHelper.getResidFile;
@@ -155,6 +159,8 @@ public class Game implements IGame {
                 case HumVsHumOffline:
                 case HumVsHumOnline:
                 case HumVsHumOnlineTimed:
+
+                    //which one is online?
                     this.player1 = new Human(Player.Direction.North);
                     this.player2 = new Human(Player.Direction.South);
                     break;
@@ -245,7 +251,7 @@ public class Game implements IGame {
         this.history.add(move);
 
         //update list view
-        getActivity().updateListView(move.toString());
+        GameActivityHelper.updateListView(getActivity(), move.toString());
 
         if (DEBUG)
             UtilityHelper.logEvent("History saved (" + move.sourceCol +  "," + move.sourceRow + ") (" + move.destCol + "," + move.destRow + ")");
@@ -375,6 +381,25 @@ public class Game implements IGame {
 
         //if still loading display the game
         if (getActivity().getScreen() == R.id.layoutLoadingScreen) {
+
+            //if we are playing multi-player
+            if (MULTI_PLAYER) {
+
+                //did we decide who goes first?
+                if (STARTED) {
+
+                    //decide who is
+                    getPlayer1().setOnline(!PLAYER_1);
+                    getPlayer2().setOnline(PLAYER_1);
+
+                    if (DEBUG)
+                        getActivity().displayMessage(PLAYER_1 ? "You are player 1" : "You are player 2");
+
+                } else {
+                    return;
+                }
+            }
+
             getActivity().setScreen(R.id.layoutGameControls, true);
 
             //we only want to display the timer if we aren't watching a replay
@@ -384,7 +409,7 @@ public class Game implements IGame {
                 getActivity().displayTimer(false);
 
                 //display history
-                getActivity().toggleSettings(true);
+                GameActivityHelper.toggleSettings(getActivity(), true);
 
             } else {
 
@@ -392,7 +417,7 @@ public class Game implements IGame {
                 getActivity().displayTimer(true);
 
                 //hide history
-                getActivity().toggleSettings(false);
+                GameActivityHelper.toggleSettings(getActivity(), false);
 
                 //setup the timer right
                 switch (getMode()) {
@@ -415,7 +440,7 @@ public class Game implements IGame {
         switch(PlayerVars.STATUS) {
 
             case Move:
-                move();
+                GameHelper.move(this);
                 break;
 
             case Select:
@@ -429,7 +454,7 @@ public class Game implements IGame {
                     if (INDEX_REPLAY < getHistory().size()) {
 
                         //update to our current move
-                        getActivity().updateListView(INDEX_REPLAY);
+                        GameActivityHelper.updateListView(getActivity(), INDEX_REPLAY);
 
                         //if we have replay get the current move
                         Move move = getHistory().get(INDEX_REPLAY);
@@ -575,9 +600,5 @@ public class Game implements IGame {
 
     public Player getPlayer() {
         return PLAYER_1_TURN ? getPlayer1() : getPlayer2();
-    }
-
-    private void move() {
-        GameHelper.move(this);
     }
 }

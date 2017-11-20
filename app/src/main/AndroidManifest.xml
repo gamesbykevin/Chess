@@ -62,16 +62,8 @@
             android:name=".activity.ReplayActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape"
-            android:theme="@style/AppTheme">
-        </activity>
-        <activity
-            android:name=".activity.RealTimeActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
-        </activity>
-        <activity android:name=".activity.MultiplayerActivity">
-        </activity>
+            android:theme="@style/AppTheme"/>
+
     </application>
 
 </manifest>

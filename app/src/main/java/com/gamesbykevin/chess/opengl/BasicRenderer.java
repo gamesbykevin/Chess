@@ -231,11 +231,8 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (PlayerVars.STATUS != PlayerVars.Status.Select && PlayerVars.STATUS != PlayerVars.Status.Promote)
             return;
 
-        //get the current player
-        Player player = PlayerVars.PLAYER_1_TURN ? getGame().getPlayer1() : getGame().getPlayer2();
-
-        //if the player isn't human, we can't select anything right now
-        if (!player.isHuman())
+        //if the current player isn't human or remotely away online, we can't select anything
+        if (!getGame().getPlayer().isHuman() || getGame().getPlayer().isOnline())
             return;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -347,6 +344,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     public void onRender(final long elapsedTime, final double deltaTime) {
 
         if (!INIT)
+            return;
+
+        if (getGame() == null)
             return;
 
         if (getGame().getPlayer() == null)

@@ -21,10 +21,6 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
      */
     public static final int FPS = 90;
 
-    public static final int WIDTH = 800;
-
-    public static final int HEIGHT = 480;
-
     /**
      * The version of open GL we are using
      */
@@ -245,7 +241,7 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
         if (System.currentTimeMillis() - timestamp >= MILLISECONDS_PER_SECOND) {
 
             //print progress
-            UtilityHelper.logEvent("FPS: " + frames);
+            //UtilityHelper.logEvent("FPS: " + frames);
 
             //reset timer for next update
             timestamp = System.currentTimeMillis();
@@ -264,7 +260,8 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
         this.previousUpdate = System.currentTimeMillis();
 
         //update game logic here
-        getGame().update();
+        if (getGame() != null)
+            getGame().update();
 
         //track time after update
         this.postUpdate = System.currentTimeMillis();

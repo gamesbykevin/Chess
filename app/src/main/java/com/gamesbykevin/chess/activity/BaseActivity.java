@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.util.UtilityHelper;
@@ -14,6 +15,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.gamesbykevin.chess.util.UtilityHelper.AMAZON;
+import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 import static com.gamesbykevin.chess.util.UtilityHelper.displayDensity;
 
 /**
@@ -321,5 +323,22 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
                 }
             }
         });
+    }
+
+    public void displayMessage(final int resid) {
+        displayMessage(getString(resid));
+    }
+
+    public void displayMessage(final String message) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (DEBUG)
+            UtilityHelper.logEvent(message);
     }
 }

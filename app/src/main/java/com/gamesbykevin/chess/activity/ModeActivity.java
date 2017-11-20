@@ -7,6 +7,8 @@ import android.view.View;
 
 import com.gamesbykevin.chess.R;
 
+import static com.gamesbykevin.chess.activity.MultiplayerActivity.MULTI_PLAYER;
+
 public class ModeActivity extends PagerActivity {
 
     private static final int PAGES = 6;
@@ -58,6 +60,9 @@ public class ModeActivity extends PagerActivity {
 
     public void onClickStartGame(View view) {
 
+        //flag multi-player false
+        MULTI_PLAYER = false;
+
         if (CURRENT_PAGE == PAGES - 1) {
 
             //start replay activity
@@ -65,8 +70,11 @@ public class ModeActivity extends PagerActivity {
 
         } else if (CURRENT_PAGE == PAGES - 2 || CURRENT_PAGE == PAGES - 3) {
 
+            //flag multi-player true
+            MULTI_PLAYER = true;
+
             //start game activity
-            startActivity(new Intent(this, MultiplayerActivity.class));
+            startActivity(new Intent(this, GameActivity.class));
 
         } else {
 

@@ -20,7 +20,11 @@ public abstract class Player implements Disposable {
     //list of pieces and its clone
     private ArrayList<Piece> pieces, clone;
 
+    //is the player human?
     private final boolean human;
+
+    //is the player online?
+    private boolean online;
 
     public enum Direction {
         North, South
@@ -32,6 +36,7 @@ public abstract class Player implements Disposable {
     //is the player in check
     private boolean check = false;
 
+    //the name of the player
     private String name = "";
 
     protected Player(final boolean human, final Direction direction) {
@@ -187,6 +192,14 @@ public abstract class Player implements Disposable {
 
     public boolean isHuman() {
         return this.human;
+    }
+
+    public boolean isOnline() {
+        return this.online;
+    }
+
+    public void setOnline(final boolean online) {
+        this.online = online;
     }
 
     public Piece getPiece(Type type) {

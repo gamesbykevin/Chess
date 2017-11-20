@@ -1,35 +1,40 @@
 package com.gamesbykevin.chess.activity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
-import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.opengl.BasicRenderer;
 import com.gamesbykevin.chess.opengl.OpenGLSurfaceView;
 import com.gamesbykevin.chess.players.PlayerVars;
-import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.util.GameTimer;
 import com.gamesbykevin.chess.util.UtilityHelper;
-import com.google.android.gms.games.InvitationsClient;
-import com.google.android.gms.games.RealTimeMultiplayerClient;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.games.GamesActivityResultCodes;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.View.VISIBLE;
+import static com.gamesbykevin.chess.activity.GameActivityHelper.toggleSettings;
+import static com.gamesbykevin.chess.activity.GameActivityHelper.updateListView;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
-public class GameActivity extends BaseGameActivity implements Disposable {
+public class GameActivity extends MultiplayerActivity implements Disposable {
 
     //our open GL surface view
     private OpenGLSurfaceView glSurfaceView;
@@ -53,21 +58,10 @@ public class GameActivity extends BaseGameActivity implements Disposable {
     private ProgressBar progressBar;
 
     //our array adapter for the list views
-    private ArrayAdapter<String> adapter;
+    protected ArrayAdapter<String> adapter;
 
     //what is the current selected item
-    private int selectedListItem;
-
-    // Request codes for the UIs that we show with startActivityForResult:
-    private final static int RC_SELECT_PLAYERS = 10000;
-    private final static int RC_INVITATION_INBOX = 10001;
-    private final static int RC_WAITING_ROOM = 10002;
-
-    // Client used to interact with the real time multiplayer system.
-    private RealTimeMultiplayerClient mRealTimeMultiplayerClient = null;
-
-    // Client used to interact with the Invitation system.
-    private InvitationsClient mInvitationsClient = null;
+    protected int selectedListItem;
 
     //the current screen we are on
     private static int SCREEN = R.id.layoutLoadingScreen;
@@ -75,23 +69,20 @@ public class GameActivity extends BaseGameActivity implements Disposable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //loading the game
-        SCREEN = R.id.layoutLoadingScreen;
-
         if (DEBUG)
             UtilityHelper.logEvent("onCreate");
-
-        //assign to calculate
-        PlayerVars.STATUS = PlayerVars.Status.Select;
 
         //call parent
         super.onCreate(savedInstanceState);
 
-        //create our game manager
-        GAME = new Game(this);
-
         //set the content view
         setContentView(R.layout.activity_game);
+
+        //loading the game
+        SCREEN = R.id.layoutLoadingScreen;
+
+        //assign to calculate
+        PlayerVars.STATUS = PlayerVars.Status.Select;
 
         //obtain our open gl surface view object for reference
         this.glSurfaceView = findViewById(R.id.openGLView);
@@ -121,126 +112,37 @@ public class GameActivity extends BaseGameActivity implements Disposable {
         //update our list view with the adapter
         listView.setAdapter(this.adapter);
 
-        //add our history to the array adapter
-        for (int i = 0; i < GAME.getHistory().size(); i++) {
-            updateListView(GAME.getHistory().get(i).toString());
-        }
-
-        //default start at top
-        listView.setSelection(0);
-
         //add the layouts to our list
         this.layouts = new ArrayList<>();
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameSettings));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutLoadingScreen));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameControls));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameReplayPrompt));
+        this.layouts.add((ViewGroup)findViewById(R.id.layoutGameMultiplayer));
 
-        //assign the current screen
-        setScreen(getScreen(), true);
-    }
+        //create our game manager
+        if (MULTI_PLAYER) {
 
-    public void updateListView(final int position) {
+            setScreen(R.id.layoutGameMultiplayer, true);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        } else {
 
-                //assign the current item
-                selectedListItem = position;
+            //create our game object
+            createGame();
 
-                //position at the latest move
-                ListView listView = findViewById(R.id.listViewHistory);
-                listView.setSelection(position);
-                listView.setVerticalScrollBarEnabled(false);
-                listView.setHorizontalScrollBarEnabled(false);
+            //assign the current screen
+            setScreen(getScreen(), true);
+        }
 
-                if (position + 5 < listView.getCount() && position > 5) {
-                    listView.smoothScrollToPosition(position + 5);
-                } else {
-                    listView.smoothScrollToPosition(position);
-                }
-
-                adapter.notifyDataSetChanged();
+        //add our history to the array adapter
+        if (getGame() != null) {
+            for (int i = 0; i < GAME.getHistory().size(); i++) {
+                updateListView(this, GAME.getHistory().get(i).toString());
             }
-        });
-    }
+        }
 
-    public void updateListView(final String description) {
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run () {
-
-                //display who executed the move
-                final String bonus = (adapter.getCount() % 2 == 0) ? "W: " : "B: ";
-
-                //add our content
-                adapter.add(bonus + description);
-
-                //position at the latest move
-                updateListView(adapter.getCount() - 1);
-            }
-        });
-    }
-
-    public void updateProgress(final int progress) {
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                progressBar.setProgress(progress);
-            }
-        });
-    }
-
-    public void displayMessage(final int resid) {
-        displayMessage(getString(resid));
-    }
-
-    public void displayMessage(final String message) {
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        if (DEBUG)
-            UtilityHelper.logEvent(message);
-    }
-
-    public OpenGLSurfaceView getSurfaceView() {
-        return this.glSurfaceView;
-    }
-
-    public void onClickResetCamera(View view) {
-        getSurfaceView().getRenderer().changeCamera();
-    }
-
-    public static Game getGame() {
-        return GAME;
-    }
-
-    public GameTimer getTimer() {
-
-        //create timer if null
-        if (this.timer == null)
-            this.timer = new GameTimer(this);
-
-        //return our timer object
-        return this.timer;
-    }
-
-    public void displayTimer(final boolean visible) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.tableGameTimer).setVisibility(visible ? VISIBLE : View.INVISIBLE);
-            }
-        });
-
+        //default start at top
+        listView.setSelection(0);
     }
 
     @Override
@@ -308,7 +210,8 @@ public class GameActivity extends BaseGameActivity implements Disposable {
         super.onPause();
 
         //pause the game
-        getGame().onPause();
+        if (getGame() != null)
+            getGame().onPause();
 
         //flag paused true
         this.paused = true;
@@ -342,7 +245,8 @@ public class GameActivity extends BaseGameActivity implements Disposable {
         super.playTheme();
 
         //resume the game object
-        getGame().onResume();
+        if (getGame() != null)
+            getGame().onResume();
 
         //if the game was previously paused we need to re-initialize the views
         if (this.paused) {
@@ -382,6 +286,101 @@ public class GameActivity extends BaseGameActivity implements Disposable {
         updateProgress(0);
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if (DEBUG)
+            UtilityHelper.logEvent("onBackPressed");
+
+        //if the game is over and not a replay, ask if they want to save the replay
+        if (PlayerVars.isGameover() && !getGame().hasReplay()) {
+
+            //ask the player if they want to save the replay
+            setScreen(R.id.layoutGameReplayPrompt, false);
+
+            //don't continue
+            return;
+
+        } else if (MULTI_PLAYER) {
+
+            if (getScreen() == R.id.layoutGameControls || getScreen() == R.id.layoutGameSettings) {
+
+                //leave the multi player room
+                leaveRoom();
+
+                //call parent
+                super.onBackPressed();
+
+                //end the activity
+                finish();
+
+            } else if (getScreen() == R.id.layoutGameMultiplayer) {
+
+                //if on the multi player screen, go back to the game mode page
+                startActivity(new Intent(this, ModeActivity.class));
+
+                //finish this activity
+                finish();
+
+                //no need to continue
+                return;
+            }
+        } else {
+
+            //call parent
+            super.onBackPressed();
+
+            //end the activity
+            finish();
+        }
+    }
+
+    public void updateProgress(final int progress) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setProgress(progress);
+            }
+        });
+    }
+
+    public OpenGLSurfaceView getSurfaceView() {
+        return this.glSurfaceView;
+    }
+
+    public void onClickResetCamera(View view) {
+        getSurfaceView().getRenderer().changeCamera();
+    }
+
+    public void createGame() {
+        GAME = new Game(this);
+    }
+
+    public static Game getGame() {
+        return GAME;
+    }
+
+    public GameTimer getTimer() {
+
+        //create timer if null
+        if (this.timer == null)
+            this.timer = new GameTimer(this);
+
+        //return our timer object
+        return this.timer;
+    }
+
+    public void displayTimer(final boolean visible) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.tableGameTimer).setVisibility(visible ? VISIBLE : View.INVISIBLE);
+            }
+        });
+
+    }
+
     public static int getScreen() {
         return SCREEN;
     }
@@ -417,6 +416,10 @@ public class GameActivity extends BaseGameActivity implements Disposable {
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameReplayPrompt), true);
                 break;
 
+            case R.id.layoutGameMultiplayer:
+                setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameMultiplayer), true);
+                break;
+
             default:
                 throw new RuntimeException("Screen not handled: " + screen);
         }
@@ -433,28 +436,6 @@ public class GameActivity extends BaseGameActivity implements Disposable {
         return this.layoutParams;
     }
 
-    @Override
-    public void onBackPressed() {
-
-        if (DEBUG)
-            UtilityHelper.logEvent("onBackPressed");
-
-        //if the game is over and not a replay, ask if they want to save the replay
-        if (PlayerVars.isGameover() && !getGame().hasReplay()) {
-
-            //ask the player if they want to save the replay
-            setScreen(R.id.layoutGameReplayPrompt, false);
-
-        } else {
-
-            //call parent
-            super.onBackPressed();
-
-            //end the activity
-            finish();
-        }
-    }
-
     public void onClickLeaderboard(View view) {
 
         //displayLeaderboardUI(getString(LeaderboardHelper.getResId(getGame().getBoard())));
@@ -463,19 +444,7 @@ public class GameActivity extends BaseGameActivity implements Disposable {
     public void onClickSettings(View view) {
 
         //switch our current choice
-        toggleSettings(getScreen() != R.id.layoutGameSettings);
-    }
-
-    public void toggleSettings(final boolean visible) {
-
-        if (visible) {
-            setScreen(R.id.layoutGameSettings, getScreen() == R.id.layoutLoadingScreen);
-        } else {
-            setScreen(R.id.layoutGameControls, true);
-        }
-
-        //we display the positions if we are viewing the settings screen
-        GameHelper.displayPositions(GAME, getScreen() == R.id.layoutGameSettings);
+        toggleSettings(this, getScreen() != R.id.layoutGameSettings);
     }
 
     public void onClickNo(View view) {
@@ -489,5 +458,69 @@ public class GameActivity extends BaseGameActivity implements Disposable {
         //flag save true
         ReplayActivity.SAVE = true;
         startActivity(new Intent(this, ReplayActivity.class));
+    }
+
+
+    // Handle the result of the "Select players UI" we launched when the user clicked the
+    // "Invite friends" button. We react by creating a room with those players.
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+        if (requestCode == RC_SIGN_IN) {
+
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
+
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                onConnected(account);
+            } catch (ApiException apiException) {
+                String message = apiException.getMessage();
+                if (message == null || message.isEmpty()) {
+                    message = getString(R.string.signin_other_error);
+                }
+
+                onDisconnected();
+
+                new AlertDialog.Builder(this)
+                        .setMessage(message)
+                        .setNeutralButton(android.R.string.ok, null)
+                        .show();
+            }
+        } else if (requestCode == RC_SELECT_PLAYERS) {
+            // we got the result from the "select players" UI -- ready to create the room
+            handleSelectPlayersResult(resultCode, intent);
+
+        } else if (requestCode == RC_INVITATION_INBOX) {
+            // we got the result from the "select invitation" UI (invitation inbox). We're
+            // ready to accept the selected invitation:
+            handleInvitationInboxResult(resultCode, intent);
+
+        } else if (requestCode == RC_WAITING_ROOM) {
+
+            // we got the result from the "waiting room" UI.
+            if (resultCode == Activity.RESULT_OK) {
+                // ready to start playing
+                Log.d(TAG, "Starting game (waiting room returned OK).");
+
+                //display loading screen
+                setScreen(R.id.layoutLoadingScreen, true);
+
+                //determine who is going first
+                selectFirstTurn();
+
+                //create the game
+                createGame();
+
+            } else if (resultCode == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
+                // player indicated that they want to leave the room
+                leaveRoom();
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // Dialog was cancelled (user pressed back key, for instance). In our game,
+                // this means leaving the room too. In more elaborate games, this could mean
+                // something else (like minimizing the waiting room UI).
+                leaveRoom();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, intent);
     }
 }
