@@ -13,7 +13,11 @@ import android.widget.TextView;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
+import com.gamesbykevin.chess.game.GameHelper;
+import com.gamesbykevin.chess.piece.Piece;
+import com.gamesbykevin.chess.piece.PieceHelper;
 import com.gamesbykevin.chess.players.PlayerHelper;
+import com.gamesbykevin.chess.players.PlayerVars;
 import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.services.BaseGameUtils;
 import com.gamesbykevin.chess.util.UtilityHelper;
@@ -50,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
+import static com.gamesbykevin.chess.players.PlayerVars.STATE;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 public class MultiplayerActivity extends BaseGameActivity {
@@ -89,7 +94,7 @@ public class MultiplayerActivity extends BaseGameActivity {
     String mIncomingInvitationId = null;
 
     // Message buffer for sending messages
-    byte[] mMsgBuf = new byte[5];
+    byte[] mMsgBuf = new byte[7];
 
     // This array lists all the individual screens our game has.
     final static int[] SCREENS = {
@@ -331,25 +336,25 @@ public class MultiplayerActivity extends BaseGameActivity {
 
     // Accept the given invitation.
     void acceptInviteToRoom(String invitationId) {
+
         // accept the invitation
         Log.d(TAG, "Accepting invitation: " + invitationId);
 
         mRoomConfig = RoomConfig.builder(mRoomUpdateCallback)
-                .setInvitationIdToAccept(invitationId)
-                .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
-                .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback)
-                .build();
+            .setInvitationIdToAccept(invitationId)
+            .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
+            .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback)
+            .build();
 
         switchToScreen(R.id.screen_wait);
         keepScreenOn();
 
-        mRealTimeMultiplayerClient.join(mRoomConfig)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Room Joined Successfully!");
-                    }
-                });
+        mRealTimeMultiplayerClient.join(mRoomConfig).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "Room Joined Successfully!");
+            }
+        });
     }
 
     // Activity is going to the background. We have to leave the current room.
@@ -373,26 +378,9 @@ public class MultiplayerActivity extends BaseGameActivity {
         //go to the main screen
         switchToScreen(R.id.screen_main);
 
+        //call parent
         super.onStop();
     }
-
-    /*
-    // Handle back key to make sure we cleanly leave a game if we are in the middle of one
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent e) {
-
-        //don't continue if no multi-player
-        if (!MULTI_PLAYER)
-            return super.onKeyDown(keyCode, e);
-
-        if (keyCode == KeyEvent.KEYCODE_BACK && STARTED) {
-            //leaveRoom();
-            //return true;
-        }
-
-        return super.onKeyDown(keyCode, e);
-    }
-    */
 
     // Leave the room.
     protected void leaveRoom() {
@@ -526,8 +514,8 @@ public class MultiplayerActivity extends BaseGameActivity {
 
         mRealTimeMultiplayerClient = null;
         mInvitationsClient = null;
-
-        switchToScreen(R.id.screen_main);
+        mRoomId = null;
+        onBackPressed();
     }
 
     private RoomStatusUpdateCallback mRoomStatusUpdateCallback = new RoomStatusUpdateCallback() {
@@ -561,7 +549,6 @@ public class MultiplayerActivity extends BaseGameActivity {
             displayMessage(R.string.player_left_game);
             onBackPressed();
         }
-
 
         // We treat most of the room update callbacks in the same way: we update our list of
         // participants and update the display. In a real game we would also have to check if that
@@ -729,14 +716,62 @@ public class MultiplayerActivity extends BaseGameActivity {
                 int sRow = (int)buf[2];
                 int dCol = (int)buf[3];
                 int dRow = (int)buf[4];
+                int promoteIndex = (int)buf[5];
+                int stateIndex = (int)buf[6];
+
+                //if the game state changed, display it
+                if (stateIndex > -1) {
+
+                    //update the state value
+                    STATE = PlayerVars.State.values()[stateIndex];
+
+                    //display the game state
+                    GameHelper.displayState(getGame(), null);
+                }
+
+                //if a piece was promoted, we need to promote it
+                if (promoteIndex > -1) {
+
+                    //check all the promotion pieces
+                    for (int index = 0; index < getGame().getPromotions().size(); index++) {
+
+                        //get the current piece
+                        Piece piece = getGame().getPromotions().get(index);
+
+                        //if the type matches, this will be the piece we promote
+                        if (piece.getType() == PieceHelper.Type.values()[promoteIndex]) {
+
+                            //make visible for now
+                            piece.getObject3D().setVisible(true);
+
+                            //promote immediately
+                            PlayerHelper.promote(getGame(), piece);
+                            break;
+                        }
+                    }
+                }
 
                 //setup the next move to be run
                 PlayerHelper.setupMove(getGame(), sCol, sRow, dCol, dRow);
+
+            } else if (buf[0] == 'C') {
+
+                int stateIndex = (int)buf[6];
+
+                //if the game state changed, display it
+                if (stateIndex > -1) {
+
+                    //update the state value
+                    STATE = PlayerVars.State.values()[stateIndex];
+
+                    //display the game state
+                    GameHelper.displayState(getGame(), null);
+                }
             }
         }
     };
 
-    public void sendMove(int sCol, int sRow, int dCol, int dRow) {
+    public void sendGameState() {
 
         //send to every other participant.
         for (Participant p : mParticipants) {
@@ -749,7 +784,35 @@ public class MultiplayerActivity extends BaseGameActivity {
             if (p.getStatus() != Participant.STATUS_JOINED)
                 continue;
 
-            //pass 'S' so we know we are starting the game
+            //pass 'C' so we know we are changing the state
+            mMsgBuf[0] = (byte) 'C';
+
+            for (int i = 0; i < PlayerVars.State.values().length; i++) {
+                if (PlayerVars.State.values()[i] == STATE) {
+                    mMsgBuf[6] = (byte) i;
+                    break;
+                }
+            }
+
+            //send message to opponent
+            sendReliableMessage(p.getParticipantId());
+        }
+    }
+
+    public void sendMove(int sCol, int sRow, int dCol, int dRow, PieceHelper.Type type) {
+
+        //send to every other participant.
+        for (Participant p : mParticipants) {
+
+            //don't send message to self
+            if (p.getParticipantId().equals(mMyId))
+                continue;
+
+            //ignore players who haven't joined the match
+            if (p.getStatus() != Participant.STATUS_JOINED)
+                continue;
+
+            //pass 'M' so we know we are making a move
             mMsgBuf[0] = (byte) 'M';
 
             //store move coordinates
@@ -757,6 +820,36 @@ public class MultiplayerActivity extends BaseGameActivity {
             mMsgBuf[2] = (byte)sRow;
             mMsgBuf[3] = (byte)dCol;
             mMsgBuf[4] = (byte)dRow;
+            mMsgBuf[5] = (byte)-1;
+            mMsgBuf[6] = (byte)-1;
+
+            //figure out the index
+            if (type != null) {
+                for (int i = 0; i < PieceHelper.Type.values().length; i++) {
+                    if (PieceHelper.Type.values()[i] == type) {
+                        mMsgBuf[5] = (byte) i;
+                        break;
+                    }
+                }
+            } else {
+                mMsgBuf[5] = (byte)-1;
+            }
+
+            //if the game is over, pass the value
+            if (PlayerVars.isGameover()) {
+
+                /*
+                for (int i = 0; i < PlayerVars.State.values().length; i++) {
+                    if (PlayerVars.State.values()[i] == STATE) {
+                        mMsgBuf[6] = (byte) i;
+                        break;
+                    }
+                }
+                */
+
+            } else {
+                mMsgBuf[6] = (byte)-1;
+            }
 
             //send message to opponent
             sendReliableMessage(p.getParticipantId());

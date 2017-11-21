@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gamesbykevin.chess.game.Game.INDEX_REPLAY;
+import static com.gamesbykevin.chess.game.GameHelper.sendLatestMove;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
@@ -790,7 +791,7 @@ public class PlayerHelper {
         public Piece pieceCaptured;
 
         //the promotion piece (if applicable)
-        public Type promotion;
+        public Type promotion = null;
 
         public Move() {
             //default constructor

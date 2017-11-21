@@ -30,6 +30,7 @@ import static com.gamesbykevin.androidframeworkv2.activity.BaseActivity.GSON;
 import static com.gamesbykevin.chess.activity.MultiplayerActivity.MULTI_PLAYER;
 import static com.gamesbykevin.chess.activity.MultiplayerActivity.PLAYER_1;
 import static com.gamesbykevin.chess.activity.MultiplayerActivity.STARTED;
+import static com.gamesbykevin.chess.game.GameHelper.adjustPositionModels;
 import static com.gamesbykevin.chess.game.GameHelper.createMaterials;
 import static com.gamesbykevin.chess.game.GameHelper.displayPositions;
 import static com.gamesbykevin.chess.game.GameHelper.getResidFile;
@@ -67,7 +68,7 @@ public class Game implements IGame {
     private List<PlayerHelper.Move> history;
 
     //the list of positions on the board
-    protected List<Object3D> positions;
+    protected List<CustomPosition> positions;
 
     //is this game a replay
     private boolean replay = false;
@@ -79,7 +80,6 @@ public class Game implements IGame {
         HumVsCpu,
         HumVsCpuTimed,
         HumVsHumOffline,
-        HumVsHumOnline,
         HumVsHumOnlineTimed,
         WatchReplay
     }
@@ -157,7 +157,6 @@ public class Game implements IGame {
             switch (getMode()) {
 
                 case HumVsHumOffline:
-                case HumVsHumOnline:
                 case HumVsHumOnlineTimed:
 
                     //which one is online?
@@ -177,8 +176,8 @@ public class Game implements IGame {
         }
 
         //give the object a name
-        this.player1.setName("Player 1");
-        this.player2.setName("Player 2");
+        this.player1.setName("White");
+        this.player2.setName("Black");
 
         if (player1.hasDirection(Player.Direction.North) && player2.hasDirection(Player.Direction.North))
             throw new RuntimeException("Each player has to face a different direction");
@@ -311,6 +310,10 @@ public class Game implements IGame {
             //do we show / hide the positions
             displayPositions(this, GameActivity.getScreen() == R.id.layoutGameSettings);
 
+            //if player 2 is online, adjust our position models
+            if (getPlayer1().isOnline() && !getPlayer2().isOnline())
+                adjustPositionModels(this);
+
             //load the board selection visible / non-visible
             PlayerHelper.loadBoardSelection(this, getActivity().getSurfaceView().getRenderer(), getTextureValid());
 
@@ -330,6 +333,10 @@ public class Game implements IGame {
                 //create the pieces and reload the models
                 PlayerHelper.reset(getPlayer1(), getActivity().getSurfaceView().getRenderer(), getTextureWhite());
                 PlayerHelper.reset(getPlayer2(), getActivity().getSurfaceView().getRenderer(), getTextureWood());
+
+                //clone right now to prevent missing pieces
+                getPlayer1().copy();
+                getPlayer2().copy();
             }
 
             //register all the chess pieces as click-able so we can select if needed for the humans
@@ -393,7 +400,17 @@ public class Game implements IGame {
                     getPlayer2().setOnline(PLAYER_1);
 
                     if (DEBUG)
-                        getActivity().displayMessage(PLAYER_1 ? "You are player 1" : "You are player 2");
+                        getActivity().displayMessage(PLAYER_1 ? R.string.player_1_selected : R.string.player_2_selected);
+
+                    //if we aren't player 1
+                    if (!PLAYER_1) {
+
+                        //change the camera angle
+                        getActivity().onClickResetCamera(null);
+
+                        //rotate the positions
+                        adjustPositionModels(this);
+                    }
 
                 } else {
                     return;
@@ -433,7 +450,11 @@ public class Game implements IGame {
                         break;
                 }
             }
+            return;
 
+        } else if (getActivity().getScreen() == R.id.layoutGameMultiplayerPrompt) {
+
+            setPicked(null);
             return;
         }
 
@@ -509,7 +530,7 @@ public class Game implements IGame {
         if (this.positions != null) {
             for (int i = 0; i < positions.size(); i++) {
                 if (this.positions.get(i) != null)
-                    this.positions.get(i).destroy();
+                    this.positions.get(i).dispose();
 
                 this.positions.set(i, null);
             }

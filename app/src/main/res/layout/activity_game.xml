@@ -27,4 +27,6 @@
     <!-- multi player lobby -->
     <include layout="@layout/layout_game_multiplayer" android:id="@+id/layoutGameMultiplayer" />
 
+    <!-- multi player exit prompt -->
+    <include layout="@layout/layout_game_multiplayer_prompt" android:id="@+id/layoutGameMultiplayerPrompt" />
 </merge>

@@ -9,6 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.activity.GameActivity;
+
+import static com.gamesbykevin.chess.activity.GameActivity.getGame;
+import static com.gamesbykevin.chess.services.BaseGameActivity.ONLINE;
 
 public class ModePageFragment extends PageFragment {
 
@@ -47,18 +51,31 @@ public class ModePageFragment extends PageFragment {
                 resIdText = R.string.game_mode_two_player_offline;
                 break;
 
+                /*
             case 3:
-                resIdImage = R.drawable.versus_human;
-                resIdText = R.string.game_mode_two_player_online;
+
+                if (ONLINE) {
+                    resIdImage = R.drawable.versus_human;
+                    resIdText = R.string.game_mode_two_player_online;
+                } else {
+                    resIdImage = R.drawable.versus_human_disabled;
+                    resIdText = R.string.game_mode_two_player_online_disabled;
+                }
+                break;
+                */
+
+            case 3:
+                if (ONLINE) {
+                    resIdImage = R.drawable.versus_human;
+                    resIdText = R.string.game_mode_two_player_online_timed;
+                } else {
+                    resIdImage = R.drawable.versus_human_disabled;
+                    resIdText = R.string.game_mode_two_player_online_timed_disabled;
+                }
                 break;
 
             case 4:
-                resIdImage = R.drawable.versus_human;
-                resIdText = R.string.game_mode_two_player_online_timed;
-                break;
-
-            case 5:
-                resIdImage = R.drawable.versus_human;
+                resIdImage = R.drawable.watch_replay;
                 resIdText = R.string.game_mode_replay;
                 break;
 
@@ -71,6 +88,28 @@ public class ModePageFragment extends PageFragment {
 
         //assign the appropriate instruction text
         textView.setText(resIdText);
+
+
+        //enable / disable
+        switch (getPageNumber()) {
+            case 3:
+            //case 4:
+
+                if (ONLINE) {
+                    imageView.setEnabled(true);
+                    textView.setEnabled(true);
+                } else {
+                    imageView.setEnabled(false);
+                    textView.setEnabled(false);
+                }
+                break;
+
+            default:
+                imageView.setEnabled(true);
+                textView.setEnabled(true);
+                break;
+
+        }
 
         // Inflate the layout for this fragment
         return view;

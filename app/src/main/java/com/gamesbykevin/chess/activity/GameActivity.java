@@ -119,6 +119,7 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameControls));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameReplayPrompt));
         this.layouts.add((ViewGroup)findViewById(R.id.layoutGameMultiplayer));
+        this.layouts.add((ViewGroup)findViewById(R.id.layoutGameMultiplayerPrompt));
 
         //create our game manager
         if (MULTI_PLAYER) {
@@ -303,7 +304,12 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
         } else if (MULTI_PLAYER) {
 
-            if (getScreen() == R.id.layoutGameControls || getScreen() == R.id.layoutGameSettings) {
+            if (getScreen() == R.id.layoutGameControls || getScreen() == R.id.layoutGameSettings && mRoomId != null) {
+
+                //display the exit prompt
+                setScreen(R.id.layoutGameMultiplayerPrompt, false);
+
+            } else if (getScreen() == R.id.layoutGameMultiplayer){
 
                 //leave the multi player room
                 leaveRoom();
@@ -311,27 +317,21 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 //call parent
                 super.onBackPressed();
 
-                //end the activity
-                finish();
+            } else if (getScreen() == R.id.layoutGameMultiplayerPrompt) {
 
-            } else if (getScreen() == R.id.layoutGameMultiplayer) {
-
-                //if on the multi player screen, go back to the game mode page
-                startActivity(new Intent(this, ModeActivity.class));
-
-                //finish this activity
-                finish();
-
-                //no need to continue
+                //don't do anything here
                 return;
+
+            } else {
+
+                //call parent
+                super.onBackPressed();
             }
+
         } else {
 
             //call parent
             super.onBackPressed();
-
-            //end the activity
-            finish();
         }
     }
 
@@ -420,6 +420,10 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameMultiplayer), true);
                 break;
 
+            case R.id.layoutGameMultiplayerPrompt:
+                setLayoutVisibility((ViewGroup)findViewById(R.id.layoutGameMultiplayerPrompt), true);
+                break;
+
             default:
                 throw new RuntimeException("Screen not handled: " + screen);
         }
@@ -447,6 +451,18 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         toggleSettings(this, getScreen() != R.id.layoutGameSettings);
     }
 
+    public void onClickMultiYes(View view) {
+
+        //go back to the game mode selector
+        super.onBackPressed();
+    }
+
+    public void onClickMultiNo(View view) {
+
+        //go back to the game controls screen
+        setScreen(R.id.layoutGameControls, true);
+    }
+
     public void onClickNo(View view) {
 
         //go back to the previous page
@@ -459,7 +475,6 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         ReplayActivity.SAVE = true;
         startActivity(new Intent(this, ReplayActivity.class));
     }
-
 
     // Handle the result of the "Select players UI" we launched when the user clicked the
     // "Invite friends" button. We react by creating a room with those players.
@@ -475,9 +490,8 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 onConnected(account);
             } catch (ApiException apiException) {
                 String message = apiException.getMessage();
-                if (message == null || message.isEmpty()) {
+                if (message == null || message.isEmpty())
                     message = getString(R.string.signin_other_error);
-                }
 
                 onDisconnected();
 

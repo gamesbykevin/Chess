@@ -11,6 +11,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 
+import static com.gamesbykevin.chess.util.UtilityHelper.AMAZON;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**
@@ -44,6 +45,8 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
      * The leader board id we want to display
      */
     protected static String LEADERBOARD_ID = "";
+
+    public static boolean ONLINE = false;
 
     /**
      * Do we skip future login? (this is in case the player does not want to sign in)
@@ -352,6 +355,9 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
 
         //don't bypass auto login
         BYPASS_LOGIN = false;
+
+        //flag we are online
+        ONLINE = true;
     }
 
     @Override
@@ -362,5 +368,8 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
 
         //bypass auto login
         BYPASS_LOGIN = true;
+
+        //flag we are offline
+        ONLINE = false;
     }
 }

@@ -287,58 +287,59 @@ public class GameHelper {
 
             //if we aren't promoting a piece, switch turns
             game.switchTurns();
+
+            //if our opponent is online let's send the move to our opponent
+            if (opponent.isOnline())
+                sendLatestMove(game);
         }
 
-        //if our opponent is online let's send the move to our opponent
-        if (opponent.isOnline()) {
-
-            //get the last move
-            Move move = game.getHistory().get(game.getHistory().size() - 1);
-
-            //send move to our opponent
-            game.getActivity().sendMove(move.sourceCol, move.sourceRow, move.destCol, move.destRow);
-        }
 
         //if we have replay enabled, change the index
         if (game.hasReplay())
             Game.INDEX_REPLAY++;
     }
 
+    public static void sendLatestMove(Game game) {
+
+        //get the last move
+        Move move = game.getHistory().get(game.getHistory().size() - 1);
+
+        //send move to our opponent
+        game.getActivity().sendMove(move.sourceCol, move.sourceRow, move.destCol, move.destRow, move.promotion);
+    }
+
     public static void displayState(Game game, Player opponent) {
 
-        if (DEBUG) {
+        switch (STATE) {
 
-            switch (STATE) {
+            case WinPlayer2:
+                game.getActivity().displayMessage(R.string.game_status_player_1_checkmate);
+                break;
 
-                case WinPlayer2:
-                    game.getActivity().displayMessage(R.string.game_status_player_1_checkmate);
-                    break;
+            case WinPlayer1:
+                game.getActivity().displayMessage(R.string.game_status_player_2_checkmate);
+                break;
 
-                case WinPlayer1:
-                    game.getActivity().displayMessage(R.string.game_status_player_2_checkmate);
-                    break;
+            case Stalemate:
+                game.getActivity().displayMessage(R.string.game_status_stalemate);
+                break;
 
-                case Stalemate:
-                    game.getActivity().displayMessage(R.string.game_status_stalemate);
-                    break;
+            case Player1TimeUp:
+                game.getActivity().displayMessage(R.string.game_status_player_1_time);
+                break;
 
-                case Player1TimeUp:
-                    game.getActivity().displayMessage(R.string.game_status_player_1_time);
-                    break;
+            case Player2TimeUp:
+                game.getActivity().displayMessage(R.string.game_status_player_2_time);
+                break;
 
-                case Player2TimeUp:
-                    game.getActivity().displayMessage(R.string.game_status_player_2_time);
-                    break;
+            default:
 
-                default:
-
-                    if (opponent.hasCheck() && !game.hasReplay()) {
-                        game.getActivity().displayMessage(PLAYER_1_TURN ? R.string.game_status_player_2_check : R.string.game_status_player_1_check);
-                    } else if (!opponent.isHuman()) {
-                        //getActivity().displayMessage("Thinking...");
-                    }
-                    break;
-            }
+                if (opponent.hasCheck() && !game.hasReplay()) {
+                    game.getActivity().displayMessage(PLAYER_1_TURN ? R.string.game_status_player_2_check : R.string.game_status_player_1_check);
+                } else if (!opponent.isHuman()) {
+                    //getActivity().displayMessage("Thinking...");
+                }
+                break;
         }
     }
 
@@ -471,7 +472,7 @@ public class GameHelper {
             for (int i = 0; i < game.positions.size(); i++) {
 
                 //remove any existing children
-                game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(game.positions.get(i));
+                game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(game.positions.get(i).getObject3D());
             }
 
         } else {
@@ -483,24 +484,24 @@ public class GameHelper {
         try {
 
             //load the letters
-            loadLetter(game, R.raw.letter_a_stl, -1, 0);
-            loadLetter(game, R.raw.letter_b_stl, -1, 1);
-            loadLetter(game, R.raw.letter_c_stl, -1, 2);
-            loadLetter(game, R.raw.letter_d_stl, -1, 3);
-            loadLetter(game, R.raw.letter_e_stl, -1, 4);
-            loadLetter(game, R.raw.letter_f_stl, -1, 5);
-            loadLetter(game, R.raw.letter_g_stl, -1, 6);
-            loadLetter(game, R.raw.letter_h_stl, -1, 7);
+            loadCustomPosition(game, R.raw.letter_a_stl, false, .003, -1, 0);
+            loadCustomPosition(game, R.raw.letter_b_stl, false, .003, -1, 1);
+            loadCustomPosition(game, R.raw.letter_c_stl, false, .003, -1, 2);
+            loadCustomPosition(game, R.raw.letter_d_stl, false, .003, -1, 3);
+            loadCustomPosition(game, R.raw.letter_e_stl, false, .003, -1, 4);
+            loadCustomPosition(game, R.raw.letter_f_stl, false, .003, -1, 5);
+            loadCustomPosition(game, R.raw.letter_g_stl, false, .003, -1, 6);
+            loadCustomPosition(game, R.raw.letter_h_stl, false, .003, -1, 7);
 
             //load the numbers
-            loadNumber(game, R.raw.number1_stl, 0, -1);
-            loadNumber(game, R.raw.number2_stl, 1, -1);
-            loadNumber(game, R.raw.number3_stl, 2, -1);
-            loadNumber(game, R.raw.number4_stl, 3, -1);
-            loadNumber(game, R.raw.number5_stl, 4, -1);
-            loadNumber(game, R.raw.number6_stl, 5, -1);
-            loadNumber(game, R.raw.number7_stl, 6, -1);
-            loadNumber(game, R.raw.number8_stl, 7, -1);
+            loadCustomPosition(game, R.raw.number1_stl, true, .2, 0, -1);
+            loadCustomPosition(game, R.raw.number2_stl, true, .2, 1, -1);
+            loadCustomPosition(game, R.raw.number3_stl, true, .2, 2, -1);
+            loadCustomPosition(game, R.raw.number4_stl, true, .2, 3, -1);
+            loadCustomPosition(game, R.raw.number5_stl, true, .2, 4, -1);
+            loadCustomPosition(game, R.raw.number6_stl, true, .2, 5, -1);
+            loadCustomPosition(game, R.raw.number7_stl, true, .2, 6, -1);
+            loadCustomPosition(game, R.raw.number8_stl, true, .2, 7, -1);
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
@@ -509,54 +510,40 @@ public class GameHelper {
 
     public static void displayPositions(Game game, final boolean visible) {
 
-        for (int i = 0; i < game.positions.size(); i++) {
-            game.positions.get(i).setVisible(visible);
+        if (game.positions != null) {
+            for (int i = 0; i < game.positions.size(); i++) {
+                if (game.positions.get(i).getObject3D() != null)
+                    game.positions.get(i).getObject3D().setVisible(visible);
+            }
         }
     }
 
-    private static void loadLetter(final Game game, final int resId, final int col, final int row) {
+    private static void loadCustomPosition(final Game game, final int resId, final boolean horizontal, final double scale, final int col, final int row) {
 
         try {
 
-            //parse our 3d model
-            LoaderSTL stlParser = new LoaderSTL(
-                game.getActivity().getSurfaceView().getRenderer().getContext().getResources(),
-                game.getActivity().getSurfaceView().getRenderer().getTextureManager(),
-                resId);
-            stlParser.parse();
-
             //get our 3d object
-            Object3D obj = stlParser.getParsedObject();
+            Object3D object3D = loadPositonModel(game, resId, horizontal, scale, col, row);
 
-            //figure out where to render the 3d object
-            final double x = getCoordinate(col) - .1;
-            final double y = Y;
-            final double z = getCoordinate(row) - .05;
-
-            //rotate piece 90 degrees so it is standing up
-            obj.rotate(Vector3.Axis.X, 90);
-
-            //assign the location
-            obj.setPosition(x, y, z);
-
-            //our model is too large so we need to shrink it
-            obj.setScale(.003);
-
-            //assign texture to 3d object
-            obj.setMaterial(game.texturePosition);
+            CustomPosition customPosition = new CustomPosition(horizontal);
+            customPosition.setCol(col);
+            customPosition.setRow(row);
+            customPosition.setObject3D(object3D);
 
             //add to the scene
-            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(obj);
+            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(object3D);
 
             //add to our array list
-            game.positions.add(obj);
+            game.positions.add(customPosition);
 
         } catch (Exception e) {
             UtilityHelper.handleException(e);
         }
     }
 
-    private static void loadNumber(final Game game, final int resid, final int col, final int row) {
+    private static Object3D loadPositonModel(Game game, int resid, boolean horizontal, double scale, int col, int row) {
+
+        Object3D obj = null;
 
         try {
 
@@ -568,7 +555,46 @@ public class GameHelper {
             stlParser.parse();
 
             //get our 3d object
-            Object3D obj = stlParser.getParsedObject();
+            obj = stlParser.getParsedObject();
+
+            //figure out where to render the 3d object
+            updatePositionModel(obj, horizontal, col, row, Vector3.Axis.X, 90);
+
+            //our model is too large so we need to shrink it
+            obj.setScale(scale);
+
+            //assign texture to 3d object
+            obj.setMaterial(game.texturePosition);
+
+        } catch (Exception e) {
+            UtilityHelper.handleException(e);
+        }
+
+        return obj;
+    }
+
+    public static void adjustPositionModels(Game game) {
+
+        if (game.positions != null) {
+
+            for (int i = 0; i < game.positions.size(); i++) {
+                CustomPosition customPosition = game.positions.get(i);
+
+                customPosition.changePositions();
+                updatePositionModel(
+                        customPosition.getObject3D(),
+                        customPosition.isHorizontal(),
+                        (int)customPosition.getCol(),
+                        (int)customPosition.getRow(),
+                        Vector3.Axis.Y,
+                        180);
+            }
+        }
+    }
+
+    private static void updatePositionModel(Object3D obj, boolean horizontal, int col, int row, Vector3.Axis axis, double angle) {
+
+        if (horizontal) {
 
             //figure out where to render the 3d object
             final double x = getCoordinate(col) - .025;
@@ -576,25 +602,23 @@ public class GameHelper {
             final double z = getCoordinate(row);
 
             //rotate piece 90 degrees so it is standing up
-            obj.rotate(Vector3.Axis.X, 90);
+            obj.rotate(axis, angle);
 
             //assign the location
             obj.setPosition(x, y, z);
 
-            //our model is too large so we need to shrink it
-            obj.setScale(.2);
+        } else {
 
-            //assign texture to 3d object
-            obj.setMaterial(game.texturePosition);
+            //figure out where to render the 3d object
+            final double x = getCoordinate(col) - .1;
+            final double y = Y;
+            final double z = getCoordinate(row) - .05;
 
-            //add to the scene
-            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().addChild(obj);
+            //rotate piece 90 degrees so it is standing up
+            obj.rotate(axis, angle);
 
-            //add to our array list
-            game.positions.add(obj);
-
-        } catch (Exception e) {
-            UtilityHelper.handleException(e);
+            //assign the location
+            obj.setPosition(x, y, z);
         }
     }
 }

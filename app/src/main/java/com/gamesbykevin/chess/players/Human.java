@@ -1,6 +1,8 @@
 package com.gamesbykevin.chess.players;
 
 import com.gamesbykevin.androidframeworkv2.base.Cell;
+import com.gamesbykevin.chess.R;
+import com.gamesbykevin.chess.activity.GameActivity;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.piece.Piece;
@@ -12,6 +14,7 @@ import org.rajawali3d.math.vector.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gamesbykevin.chess.game.GameHelper.sendLatestMove;
 import static com.gamesbykevin.chess.players.PlayerVars.PLAYER_1_TURN;
 
 /**
@@ -97,6 +100,10 @@ public class Human extends Player {
             //display the game state
             GameHelper.displayState(game, opponent);
 
+            //if online opponent, send the game state
+            if (opponent.isOnline())
+                game.getActivity().sendGameState();
+
             //don't continue
             return;
         }
@@ -130,6 +137,10 @@ public class Human extends Player {
 
                     //display the game state
                     GameHelper.displayState(game, opponent);
+
+                    //if our opponent is online let's send the move to our opponent
+                    if (opponent.isOnline())
+                        sendLatestMove(game);
 
                     //switch turns
                     game.switchTurns();
@@ -217,23 +228,41 @@ public class Human extends Player {
             final int col = PlayerHelper.getCol(game.getPicked().getX());
             final int row = PlayerHelper.getRow(game.getPicked().getZ());
 
-            //check if we selected a valid move
-            for (int i = 0; i < this.moves.size(); i++) {
+            //if we selected the same piece, de-select it
+            if ((int)game.getSelected().getCol() == col && (int)game.getSelected().getRow() == row) {
 
-                //make sure we are making a valid move
-                if (this.moves.get(i).hasLocation(col, row)) {
+                //de-select the piece
+                game.deselect();
 
-                    //setup the move
-                    PlayerHelper.setupMove(game, (int)game.getSelected().getCol(), (int)game.getSelected().getRow(), col, row);
+                //remove all targets from the scene
+                for (int x = 0; x < targets.size(); x++) {
+                    game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(targets.get(x));
+                    game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(targets.get(x));
+                }
 
-                    //remove all targets from the scene
-                    for (int x = 0; x < targets.size(); x++) {
-                        game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(targets.get(x));
-                        game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(targets.get(x));
+                //clear list
+                targets.clear();
+
+            } else {
+
+                //check if we selected a valid move
+                for (int i = 0; i < this.moves.size(); i++) {
+
+                    //make sure we are making a valid move
+                    if (this.moves.get(i).hasLocation(col, row)) {
+
+                        //setup the move
+                        PlayerHelper.setupMove(game, (int) game.getSelected().getCol(), (int) game.getSelected().getRow(), col, row);
+
+                        //remove all targets from the scene
+                        for (int x = 0; x < targets.size(); x++) {
+                            game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(targets.get(x));
+                            game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(targets.get(x));
+                        }
+
+                        //clear list
+                        targets.clear();
                     }
-
-                    //clear list
-                    targets.clear();
                 }
             }
         }

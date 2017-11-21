@@ -31,20 +31,18 @@
     <string name="button_text_achievements">Achievements</string>
 
     <!-- game status -->
-    <string name="game_status_player_1_check">Player 1 is in check</string>
-    <string name="game_status_player_2_check">Player 2 is in check</string>
-    <string name="game_status_player_1_checkmate">Player 1 Checkmate</string>
-    <string name="game_status_player_2_checkmate">Player 2 Checkmate</string>
-    <string name="game_status_player_1_time">Player 1 Time Expired</string>
-    <string name="game_status_player_2_time">Player 2 Time Expired</string>
-
+    <string name="game_status_player_1_check">White is in check</string>
+    <string name="game_status_player_2_check">Black is in check</string>
+    <string name="game_status_player_1_checkmate">White Checkmate</string>
+    <string name="game_status_player_2_checkmate">Black Checkmate</string>
+    <string name="game_status_player_1_time">White Time Expired</string>
+    <string name="game_status_player_2_time">Black Time Expired</string>
     <string name="game_status_stalemate">Stalemate</string>
 
     <!-- prompt to exit -->
     <string name="exit_prompt">Press again to exit</string>
 
     <!-- text on options page -->
-    <string name="text_in_game_options">Game Options</string>
     <string name="vibrate_on">Vibrate: On</string>
     <string name="vibrate_off">Vibrate: Off</string>
     <string name="sound_on">Sound: On</string>
@@ -52,11 +50,19 @@
     <string name="google_play_auto_enabled">Google Login: On</string>
     <string name="google_play_auto_disabled">Google Login: Off</string>
 
+    <!-- different difficulties -->
     <string-array name="difficulty_arrays">
         <item>SKILL: EASY</item>
         <item>SKILL: MEDIUM</item>
         <item>SKILL: HARD</item>
     </string-array>
+
+    <!-- text for each player -->
+    <string name="player_1_selected">You are white and move first</string>
+    <string name="player_2_selected">You are black, white moves first</string>
+
+    <!-- text prompt when exiting multiplayer -->
+    <string name="exit_multiplayer_prompt">Do you want to exit?</string>
 
     <!-- text on prompt save/load replay -->
     <string name="confirm_save">Yes</string>
@@ -67,15 +73,16 @@
     <string name="replay_not_available">No replay saved here</string>
     <string name="save_replay">Save replay of this game?</string>
 
-    <!-- text displayed -->
-    <string name="game_over_text">Game Over</string>
-
     <!-- different game modes -->
     <string name="game_mode_single_player">Human vs Computer</string>
     <string name="game_mode_single_player_timed">Human vs Computer (Speed 5 minutes)</string>
     <string name="game_mode_two_player_offline">Human vs Human (Offline)</string>
     <string name="game_mode_two_player_online">Human vs Human (Online)</string>
     <string name="game_mode_two_player_online_timed">Human vs Human (Online, Speed 5 minutes)</string>
+
+    <string name="game_mode_two_player_online_disabled">Human vs Human (Online) "Disabled"</string>
+    <string name="game_mode_two_player_online_timed_disabled">Human vs Human (Online, Speed 5 minutes) "Disabled"</string>
+
     <string name="game_mode_replay">Watch Game Replay</string>
 
     <!-- ui messages for google play services -->
@@ -99,10 +106,9 @@
     <string name="accept_popup_invite">Accept!</string>
     <string name="please_wait">Please wait&#8230;</string>
     <string name="game_problem">An error occurred while starting the game. Please try again.</string>
-    <string name="is_inviting_you">is challenging you to a game!</string>
+    <string name="is_inviting_you">invited you to a game!</string>
     <string name="signin_other_error">There was an issue with sign in. Please try again later.</string>
     <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
-
     <string name="status_multiplayer_error_not_trusted_tester">Anyone you invite must be a trusted tester</string>
     <string name="match_error_already_rematched">This rematch has already been started!</string>
     <string name="client_reconnect_required">Games client reconnect required</string>

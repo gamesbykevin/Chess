@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:layout_gravity="center"
+android:gravity="center"
+android:visibility="invisible">
+
+<TableLayout
+    android:gravity="center"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TableRow style="@style/row">
+        <TextView style="@style/text_tutorial" android:text="@string/exit_multiplayer_prompt" />
+    </TableRow>
+
+    <TableRow style="@style/row">
+        <Button style="@style/button" android:text="@string/confirm_save" android:onClick="onClickMultiYes" />
+    </TableRow>
+
+    <TableRow style="@style/row">
+        <Button style="@style/button" android:text="@string/confirm_exit" android:onClick="onClickMultiNo" />
+    </TableRow>
+</TableLayout>
+
+</RelativeLayout>
