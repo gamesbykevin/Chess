@@ -68,7 +68,7 @@ public class ModeActivity extends PagerActivity {
             //start replay activity
             startActivity(new Intent(this, ReplayActivity.class));
 
-        } else if (CURRENT_PAGE == PAGES - 2) {// || CURRENT_PAGE == PAGES - 3) {
+        } else if (CURRENT_PAGE == PAGES - 2) {
 
             //flag multi-player true
             MULTI_PLAYER = true;

@@ -6,13 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.gamesbykevin.chess.R;
-import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
 import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.piece.PieceHelper;
@@ -55,7 +53,6 @@ import java.util.List;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 import static com.gamesbykevin.chess.players.PlayerVars.STATE;
-import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 public class MultiplayerActivity extends BaseGameActivity {
 
@@ -514,8 +511,11 @@ public class MultiplayerActivity extends BaseGameActivity {
 
         mRealTimeMultiplayerClient = null;
         mInvitationsClient = null;
-        mRoomId = null;
-        onBackPressed();
+
+        if (mRoomId != null) {
+            mRoomId = null;
+            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
+        }
     }
 
     private RoomStatusUpdateCallback mRoomStatusUpdateCallback = new RoomStatusUpdateCallback() {
@@ -543,11 +543,15 @@ public class MultiplayerActivity extends BaseGameActivity {
         // Called when we get disconnected from the room. We return to the main screen.
         @Override
         public void onDisconnectedFromRoom(Room room) {
-            mRoomId = null;
+            Log.d(TAG, "onDisconnectedFromRoom");
             mRoomConfig = null;
             showGameError();
             displayMessage(R.string.player_left_game);
-            onBackPressed();
+
+            if (mRoomId != null) {
+                mRoomId = null;
+                getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
+            }
         }
 
         // We treat most of the room update callbacks in the same way: we update our list of
@@ -579,9 +583,15 @@ public class MultiplayerActivity extends BaseGameActivity {
 
         @Override
         public void onPeerLeft(Room room, @NonNull List<String> peersWhoLeft) {
+            Log.d(TAG, "onPeerLeft");
+
             updateRoom(room);
             displayMessage(R.string.player_left_game);
-            onBackPressed();
+
+            if (mRoomId != null) {
+                mRoomId = null;
+                getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
+            }
         }
 
         @Override
@@ -729,6 +739,9 @@ public class MultiplayerActivity extends BaseGameActivity {
                     GameHelper.displayState(getGame(), null);
                 }
 
+                //setup the next move to be run
+                PlayerHelper.setupMove(getGame(), sCol, sRow, dCol, dRow);
+
                 //if a piece was promoted, we need to promote it
                 if (promoteIndex > -1) {
 
@@ -750,9 +763,6 @@ public class MultiplayerActivity extends BaseGameActivity {
                         }
                     }
                 }
-
-                //setup the next move to be run
-                PlayerHelper.setupMove(getGame(), sCol, sRow, dCol, dRow);
 
             } else if (buf[0] == 'C') {
 

@@ -531,6 +531,11 @@ public class PlayerHelper {
             for (Piece tmp : game.getPromotions()) {
                 tmp.getObject3D().setVisible(false);
             }
+
+            //if the player is online, notify opponent it's now their turn
+            if (player.isOnline())
+                game.getActivity().displayMessage(R.string.next_turn);
+
         }
     }
 

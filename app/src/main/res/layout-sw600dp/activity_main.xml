@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/activity_page"
+    tools:context="com.gamesbykevin.chess.activity.MainActivity">
+
+    <include layout="@layout/layout_logo" />
+
+    <TableLayout style="@style/table_sw600" android:id="@+id/table_menu">
+        <TableRow style="@style/row_sw600">
+            <Button style="@style/button_sw600" android:text="@string/button_text_start" android:onClick="onClickStart" />
+        </TableRow>
+        <TableRow style="@style/row_sw600">
+            <Button style="@style/button_sw600" android:text="@string/button_text_options" android:onClick="onClickOptions" />
+        </TableRow>
+        <TableRow style="@style/row_sw600">
+            <Button style="@style/button_sw600" android:text="@string/button_text_achievements" android:id="@+id/achievements" android:onClick="onClickAchievements" />
+        </TableRow>
+        <TableRow style="@style/row_sw600">
+            <Button style="@style/button_sw600" android:text="@string/button_text_leaderboard" android:onClick="onClickLeaderboards" />
+        </TableRow>
+        <TableRow style="@style/row_sw600">
+            <Button style="@style/button_sw600" android:text="@string/button_text_rate" android:onClick="onClickRate" />
+        </TableRow>
+        <TableRow style="@style/row_sw600">
+            <Button style="@style/button_sw600" android:text="@string/button_text_more" android:onClick="onClickMore" />
+        </TableRow>
+    </TableLayout>
+
+    <include layout="@layout/layout_social_icons" />
+
+</LinearLayout>

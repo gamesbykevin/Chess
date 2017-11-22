@@ -13,15 +13,15 @@ android:visibility="invisible">
     android:layout_height="wrap_content">
 
     <TableRow style="@style/row">
-        <TextView style="@style/text_tutorial" android:text="@string/exit_multiplayer_prompt" android:id="@+id/textViewMultiPrompt" />
+        <TextView style="@style/text_tutorial_sw600" android:text="@string/exit_multiplayer_prompt" android:id="@+id/textViewMultiPrompt" />
     </TableRow>
 
-    <TableRow style="@style/row">
-        <Button style="@style/button" android:text="@string/confirm_save" android:onClick="onClickMultiYes" />
+    <TableRow style="@style/row_sw600">
+        <Button style="@style/button_sw600" android:text="@string/confirm_save" android:onClick="onClickMultiYes" />
     </TableRow>
 
-    <TableRow style="@style/row">
-        <Button style="@style/button" android:text="@string/confirm_exit" android:onClick="onClickMultiNo" />
+    <TableRow style="@style/row_sw600">
+        <Button style="@style/button_sw600" android:text="@string/confirm_exit" android:onClick="onClickMultiNo" />
     </TableRow>
 </TableLayout>
 

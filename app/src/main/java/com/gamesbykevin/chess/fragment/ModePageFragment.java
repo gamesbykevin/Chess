@@ -51,19 +51,6 @@ public class ModePageFragment extends PageFragment {
                 resIdText = R.string.game_mode_two_player_offline;
                 break;
 
-                /*
-            case 3:
-
-                if (ONLINE) {
-                    resIdImage = R.drawable.versus_human;
-                    resIdText = R.string.game_mode_two_player_online;
-                } else {
-                    resIdImage = R.drawable.versus_human_disabled;
-                    resIdText = R.string.game_mode_two_player_online_disabled;
-                }
-                break;
-                */
-
             case 3:
                 if (ONLINE) {
                     resIdImage = R.drawable.versus_human;
@@ -92,9 +79,8 @@ public class ModePageFragment extends PageFragment {
 
         //enable / disable
         switch (getPageNumber()) {
-            case 3:
-            //case 4:
 
+            case 3:
                 if (ONLINE) {
                     imageView.setEnabled(true);
                     textView.setEnabled(true);

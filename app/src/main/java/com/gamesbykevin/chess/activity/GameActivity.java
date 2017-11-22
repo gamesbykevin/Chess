@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
 import com.gamesbykevin.chess.R;
@@ -44,6 +45,9 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
     //has the activity been paused
     private boolean paused = false;
+
+    //did we pause while playing multi player?
+    private boolean pausedMulti = false;
 
     //our layout parameters
     private LinearLayout.LayoutParams layoutParams;
@@ -144,6 +148,10 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
         //default start at top
         listView.setSelection(0);
+
+        //flag paused false
+        pausedMulti = false;
+        paused = false;
     }
 
     @Override
@@ -217,11 +225,22 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         //flag paused true
         this.paused = true;
 
-        //pause the game view
-        glSurfaceView.onPause();
+        //if playing multi player
+        if (MULTI_PLAYER) {
 
-        //flag for recycling
-        glSurfaceView = null;
+            //if we are in middle of playing a game
+            if (getScreen() == R.id.layoutGameSettings || getScreen() == R.id.layoutGameControls)
+                pausedMulti = true;
+        }
+
+        if (glSurfaceView != null) {
+
+            //pause the game view
+            glSurfaceView.onPause();
+
+            //flag for recycling
+            glSurfaceView = null;
+        }
 
         //go back to loading screen
         setScreen(R.id.layoutLoadingScreen, true);
@@ -263,7 +282,7 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
             //remove layouts from the parent view
             for (int i = 0; i < layouts.size(); i++) {
-                ((ViewGroup) layouts.get(i).getParent()).removeView(layouts.get(i));
+                ((ViewGroup)layouts.get(i).getParent()).removeView(layouts.get(i));
             }
 
             //set the content view for our open gl surface view
@@ -285,6 +304,13 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
         //update the progress bar
         updateProgress(0);
+
+        //if we resumed in middle of a multi player game
+        if (pausedMulti) {
+            pausedMulti = false;
+            displayMessage(R.string.resume_match_end);
+            setScreen(R.id.layoutGameMultiplayer, true);
+        }
     }
 
     @Override
@@ -304,18 +330,10 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
         } else if (MULTI_PLAYER) {
 
-            if (getScreen() == R.id.layoutGameControls || getScreen() == R.id.layoutGameSettings && mRoomId != null) {
+            if ((getScreen() == R.id.layoutGameControls || getScreen() == R.id.layoutGameSettings) && mRoomId != null) {
 
                 //display the exit prompt
                 setScreen(R.id.layoutGameMultiplayerPrompt, false);
-
-            } else if (getScreen() == R.id.layoutGameMultiplayer){
-
-                //leave the multi player room
-                leaveRoom();
-
-                //call parent
-                super.onBackPressed();
 
             } else if (getScreen() == R.id.layoutGameMultiplayerPrompt) {
 
@@ -324,7 +342,7 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
             } else {
 
-                //call parent
+                //go back to mode selection
                 super.onBackPressed();
             }
 
@@ -453,8 +471,8 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
     public void onClickMultiYes(View view) {
 
-        //go back to the game mode selector
-        super.onBackPressed();
+        //go back to multi-player lobby
+        setScreen(R.id.layoutGameMultiplayer, true);
     }
 
     public void onClickMultiNo(View view) {
@@ -500,11 +518,14 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                         .setNeutralButton(android.R.string.ok, null)
                         .show();
             }
+
         } else if (requestCode == RC_SELECT_PLAYERS) {
+
             // we got the result from the "select players" UI -- ready to create the room
             handleSelectPlayersResult(resultCode, intent);
 
         } else if (requestCode == RC_INVITATION_INBOX) {
+
             // we got the result from the "select invitation" UI (invitation inbox). We're
             // ready to accept the selected invitation:
             handleInvitationInboxResult(resultCode, intent);
@@ -513,6 +534,7 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
             // we got the result from the "waiting room" UI.
             if (resultCode == Activity.RESULT_OK) {
+
                 // ready to start playing
                 Log.d(TAG, "Starting game (waiting room returned OK).");
 
@@ -526,13 +548,17 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 createGame();
 
             } else if (resultCode == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
+
                 // player indicated that they want to leave the room
                 leaveRoom();
+
             } else if (resultCode == Activity.RESULT_CANCELED) {
+
                 // Dialog was cancelled (user pressed back key, for instance). In our game,
                 // this means leaving the room too. In more elaborate games, this could mean
                 // something else (like minimizing the waiting room UI).
                 leaveRoom();
+
             }
         }
         super.onActivityResult(requestCode, resultCode, intent);

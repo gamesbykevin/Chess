@@ -11,7 +11,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 
-import static com.gamesbykevin.chess.util.UtilityHelper.AMAZON;
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
 /**

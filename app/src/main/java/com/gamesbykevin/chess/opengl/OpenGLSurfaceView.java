@@ -241,7 +241,7 @@ public class OpenGLSurfaceView extends SurfaceView implements Runnable {
         if (System.currentTimeMillis() - timestamp >= MILLISECONDS_PER_SECOND) {
 
             //print progress
-            //UtilityHelper.logEvent("FPS: " + frames);
+            UtilityHelper.logEvent("FPS: " + frames);
 
             //reset timer for next update
             timestamp = System.currentTimeMillis();

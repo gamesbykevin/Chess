@@ -82,7 +82,7 @@ public class UtilityHelper {
                 if (!AMAZON) {
 
                     //report exception to fire base
-                    //FirebaseCrash.report(exception);
+                    FirebaseCrash.report(exception);
                 }
 
             } catch (Exception e) {

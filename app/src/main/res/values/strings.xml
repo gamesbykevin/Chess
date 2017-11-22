@@ -55,6 +55,7 @@
         <item>SKILL: EASY</item>
         <item>SKILL: MEDIUM</item>
         <item>SKILL: HARD</item>
+        <item>SKILL: HARDER</item>
     </string-array>
 
     <!-- text for each player -->
@@ -63,6 +64,12 @@
 
     <!-- text prompt when exiting multiplayer -->
     <string name="exit_multiplayer_prompt">Do you want to exit?</string>
+
+    <!-- when resuming and match has ended -->
+    <string name="resume_match_end">Previous online match has ended</string>
+
+    <!-- notify its my turn -->
+    <string name="next_turn">Your turn</string>
 
     <!-- text on prompt save/load replay -->
     <string name="confirm_save">Yes</string>
@@ -105,6 +112,7 @@
     <string name="inv_popup_text">Incoming invitation!</string>
     <string name="accept_popup_invite">Accept!</string>
     <string name="please_wait">Please wait&#8230;</string>
+    <string name="multiplayer_lobby">Multiplayer lobby</string>
     <string name="game_problem">An error occurred while starting the game. Please try again.</string>
     <string name="is_inviting_you">invited you to a game!</string>
     <string name="signin_other_error">There was an issue with sign in. Please try again later.</string>

@@ -12,7 +12,7 @@
     <!-- INVITATION POPUP -->
     <TableLayout android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/invitation_popup" >
         <TableRow style="@style/row">
-            <TextView android:id="@+id/incoming_invitation_text" style="@style/text_tutorial" />
+            <TextView android:id="@+id/incoming_invitation_text" style="@style/text_tutorial_sw600" />
             <Button android:id="@+id/button_accept_popup_invitation" android:layout_width="wrap_content" style="@style/button" android:text="@string/accept_popup_invite" android:onClick="onClickAcceptInvitation" />
         </TableRow>
     </TableLayout>
@@ -20,27 +20,27 @@
     <!-- MAIN SCREEN -->
     <TableLayout android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/screen_main">
 
-        <TableRow style="@style/row">
-            <TextView style="@style/text_tutorial" android:text="@string/multiplayer_lobby" />
+        <TableRow style="@style/row_sw600">
+            <TextView style="@style/text_tutorial_sw600" android:text="@string/multiplayer_lobby" />
         </TableRow>
 
-        <TableRow style="@style/row">
-            <Button android:layout_width="200dp" style="@style/button" android:id="@+id/button_quick_game" android:text="@string/quick_game" android:onClick="onClickQuickMatch" />
+        <TableRow style="@style/row_sw600">
+            <Button android:layout_width="200dp" style="@style/button_sw600" android:id="@+id/button_quick_game" android:text="@string/quick_game" android:onClick="onClickQuickMatch" />
         </TableRow>
 
-        <TableRow style="@style/row">
-            <Button android:layout_width="200dp" style="@style/button" android:id="@+id/button_invite_players" android:text="@string/invite_players" android:onClick="onClickInvite" />
+        <TableRow style="@style/row_sw600">
+            <Button android:layout_width="200dp" style="@style/button_sw600" android:id="@+id/button_invite_players" android:text="@string/invite_players" android:onClick="onClickInvite" />
         </TableRow>
 
-        <TableRow style="@style/row">
-            <Button android:layout_width="200dp" style="@style/button" android:id="@+id/button_see_invitations" android:text="@string/see_invitations" android:onClick="onClickViewInvitations" />
+        <TableRow style="@style/row_sw600">
+            <Button android:layout_width="200dp" style="@style/button_sw600" android:id="@+id/button_see_invitations" android:text="@string/see_invitations" android:onClick="onClickViewInvitations" />
         </TableRow>
     </TableLayout>
 
     <!-- "PLEASE WAIT" SCREEN -->
     <TableLayout android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/screen_wait">
         <TableRow style="@style/row">
-            <TextView style="@style/text_tutorial" android:text="@string/please_wait" />
+            <TextView style="@style/text_tutorial_sw600" android:text="@string/please_wait" />
         </TableRow>
     </TableLayout>
 

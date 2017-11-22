@@ -288,9 +288,13 @@ public class GameHelper {
             //if we aren't promoting a piece, switch turns
             game.switchTurns();
 
-            //if our opponent is online let's send the move to our opponent
-            if (opponent.isOnline())
+            if (opponent.isOnline()) {
+                //if our opponent is online let's send the move to our opponent
                 sendLatestMove(game);
+            } else if (player.isOnline()) {
+                //if the player is online, notify opponent it's now their turn
+                game.getActivity().displayMessage(R.string.next_turn);
+            }
         }
 
 

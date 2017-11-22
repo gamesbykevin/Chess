@@ -58,6 +58,50 @@
         <item name="android:layout_weight">1</item>
     </style>
 
+
+
+    <style name="spinner_sw600">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:maxWidth">175dp</item>
+        <item name="android:minWidth">175dp</item>
+        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:dropDownWidth">match_parent</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="spinner_item_sw600">
+        <item name="android:textSize">14pt</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxWidth">175dp</item>
+        <item name="android:minWidth">175dp</item>
+        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:soundEffectsEnabled">true</item>
+    </style>
+
+    <style name="spinner_dropdown_item_sw600">
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">14pt</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxWidth">175dp</item>
+        <item name="android:minWidth">175dp</item>
+        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:soundEffectsEnabled">true</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
     <style name="GameOverPage">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
@@ -74,6 +118,22 @@
         <item name="android:layout_marginTop">10dp</item>
         <item name="android:padding">5dp</item>
         <item name="android:textSize">20sp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">start</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+
+    <style name="text_tutorial_sw600">
+        <item name="android:background">@color/transparent50</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textSize">35sp</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">start</item>
@@ -103,9 +163,38 @@
         <item name="android:soundEffectsEnabled">true</item>
     </style>
 
+    <style name="button_sw600">
+        <item name="android:textSize">12pt</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:maxWidth">175dp</item>
+        <item name="android:minWidth">175dp</item>
+        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:background">@drawable/button</item>
+        <item name="android:soundEffectsEnabled">true</item>
+    </style>
+
+    <style name="row_sw600">
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingTop">0dp</item>
+    </style>
+
     <style name="row">
         <item name="android:paddingBottom">5dp</item>
         <item name="android:paddingTop">0dp</item>
+    </style>
+
+    <style name="table_sw600">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">40dp</item>
+        <item name="android:layout_marginRight">40dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
     </style>
 
     <style name="table">
@@ -144,15 +233,6 @@
         <item name="android:contentDescription">@null</item>
     </style>
 
-    <style name="button_social">
-        <item name="android:layout_width">60dp</item>
-        <item name="android:layout_height">60dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_marginLeft">10dp</item>
-        <item name="android:layout_marginRight">10dp</item>
-        <item name="android:soundEffectsEnabled">true</item>
-    </style>
-
     <style name="table_splash">
         <item name="android:layout_marginLeft">20dp</item>
         <item name="android:layout_marginRight">20dp</item>
@@ -174,6 +254,36 @@
         <item name="android:gravity">bottom</item>
     </style>
 
+    <style name="table_social_sw600">
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingRight">5dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:gravity">bottom</item>
+    </style>
+
+    <style name="button_social">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:soundEffectsEnabled">true</item>
+    </style>
+
+    <style name="button_social_sw600">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:layout_marginRight">5dp</item>
+        <item name="android:soundEffectsEnabled">true</item>
+    </style>
+
     <style name="button_camera">
         <item name="android:layout_marginTop">15dp</item>
         <item name="android:layout_marginLeft">10dp</item>
@@ -186,6 +296,15 @@
         <item name="android:padding">3dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="logo_sw600">
+        <item name="android:contentDescription">@null</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:src">@drawable/logo</item>
+        <item name="android:layout_margin">20dp</item>
     </style>
 
     <style name="logo">
