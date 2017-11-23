@@ -106,6 +106,7 @@
 
 
     <string name="player_left_game">Player left game</string>
+    <string name="lost_connection">Lost connection to game</string>
     <string name="quick_game">Quick game</string>
     <string name="invite_players">Invite friends</string>
     <string name="see_invitations">See invitations</string>

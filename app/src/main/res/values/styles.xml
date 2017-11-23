@@ -58,13 +58,9 @@
         <item name="android:layout_weight">1</item>
     </style>
 
-
-
     <style name="spinner_sw600">
         <item name="android:background">@drawable/button</item>
-        <item name="android:maxWidth">175dp</item>
-        <item name="android:minWidth">175dp</item>
-        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">80dp</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
@@ -73,30 +69,29 @@
     </style>
 
     <style name="spinner_item_sw600">
-        <item name="android:textSize">14pt</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">12pt</item>
         <item name="android:textIsSelectable">false</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
-        <item name="android:maxWidth">175dp</item>
-        <item name="android:minWidth">175dp</item>
-        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">80dp</item>
         <item name="android:soundEffectsEnabled">true</item>
     </style>
 
     <style name="spinner_dropdown_item_sw600">
+        <item name="android:maxLines">1</item>
         <item name="android:textAlignment">center</item>
-        <item name="android:textSize">14pt</item>
+        <item name="android:textSize">12pt</item>
         <item name="android:textIsSelectable">false</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/colorBlack</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
-        <item name="android:maxWidth">175dp</item>
-        <item name="android:minWidth">175dp</item>
-        <item name="android:layout_width">175dp</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">80dp</item>
         <item name="android:soundEffectsEnabled">true</item>
         <item name="android:layout_weight">1</item>
@@ -165,6 +160,8 @@
 
     <style name="button_sw600">
         <item name="android:textSize">12pt</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:maxWidth">175dp</item>
         <item name="android:minWidth">175dp</item>
@@ -172,8 +169,6 @@
         <item name="android:layout_height">80dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:textColor">@color/colorWhite</item>
-        <item name="android:textIsSelectable">false</item>
-        <item name="android:textStyle">normal</item>
         <item name="android:background">@drawable/button</item>
         <item name="android:soundEffectsEnabled">true</item>
     </style>
@@ -277,7 +272,7 @@
 
     <style name="button_social_sw600">
         <item name="android:layout_width">70dp</item>
-        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_height">100dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_marginLeft">5dp</item>
         <item name="android:layout_marginRight">5dp</item>
@@ -338,6 +333,51 @@
     <style name="list_view_history">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
+
+
+    <style name="button_camera_sw600">
+        <item name="android:layout_marginTop">30dp</item>
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:background">@drawable/camera</item>
+        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_height">80dp</item>
+    </style>
+
+    <style name="table_timer_sw600">
+        <item name="android:padding">10dp</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="image_timer_sw600">
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">60dp</item>
+    </style>
+
+    <style name="image_settings_sw600">
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_marginTop">30dp</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
+    <style name="layout_history_text_view_sw600">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">12pt</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:textStyle">normal</item>
     </style>
 
 </resources>

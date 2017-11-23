@@ -546,7 +546,7 @@ public class MultiplayerActivity extends BaseGameActivity {
             Log.d(TAG, "onDisconnectedFromRoom");
             mRoomConfig = null;
             showGameError();
-            displayMessage(R.string.player_left_game);
+            displayMessage(R.string.lost_connection);
 
             if (mRoomId != null) {
                 mRoomId = null;
