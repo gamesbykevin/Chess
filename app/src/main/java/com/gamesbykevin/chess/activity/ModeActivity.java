@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.gamesbykevin.chess.R;
 
@@ -62,6 +63,10 @@ public class ModeActivity extends PagerActivity {
 
         //flag multi-player false
         MULTI_PLAYER = false;
+
+        //disable view after we click it
+        if (view != null)
+            view.setEnabled(false);
 
         if (CURRENT_PAGE == PAGES - 1) {
 

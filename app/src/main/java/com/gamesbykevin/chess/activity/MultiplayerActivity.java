@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -150,6 +151,9 @@ public class MultiplayerActivity extends BaseGameActivity {
         // Since the state of the signed in user can change when the activity is not active
         // it is recommended to try and sign in silently from when the app resumes.
         signInSilently();
+
+        //make sure all buttons enabled
+        enableChildren((ViewGroup)findViewById(R.id.layoutGameMultiplayer));
     }
 
     @Override
@@ -167,6 +171,11 @@ public class MultiplayerActivity extends BaseGameActivity {
     }
 
     public void onClickInvite(View view) {
+
+        //if existing, prevent us selecting it twice
+        if (view != null)
+            view.setEnabled(false);
+
         switchToScreen(R.id.screen_wait);
 
         // show list of players who can be invited
@@ -181,6 +190,11 @@ public class MultiplayerActivity extends BaseGameActivity {
     }
 
     public void onClickViewInvitations(View view) {
+
+        //if existing, prevent us selecting it twice
+        if (view != null)
+            view.setEnabled(false);
+
         switchToScreen(R.id.screen_wait);
 
         // show list of pending invitations
@@ -196,6 +210,10 @@ public class MultiplayerActivity extends BaseGameActivity {
 
     public void onClickAcceptInvitation(View view) {
 
+        //if existing, prevent us selecting it twice
+        if (view != null)
+            view.setEnabled(false);
+
         // user wants to accept the invitation shown on the invitation popup
         // (the one we got through the OnInvitationReceivedListener).
         acceptInviteToRoom(mIncomingInvitationId);
@@ -203,6 +221,10 @@ public class MultiplayerActivity extends BaseGameActivity {
     }
 
     public void onClickQuickMatch(View view) {
+
+        //if existing, prevent us selecting it twice
+        if (view != null)
+            view.setEnabled(false);
 
         //we are not ready to start
         STARTED = false;
@@ -512,10 +534,11 @@ public class MultiplayerActivity extends BaseGameActivity {
         mRealTimeMultiplayerClient = null;
         mInvitationsClient = null;
 
-        if (mRoomId != null) {
+        if (mRoomId != null)
             mRoomId = null;
-            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
-        }
+
+        //displayMessage(R.string.player_left_game);
+        getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
     }
 
     private RoomStatusUpdateCallback mRoomStatusUpdateCallback = new RoomStatusUpdateCallback() {
@@ -546,12 +569,12 @@ public class MultiplayerActivity extends BaseGameActivity {
             Log.d(TAG, "onDisconnectedFromRoom");
             mRoomConfig = null;
             showGameError();
-            displayMessage(R.string.lost_connection);
 
-            if (mRoomId != null) {
+            if (mRoomId != null)
                 mRoomId = null;
-                getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
-            }
+
+            displayMessage(R.string.player_left_game);
+            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
         }
 
         // We treat most of the room update callbacks in the same way: we update our list of
@@ -586,12 +609,12 @@ public class MultiplayerActivity extends BaseGameActivity {
             Log.d(TAG, "onPeerLeft");
 
             updateRoom(room);
-            displayMessage(R.string.player_left_game);
 
-            if (mRoomId != null) {
+            if (mRoomId != null)
                 mRoomId = null;
-                getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
-            }
+
+            displayMessage(R.string.player_left_game);
+            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
         }
 
         @Override

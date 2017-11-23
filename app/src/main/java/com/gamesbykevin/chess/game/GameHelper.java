@@ -86,9 +86,13 @@ public class GameHelper {
         }
     }
 
-    public static void saveHistory(Game game, final int position) {
+    public static boolean saveHistory(Game game, final int position) {
+
+        //was the save successful?
+        boolean result = false;
 
         try {
+
             //obtain editor
             SharedPreferences.Editor editor = getSharedPreferences().edit();
 
@@ -109,9 +113,15 @@ public class GameHelper {
             //save setting
             editor.apply();
 
+            //flag success
+            result = true;
+
         } catch (Exception e) {
             UtilityHelper.handleException(e);
         }
+
+        //return our result
+        return result;
     }
 
     public static final int getResidDesc(final int position) {

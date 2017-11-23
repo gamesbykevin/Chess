@@ -312,6 +312,10 @@ public class Game implements IGame {
             for (int i = 0; i < positions.size(); i++) {
                 if (positions.get(i) != null && positions.get(i).getObject3D() != null) {
                     getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(positions.get(i).getObject3D());
+
+                    if (positions.get(i).getObject3D().getMaterial() != null)
+                        positions.get(i).getObject3D().setMaterial(null);
+
                     positions.get(i).getObject3D().destroy();
                     positions.get(i).setObject3D(null);
                 }
@@ -319,6 +323,20 @@ public class Game implements IGame {
 
             positions.clear();
             positions = null;
+        }
+
+        if (this.promotions != null) {
+            for (int i = 0; i < this.promotions.size(); i++) {
+                if (this.promotions.get(i) != null) {
+                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(this.promotions.get(i).getObject3D());
+                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(this.promotions.get(i).getObject3D());
+                    this.promotions.get(i).dispose();
+                    this.promotions.set(i, null);
+                }
+            }
+
+            this.promotions.clear();
+            this.promotions = null;
         }
 
         if (this.player1 != null) {
@@ -335,6 +353,10 @@ public class Game implements IGame {
                 if (piece.getObject3D() != null) {
                     getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
                     getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
+
+                    if (piece.getObject3D().getMaterial() != null)
+                        piece.getObject3D().setMaterial(null);
+
                     piece.getObject3D().destroy();
                     piece.setObject3D(null);
                 }
@@ -355,6 +377,10 @@ public class Game implements IGame {
                 if (piece.getObject3D() != null) {
                     getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
                     getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
+
+                    if (piece.getObject3D().getMaterial() != null)
+                        piece.getObject3D().setMaterial(null);
+
                     piece.getObject3D().destroy();
                     piece.setObject3D(null);
                 }
@@ -375,7 +401,7 @@ public class Game implements IGame {
         try {
 
             //recycle models (if exist)
-            recycleModels();
+            //recycleModels();
 
             //remove selection (if exists)
             setSelected(null);
@@ -478,8 +504,7 @@ public class Game implements IGame {
                     getPlayer1().setOnline(!PLAYER_1);
                     getPlayer2().setOnline(PLAYER_1);
 
-                    if (DEBUG)
-                        getActivity().displayMessage(PLAYER_1 ? R.string.player_1_selected : R.string.player_2_selected);
+                    getActivity().displayMessage(PLAYER_1 ? R.string.player_1_selected : R.string.player_2_selected);
 
                     //if we aren't player 1
                     if (!PLAYER_1) {

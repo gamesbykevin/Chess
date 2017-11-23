@@ -74,11 +74,6 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         this.context = context;
         this.view = view;
-
-        //create our camera
-        this.camera2D = new Camera2D();
-        this.camera2D.setZ(0);
-        this.camera2D.setLookAt(0, 0, 0);
     }
 
     @Override
@@ -90,11 +85,19 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         //flag false until init is complete
         INIT = false;
 
+        //recycle any elements
+        recycle();
+
         //flag analyze false
         PlayerVars.STATUS = PlayerVars.Status.Select;
 
         //reset camera angle
         this.cameraAngle = 0;
+
+        //create our camera
+        this.camera2D = new Camera2D();
+        this.camera2D.setZ(0);
+        this.camera2D.setLookAt(0, 0, 0);
 
         //create our object picker to select the pieces
         this.objectPicker = new ObjectColorPicker(this);
@@ -110,14 +113,51 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         addBoard();
 
         //reset our game (if exists)
-        if (getGame() != null)
+        if (getGame() != null) {
+            getGame().recycleModels();
             getGame().reset();
+        }
 
         //create arc ball camera to rotate around the board
         resetCamera();
 
         //we completed initialization
         INIT = true;
+    }
+
+    public void recycle() {
+
+        if (camera != null) {
+            camera.removeListeners();
+            camera = null;
+        }
+
+        if (board != null) {
+
+            if (board.getMaterial() != null) {
+                getCurrentScene().removeChild(board);
+                board.getMaterial().unbindTextures();
+                board.setMaterial(null);
+            }
+
+            board.destroy();
+            board = null;
+        }
+
+        if (plane != null) {
+            if (plane.getMaterial() != null) {
+                plane.getMaterial().unbindTextures();
+                plane.setMaterial(null);
+            }
+
+            plane.destroy();
+            plane = null;
+        }
+
+        if (camera2D != null)
+            camera2D = null;
+        if (objectPicker != null)
+            objectPicker = null;
     }
 
     private void addLight() {
@@ -344,6 +384,9 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
     public void onRender(final long elapsedTime, final double deltaTime) {
 
         if (!INIT)
+            return;
+
+        if (camera == null || camera2D == null || board == null || plane == null || objectPicker == null)
             return;
 
         if (getGame() == null)

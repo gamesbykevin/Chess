@@ -70,12 +70,20 @@ public class ReplayActivity extends PagerActivity {
 
     public void onClickStartReplay(View view) {
 
+        //disable view after we click it
+        if (view != null)
+            view.setEnabled(false);
+
         if (SAVE) {
 
             //determine where to save our game
-            GameHelper.saveHistory(getGame(), CURRENT_PAGE);
+            boolean result = GameHelper.saveHistory(getGame(), CURRENT_PAGE);
 
-            //go back kto mode activity
+            //notify user, if replay was saved
+            if (result)
+                displayMessage(R.string.save_replay_success);
+
+            //go back to mode activity
             startActivity(new Intent(this, ModeActivity.class));
 
         } else {

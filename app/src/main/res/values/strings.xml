@@ -71,6 +71,8 @@
     <!-- notify its my turn -->
     <string name="next_turn">Your turn</string>
 
+    <string name="save_replay_success">Replay has been saved</string>
+
     <!-- text on prompt save/load replay -->
     <string name="confirm_save">Yes</string>
     <string name="confirm_exit">No</string>

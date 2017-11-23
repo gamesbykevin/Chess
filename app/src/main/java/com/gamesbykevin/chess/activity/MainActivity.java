@@ -79,19 +79,6 @@ public class MainActivity extends BaseGameActivity {
         enableChildren((ViewGroup)findViewById(R.id.table_menu));
     }
 
-    private void enableChildren(ViewGroup viewGroup) {
-
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-
-            //enable the view group
-            viewGroup.getChildAt(i).setEnabled(true);
-
-            //recursive call in case there are additional children
-            if (viewGroup.getChildAt(i) instanceof ViewGroup)
-                enableChildren((ViewGroup)viewGroup.getChildAt(i));
-        }
-    }
-
     @Override
     public void onBackPressed() {
 

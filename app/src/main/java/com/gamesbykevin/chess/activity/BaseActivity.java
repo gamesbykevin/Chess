@@ -73,6 +73,19 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
         return this.firebaseAnalytics;
     }
 
+    protected void enableChildren(ViewGroup viewGroup) {
+
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+
+            //enable the view group
+            viewGroup.getChildAt(i).setEnabled(true);
+
+            //recursive call in case there are additional children
+            if (viewGroup.getChildAt(i) instanceof ViewGroup)
+                enableChildren((ViewGroup)viewGroup.getChildAt(i));
+        }
+    }
+
     /**
      * Setup default options if they don't exist yet
      */

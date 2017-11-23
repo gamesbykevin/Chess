@@ -44,7 +44,7 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
     private static Game GAME;
 
     //has the activity been paused
-    private boolean paused = false;
+    public boolean paused = false;
 
     //did we pause while playing multi player?
     private boolean pausedMulti = false;
@@ -212,14 +212,14 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
     @Override
     protected void onPause() {
 
+        //flag paused true
+        this.paused = true;
+
         if (DEBUG)
             UtilityHelper.logEvent("onPause");
 
         //call parent
         super.onPause();
-
-        //flag paused true
-        this.paused = true;
 
         //pause the game
         if (getGame() != null)
@@ -320,7 +320,7 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
             UtilityHelper.logEvent("onBackPressed");
 
         //if the game is over and not a replay, ask if they want to save the replay
-        if (PlayerVars.isGameover() && !getGame().hasReplay()) {
+        if (PlayerVars.isGameover() && getGame() != null && !getGame().hasReplay()) {
 
             //ask the player if they want to save the replay
             setScreen(R.id.layoutGameReplayPrompt, false);
@@ -458,11 +458,6 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         return this.layoutParams;
     }
 
-    public void onClickLeaderboard(View view) {
-
-        //displayLeaderboardUI(getString(LeaderboardHelper.getResId(getGame().getBoard())));
-    }
-
     public void onClickSettings(View view) {
 
         //switch our current choice
@@ -473,6 +468,9 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
         //go back to multi-player lobby
         setScreen(R.id.layoutGameMultiplayer, true);
+
+        //make sure we leave the game room
+        leaveRoom();
     }
 
     public void onClickMultiNo(View view) {
@@ -552,6 +550,9 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 // player indicated that they want to leave the room
                 leaveRoom();
 
+                //go back to multi-player lobby
+                setScreen(R.id.layoutGameMultiplayer, true);
+
             } else if (resultCode == Activity.RESULT_CANCELED) {
 
                 // Dialog was cancelled (user pressed back key, for instance). In our game,
@@ -559,8 +560,11 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 // something else (like minimizing the waiting room UI).
                 leaveRoom();
 
+                //go back to multi-player lobby
+                setScreen(R.id.layoutGameMultiplayer, true);
             }
         }
+
         super.onActivityResult(requestCode, resultCode, intent);
     }
 }
