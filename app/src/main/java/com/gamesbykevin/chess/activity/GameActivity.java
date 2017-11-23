@@ -218,12 +218,12 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         //call parent
         super.onPause();
 
+        //flag paused true
+        this.paused = true;
+
         //pause the game
         if (getGame() != null)
             getGame().onPause();
-
-        //flag paused true
-        this.paused = true;
 
         //if playing multi player
         if (MULTI_PLAYER) {

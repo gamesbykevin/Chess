@@ -349,6 +349,10 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
         if (getGame() == null)
             return;
 
+        //don't continue to render if game is paused
+        if (getGame().getActivity().paused)
+            return;
+
         if (getGame().getPlayer() == null)
             getGame().reset();
 

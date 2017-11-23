@@ -286,6 +286,82 @@ public class Game implements IGame {
         PlayerVars.STATUS = Status.Interrupt;
     }
 
+    public void recycleModels() {
+
+        if (textureWhite != null) {
+            textureWhite.unbindTextures();
+            textureWhite = null;
+        }
+
+        if (textureWood != null) {
+            textureWood.unbindTextures();
+            textureWood = null;
+        }
+
+        if (textureHighlight != null) {
+            textureHighlight.unbindTextures();
+            textureHighlight = null;
+        }
+
+        if (texturePosition != null) {
+            texturePosition.unbindTextures();
+            texturePosition = null;
+        }
+
+        if (positions != null) {
+            for (int i = 0; i < positions.size(); i++) {
+                if (positions.get(i) != null && positions.get(i).getObject3D() != null) {
+                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(positions.get(i).getObject3D());
+                    positions.get(i).getObject3D().destroy();
+                    positions.get(i).setObject3D(null);
+                }
+            }
+
+            positions.clear();
+            positions = null;
+        }
+
+        if (this.player1 != null) {
+
+            for (int i = 0; i < this.player1.getPieceCount(); i++) {
+
+                //get the current piece
+                Piece piece = this.player1.getPiece(i, true);
+
+                if (piece == null)
+                    continue;
+
+                //remove previous, if it exists
+                if (piece.getObject3D() != null) {
+                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
+                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
+                    piece.getObject3D().destroy();
+                    piece.setObject3D(null);
+                }
+            }
+        }
+
+        if (this.player2 != null) {
+
+            for (int i = 0; i < this.player2.getPieceCount(); i++) {
+
+                //get the current piece
+                Piece piece = this.player2.getPiece(i, true);
+
+                if (piece == null)
+                    continue;
+
+                //remove previous, if it exists
+                if (piece.getObject3D() != null) {
+                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
+                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
+                    piece.getObject3D().destroy();
+                    piece.setObject3D(null);
+                }
+            }
+        }
+    }
+
     @Override
     public void onResume() {
 
@@ -297,6 +373,9 @@ public class Game implements IGame {
     public void reset() {
 
         try {
+
+            //recycle models (if exist)
+            recycleModels();
 
             //remove selection (if exists)
             setSelected(null);

@@ -23,7 +23,7 @@ public class UtilityHelper {
     /**
      * Are we debugging the application
      */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     /**
      * Are we running unit tests

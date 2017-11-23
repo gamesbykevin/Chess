@@ -434,6 +434,7 @@ public class GameHelper {
     }
 
     protected static void createMaterials(Game game) {
+
         try {
 
             game.textureWhite = new Material();

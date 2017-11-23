@@ -86,9 +86,7 @@
     <string name="game_mode_two_player_offline">Human vs Human (Offline)</string>
     <string name="game_mode_two_player_online">Human vs Human (Online)</string>
     <string name="game_mode_two_player_online_timed">Human vs Human (Online, Speed 5 minutes)</string>
-
-    <string name="game_mode_two_player_online_disabled">Human vs Human (Online) "Disabled"</string>
-    <string name="game_mode_two_player_online_timed_disabled">Human vs Human (Online, Speed 5 minutes) "Disabled"</string>
+    <string name="game_mode_two_player_online_timed_disabled">Human vs Human (Online) "Disabled"</string>
 
     <string name="game_mode_replay">Watch Game Replay</string>
 
@@ -103,7 +101,6 @@
     <string name="gamehelper_app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
     <string name="gamehelper_license_failed">License check failed.</string>
     <string name="gamehelper_unknown_error">Unknown error.</string>
-
 
     <string name="player_left_game">Player left game</string>
     <string name="lost_connection">Lost connection to game</string>
