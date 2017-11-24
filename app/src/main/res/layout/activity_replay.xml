@@ -28,4 +28,7 @@
         android:layout_marginBottom="10dp">
     </LinearLayout>
 
+    <!-- Splash page layout -->
+    <include layout="@layout/activity_splash" android:id="@+id/layoutLoadingScreen" android:visibility="invisible" />
+
 </RelativeLayout>

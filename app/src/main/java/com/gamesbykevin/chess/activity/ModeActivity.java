@@ -50,6 +50,12 @@ public class ModeActivity extends PagerActivity {
 
         //resume audio
         super.playMenu();
+
+        //only show when the user makes a selection
+        findViewById(R.id.layoutLoadingScreen).setVisibility(View.INVISIBLE);
+
+        //display the pager icons
+        findViewById(R.id.listPageContainer).setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -60,6 +66,12 @@ public class ModeActivity extends PagerActivity {
     }
 
     public void onClickStartGame(View view) {
+
+        //display the loading page for now
+        findViewById(R.id.layoutLoadingScreen).setVisibility(View.VISIBLE);
+
+        //hide the pager icons
+        findViewById(R.id.listPageContainer).setVisibility(View.INVISIBLE);
 
         //flag multi-player false
         MULTI_PLAYER = false;

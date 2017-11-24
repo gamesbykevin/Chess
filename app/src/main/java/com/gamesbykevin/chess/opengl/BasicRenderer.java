@@ -114,7 +114,7 @@ public class BasicRenderer extends Renderer implements OnObjectPickedListener {
 
         //reset our game (if exists)
         if (getGame() != null) {
-            getGame().recycleModels();
+            //getGame().recycleModels();
             getGame().reset();
         }
 

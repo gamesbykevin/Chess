@@ -59,6 +59,12 @@ public class ReplayActivity extends PagerActivity {
 
         //resume audio
         super.playMenu();
+
+        //only show when the user makes a selection
+        findViewById(R.id.layoutLoadingScreen).setVisibility(View.INVISIBLE);
+
+        //display the pager icons
+        findViewById(R.id.listPageContainer).setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -69,6 +75,12 @@ public class ReplayActivity extends PagerActivity {
     }
 
     public void onClickStartReplay(View view) {
+
+        //display the loading page for now
+        findViewById(R.id.layoutLoadingScreen).setVisibility(View.VISIBLE);
+
+        //hide the pager icons
+        findViewById(R.id.listPageContainer).setVisibility(View.INVISIBLE);
 
         //disable view after we click it
         if (view != null)
