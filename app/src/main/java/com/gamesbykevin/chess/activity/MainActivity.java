@@ -88,10 +88,10 @@ public class MainActivity extends BaseGameActivity {
             if (exit) {
 
                 //no need to bypass login in the future
-                //BYPASS_LOGIN = false;
+                BYPASS_LOGIN = false;
 
                 //sign out of google play services
-                //super.signOut();
+                super.signOut();
 
                 //finish activity
                 super.finish();

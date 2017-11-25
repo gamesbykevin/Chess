@@ -58,8 +58,10 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
 
             //create new list
             SOUND = new SparseArray<>();
-            //loadSound(R.raw.menu);
-            //loadSound(R.raw.place);
+            loadSound(R.raw.menu);
+            loadSound(R.raw.theme);
+            loadSound(R.raw.move);
+            loadSound(R.raw.check);
         }
 
         //make sure all options are entered
@@ -144,7 +146,7 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
         stopSound();
 
         //start playing menu song
-        //playSong(R.raw.menu);
+        playSong(R.raw.menu);
     }
 
     public void playTheme() {
@@ -153,7 +155,7 @@ public abstract class BaseActivity extends com.gamesbykevin.androidframeworkv2.a
         stopSound();
 
         //start playing main song
-        //playSong(R.raw.theme);
+        playSong(R.raw.theme);
     }
 
     protected void playSong(final int resId) {

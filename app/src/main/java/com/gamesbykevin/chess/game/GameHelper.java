@@ -287,6 +287,16 @@ public class GameHelper {
         //display state
         displayState(game, opponent);
 
+        //only play sound effects if this isn't a replay
+        if (!game.hasReplay()) {
+
+            if (opponent.hasCheck() || player.hasCheck()) {
+                game.getActivity().playSoundEffect(R.raw.check);
+            } else {
+                game.getActivity().playSoundEffect(R.raw.move);
+            }
+        }
+
         //updates if game is over
         if (PlayerVars.isGameover()) {
 
@@ -319,10 +329,10 @@ public class GameHelper {
             }
         }
 
-
         //if we have replay enabled, change the index
-        if (game.hasReplay())
+        if (game.hasReplay()) {
             Game.INDEX_REPLAY++;
+        }
     }
 
     public static void sendLatestMove(Game game) {

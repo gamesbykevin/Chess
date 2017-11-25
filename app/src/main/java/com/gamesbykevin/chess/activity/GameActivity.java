@@ -152,6 +152,9 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         //flag paused false
         pausedMulti = false;
         paused = false;
+
+        //play the main theme again from the beginning
+        playSound(R.raw.theme, true, true);
     }
 
     @Override
@@ -261,15 +264,15 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
         //call parent
         super.onResume();
 
-        //resume theme if the game has started
-        super.playTheme();
-
         //resume the game object
         if (getGame() != null)
             getGame().onResume();
 
         //if the game was previously paused we need to re-initialize the views
         if (this.paused) {
+
+            //resume theme if the game was paused
+            super.playTheme();
 
             //flag paused false
             this.paused = false;

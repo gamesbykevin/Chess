@@ -9,7 +9,7 @@ android {
         applicationId "com.gamesbykevin.chess"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 3
+        versionCode 4
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -69,10 +69,5 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
 }
-
-
-
-
-
 
 apply plugin: 'com.google.gms.google-services'
