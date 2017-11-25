@@ -344,12 +344,18 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
 
                 //go back to mode selection
                 super.onBackPressed();
+
+                //finish activity
+                finish();
             }
 
         } else {
 
             //call parent
             super.onBackPressed();
+
+            //finish activity
+            finish();
         }
     }
 

@@ -39,31 +39,43 @@ public class ModePageFragment extends PageFragment {
             case 0:
                 resIdImage = R.drawable.versus_cpu;
                 resIdText = R.string.game_mode_single_player;
+                imageView.setEnabled(true);
+                textView.setEnabled(true);
                 break;
 
             case 1:
                 resIdImage = R.drawable.versus_cpu;
                 resIdText = R.string.game_mode_single_player_timed;
+                imageView.setEnabled(true);
+                textView.setEnabled(true);
                 break;
 
             case 2:
                 resIdImage = R.drawable.versus_human;
                 resIdText = R.string.game_mode_two_player_offline;
+                imageView.setEnabled(true);
+                textView.setEnabled(true);
                 break;
 
             case 3:
                 if (ONLINE) {
                     resIdImage = R.drawable.versus_human;
                     resIdText = R.string.game_mode_two_player_online_timed;
+                    imageView.setEnabled(true);
+                    textView.setEnabled(true);
                 } else {
                     resIdImage = R.drawable.versus_human_disabled;
                     resIdText = R.string.game_mode_two_player_online_timed_disabled;
+                    imageView.setEnabled(false);
+                    textView.setEnabled(false);
                 }
                 break;
 
             case 4:
                 resIdImage = R.drawable.watch_replay;
                 resIdText = R.string.game_mode_replay;
+                imageView.setEnabled(true);
+                textView.setEnabled(true);
                 break;
 
             default:
@@ -75,27 +87,6 @@ public class ModePageFragment extends PageFragment {
 
         //assign the appropriate instruction text
         textView.setText(resIdText);
-
-
-        //enable / disable
-        switch (getPageNumber()) {
-
-            case 3:
-                if (ONLINE) {
-                    imageView.setEnabled(true);
-                    textView.setEnabled(true);
-                } else {
-                    imageView.setEnabled(false);
-                    textView.setEnabled(false);
-                }
-                break;
-
-            default:
-                imageView.setEnabled(true);
-                textView.setEnabled(true);
-                break;
-
-        }
 
         // Inflate the layout for this fragment
         return view;

@@ -48,8 +48,8 @@ public class Game implements IGame {
     private final GameActivity activity;
 
     //our players
-    private Player player1;
-    private Player player2;
+    protected Player player1;
+    protected Player player2;
 
     //our texture materials for the pieces
     protected Material textureWhite;
@@ -94,7 +94,7 @@ public class Game implements IGame {
     private boolean player1Turn = true;
 
     //list of promotional pieces when a pawn reaches the end
-    private List<Piece> promotions;
+    protected List<Piece> promotions;
 
     //current list in our replay
     public static int INDEX_REPLAY = 0;
@@ -286,108 +286,6 @@ public class Game implements IGame {
         PlayerVars.STATUS = Status.Interrupt;
     }
 
-    public void recycleModels() {
-
-        if (textureWhite != null) {
-            textureWhite.unbindTextures();
-            textureWhite = null;
-        }
-
-        if (textureWood != null) {
-            textureWood.unbindTextures();
-            textureWood = null;
-        }
-
-        if (textureHighlight != null) {
-            textureHighlight.unbindTextures();
-            textureHighlight = null;
-        }
-
-        if (texturePosition != null) {
-            texturePosition.unbindTextures();
-            texturePosition = null;
-        }
-
-        if (positions != null) {
-            for (int i = 0; i < positions.size(); i++) {
-                if (positions.get(i) != null && positions.get(i).getObject3D() != null) {
-                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(positions.get(i).getObject3D());
-
-                    if (positions.get(i).getObject3D().getMaterial() != null)
-                        positions.get(i).getObject3D().setMaterial(null);
-
-                    positions.get(i).getObject3D().destroy();
-                    positions.get(i).setObject3D(null);
-                }
-            }
-
-            positions.clear();
-            positions = null;
-        }
-
-        if (this.promotions != null) {
-            for (int i = 0; i < this.promotions.size(); i++) {
-                if (this.promotions.get(i) != null) {
-                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(this.promotions.get(i).getObject3D());
-                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(this.promotions.get(i).getObject3D());
-                    this.promotions.get(i).dispose();
-                    this.promotions.set(i, null);
-                }
-            }
-
-            this.promotions.clear();
-            this.promotions = null;
-        }
-
-        if (this.player1 != null) {
-
-            for (int i = 0; i < this.player1.getPieceCount(); i++) {
-
-                //get the current piece
-                Piece piece = this.player1.getPiece(i, true);
-
-                if (piece == null)
-                    continue;
-
-                //remove previous, if it exists
-                if (piece.getObject3D() != null) {
-                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
-                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
-
-                    if (piece.getObject3D().getMaterial() != null)
-                        piece.getObject3D().setMaterial(null);
-
-                    piece.getObject3D().destroy();
-                    piece.setObject3D(null);
-                }
-            }
-        }
-
-        if (this.player2 != null) {
-
-            for (int i = 0; i < this.player2.getPieceCount(); i++) {
-
-                //get the current piece
-                Piece piece = this.player2.getPiece(i, true);
-
-                if (piece == null)
-                    continue;
-
-                //remove previous, if it exists
-                if (piece.getObject3D() != null) {
-                    getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
-                    getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
-
-                    if (piece.getObject3D().getMaterial() != null)
-                        piece.getObject3D().setMaterial(null);
-
-                    piece.getObject3D().destroy();
-                    piece.setObject3D(null);
-                }
-            }
-        }
-    }
-
     @Override
     public void onResume() {
 
@@ -473,9 +371,6 @@ public class Game implements IGame {
         } catch (Exception e) {
             UtilityHelper.handleException(e);
         }
-
-        //track game started in analytics
-        //AnalyticsHelper.trackPuzzleStarted(getActivity(), this);
     }
 
     @Override
@@ -603,60 +498,24 @@ public class Game implements IGame {
     @Override
     public void dispose() {
 
+        GameHelper.recycleModels(this);
+
         if (this.player1 != null)
             this.player1.dispose();
         if (this.player2 != null)
             this.player2.dispose();
-        if (this.textureWhite != null)
-            this.textureWhite.unbindTextures();
-        if (this.textureWood != null)
-            this.textureWood.unbindTextures();
-        if (this.textureHighlight != null)
-            this.textureHighlight.unbindTextures();
-        if (this.textureValid != null)
-            this.textureValid.unbindTextures();
-        if (this.texturePosition != null)
-            this.texturePosition.unbindTextures();
         if (this.selection != null)
             this.selection.destroy();
         if (this.selected != null)
             this.selected.dispose();
-        if (this.promotions != null) {
-            for (int i = 0; i < promotions.size(); i++) {
-                if (this.promotions.get(i) != null)
-                    this.promotions.get(i).dispose();
-
-                this.promotions.set(i, null);
-            }
-
-            this.promotions.clear();
-        }
-        if (this.positions != null) {
-            for (int i = 0; i < positions.size(); i++) {
-                if (this.positions.get(i) != null)
-                    this.positions.get(i).dispose();
-
-                this.positions.set(i, null);
-            }
-
-            this.positions.clear();
-        }
-
-
         if (this.history != null)
             this.history.clear();
 
         this.positions = null;
         this.player1 = null;
         this.player2 = null;
-        this.textureWhite = null;
-        this.textureWood = null;
-        this.textureHighlight = null;
-        this.textureValid = null;
-        this.texturePosition = null;
         this.selection = null;
         this.selected = null;
-        this.promotions = null;
         this.history = null;
     }
 

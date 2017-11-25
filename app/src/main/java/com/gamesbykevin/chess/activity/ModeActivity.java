@@ -76,10 +76,6 @@ public class ModeActivity extends PagerActivity {
         //flag multi-player false
         MULTI_PLAYER = false;
 
-        //disable view after we click it
-        if (view != null)
-            view.setEnabled(false);
-
         if (CURRENT_PAGE == PAGES - 1) {
 
             //start replay activity

@@ -17,8 +17,10 @@ import com.gamesbykevin.chess.piece.Piece;
 import com.gamesbykevin.chess.piece.PieceHelper;
 import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerVars;
+import com.gamesbykevin.chess.services.AchievementHelper;
 import com.gamesbykevin.chess.services.BaseGameActivity;
 import com.gamesbykevin.chess.services.BaseGameUtils;
+import com.gamesbykevin.chess.services.EventHelper;
 import com.gamesbykevin.chess.util.UtilityHelper;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -263,7 +265,8 @@ public class MultiplayerActivity extends BaseGameActivity {
                         onDisconnected();
                     }
                 }
-        });
+            }
+        );
     }
 
     void switchToScreen(int screenId) {
@@ -538,7 +541,8 @@ public class MultiplayerActivity extends BaseGameActivity {
             mRoomId = null;
 
         //displayMessage(R.string.player_left_game);
-        getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
+        if (getGame() != null && getGame().getActivity() != null)
+            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
     }
 
     private RoomStatusUpdateCallback mRoomStatusUpdateCallback = new RoomStatusUpdateCallback() {
@@ -574,7 +578,9 @@ public class MultiplayerActivity extends BaseGameActivity {
                 mRoomId = null;
 
             displayMessage(R.string.player_left_game);
-            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
+
+            if (getGame() != null && getGame().getActivity() != null)
+                getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
         }
 
         // We treat most of the room update callbacks in the same way: we update our list of
@@ -614,7 +620,9 @@ public class MultiplayerActivity extends BaseGameActivity {
                 mRoomId = null;
 
             displayMessage(R.string.player_left_game);
-            getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
+
+            if (getGame() != null && getGame().getActivity() != null)
+                getGame().getActivity().setScreen(R.id.layoutGameMultiplayer, true);
         }
 
         @Override
@@ -799,6 +807,16 @@ public class MultiplayerActivity extends BaseGameActivity {
 
                     //display the game state
                     GameHelper.displayState(getGame(), null);
+
+                    //updates if game is over
+                    if (PlayerVars.isGameover()) {
+
+                        //track our events
+                        EventHelper.trackEvents(getGame().getActivity());
+
+                        //track our achievements
+                        AchievementHelper.trackAchievements(getGame().getActivity());
+                    }
                 }
             }
         }
@@ -992,7 +1010,7 @@ public class MultiplayerActivity extends BaseGameActivity {
                 errorString = getString(R.string.match_error_locally_modified);
                 break;
             default:
-                errorString = getString(R.string.unexpected_status, GamesClientStatusCodes.getStatusCodeString(status));
+                errorString = getString(R.string.unexpected_status) + GamesClientStatusCodes.getStatusCodeString(status);
                 break;
         }
 

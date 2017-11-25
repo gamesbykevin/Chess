@@ -112,9 +112,6 @@ public class PagerActivity extends BaseGameActivity {
 
         //make sure the current page is displayed
         getCustomPager().setCurrentItem(CURRENT_PAGE);
-
-        //re-enable any disabled children
-        enableChildren((ViewGroup)findViewById(R.id.customPager));
     }
 
     @Override

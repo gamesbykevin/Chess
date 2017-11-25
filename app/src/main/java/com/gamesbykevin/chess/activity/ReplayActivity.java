@@ -3,10 +3,13 @@ package com.gamesbykevin.chess.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.gamesbykevin.chess.R;
 import com.gamesbykevin.chess.game.Game;
 import com.gamesbykevin.chess.game.GameHelper;
+import com.gamesbykevin.chess.services.AchievementHelper;
+import com.gamesbykevin.chess.services.EventHelper;
 
 import static com.gamesbykevin.chess.activity.GameActivity.getGame;
 
@@ -65,6 +68,9 @@ public class ReplayActivity extends PagerActivity {
 
         //display the pager icons
         findViewById(R.id.listPageContainer).setVisibility(View.VISIBLE);
+
+        //re-enable any disabled children
+        enableChildren((ViewGroup)findViewById(R.id.customPager));
     }
 
     @Override
@@ -88,17 +94,30 @@ public class ReplayActivity extends PagerActivity {
 
         if (SAVE) {
 
+            //achievements
+            AchievementHelper.trackAchievementSaveReplay(this);
+
             //determine where to save our game
             boolean result = GameHelper.saveHistory(getGame(), CURRENT_PAGE);
 
             //notify user, if replay was saved
-            if (result)
+            if (result) {
                 displayMessage(R.string.save_replay_success);
+
+                //update event
+                EventHelper.trackEventGameSavedReplay(this);
+            }
 
             //go back to mode activity
             startActivity(new Intent(this, ModeActivity.class));
 
         } else {
+
+            //achievements
+            AchievementHelper.trackAchievementWatchReplay(this);
+
+            //update event
+            EventHelper.trackEventGameWatchReplay(this);
 
             //flag we want to watch a replay
             Game.REPLAY = true;

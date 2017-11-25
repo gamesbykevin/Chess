@@ -10,6 +10,8 @@ import com.gamesbykevin.chess.players.Player;
 import com.gamesbykevin.chess.players.PlayerHelper;
 import com.gamesbykevin.chess.players.PlayerHelper.Move;
 import com.gamesbykevin.chess.players.PlayerVars;
+import com.gamesbykevin.chess.services.AchievementHelper;
+import com.gamesbykevin.chess.services.EventHelper;
 import com.gamesbykevin.chess.util.UtilityHelper;
 
 import org.rajawali3d.Object3D;
@@ -285,6 +287,16 @@ public class GameHelper {
         //display state
         displayState(game, opponent);
 
+        //updates if game is over
+        if (PlayerVars.isGameover()) {
+
+            //track our events
+            EventHelper.trackEvents(game.getActivity());
+
+            //track our achievements
+            AchievementHelper.trackAchievements(game.getActivity());
+        }
+
         //we are at our destination, de-select the chess piece
         game.deselect();
 
@@ -411,6 +423,7 @@ public class GameHelper {
 
                 //rotate east
                 piece.getObject3D().rotate(Vector3.Z, 1);
+
             } else {
 
 
@@ -634,6 +647,121 @@ public class GameHelper {
 
             //assign the location
             obj.setPosition(x, y, z);
+        }
+    }
+
+    protected static void recycleModels(Game game) {
+
+        if (game.textureWhite != null) {
+            game.textureWhite.unbindTextures();
+            game.textureWhite = null;
+        }
+
+        if (game.textureWood != null) {
+            game.textureWood.unbindTextures();
+            game.textureWood = null;
+        }
+
+        if (game.textureHighlight != null) {
+            game.textureHighlight.unbindTextures();
+            game.textureHighlight = null;
+        }
+
+        if (game.textureValid != null) {
+            game.textureValid.unbindTextures();
+            game.textureValid = null;
+        }
+
+        if (game.texturePosition != null) {
+            game.texturePosition.unbindTextures();
+            game.texturePosition = null;
+        }
+
+        if (game.positions != null) {
+            for (int i = 0; i < game.positions.size(); i++) {
+                if (game.positions.get(i) != null && game.positions.get(i).getObject3D() != null) {
+                    if (game.getActivity().getSurfaceView() != null && game.getActivity().getSurfaceView().getRenderer() != null)
+                        game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(game.positions.get(i).getObject3D());
+
+                    if (game.positions.get(i).getObject3D().getMaterial() != null)
+                        game.positions.get(i).getObject3D().setMaterial(null);
+
+                    game.positions.get(i).getObject3D().destroy();
+                    game.positions.get(i).setObject3D(null);
+                }
+            }
+
+            game.positions.clear();
+            game.positions = null;
+        }
+
+        if (game.promotions != null) {
+            for (int i = 0; i < game.promotions.size(); i++) {
+                if (game.promotions.get(i) != null) {
+                    if (game.getActivity().getSurfaceView() != null && game.getActivity().getSurfaceView().getRenderer() != null) {
+                        game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(game.promotions.get(i).getObject3D());
+                        game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(game.promotions.get(i).getObject3D());
+                    }
+
+                    game.promotions.get(i).dispose();
+                    game.promotions.set(i, null);
+                }
+            }
+
+            game.promotions.clear();
+            game.promotions = null;
+        }
+
+        if (game.player1 != null) {
+
+            for (int i = 0; i < game.player1.getPieceCount(); i++) {
+
+                //get the current piece
+                Piece piece = game.player1.getPiece(i, true);
+
+                if (piece == null)
+                    continue;
+
+                //remove previous, if it exists
+                if (piece.getObject3D() != null) {
+                    if (game.getActivity().getSurfaceView() != null && game.getActivity().getSurfaceView().getRenderer() != null) {
+                        game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
+                        game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
+                    }
+
+                    if (piece.getObject3D().getMaterial() != null)
+                        piece.getObject3D().setMaterial(null);
+
+                    piece.getObject3D().destroy();
+                    piece.setObject3D(null);
+                }
+            }
+        }
+
+        if (game.player2 != null) {
+
+            for (int i = 0; i < game.player2.getPieceCount(); i++) {
+
+                //get the current piece
+                Piece piece = game.player2.getPiece(i, true);
+
+                if (piece == null)
+                    continue;
+
+                //remove previous, if it exists
+                if (piece.getObject3D() != null) {
+                    if (game.getActivity().getSurfaceView() != null && game.getActivity().getSurfaceView().getRenderer() != null) {
+                        game.getActivity().getSurfaceView().getRenderer().getCurrentScene().removeChild(piece.getObject3D());
+                        game.getActivity().getSurfaceView().getRenderer().getObjectPicker().unregisterObject(piece.getObject3D());
+                    }
+
+                    if (piece.getObject3D().getMaterial() != null)
+                        piece.getObject3D().setMaterial(null);
+
+                    piece.getObject3D().destroy();
+                    piece.setObject3D(null);
+                }
+            }
         }
     }
 }

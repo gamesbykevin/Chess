@@ -51,7 +51,7 @@
     <string name="google_play_auto_disabled">Google Login: Off</string>
 
     <!-- different difficulties -->
-    <string-array name="difficulty_arrays">
+    <string-array name="difficulty_arrays" translatable="false">
         <item>SKILL: EASY</item>
         <item>SKILL: MEDIUM</item>
         <item>SKILL: HARD</item>
@@ -86,7 +86,6 @@
     <string name="game_mode_single_player">Human vs Computer</string>
     <string name="game_mode_single_player_timed">Human vs Computer (Speed 5 minutes)</string>
     <string name="game_mode_two_player_offline">Human vs Human (Offline)</string>
-    <string name="game_mode_two_player_online">Human vs Human (Online)</string>
     <string name="game_mode_two_player_online_timed">Human vs Human (Online, Speed 5 minutes)</string>
     <string name="game_mode_two_player_online_timed_disabled">Human vs Human (Online) "Disabled"</string>
 
@@ -116,13 +115,13 @@
     <string name="game_problem">An error occurred while starting the game. Please try again.</string>
     <string name="is_inviting_you">invited you to a game!</string>
     <string name="signin_other_error">There was an issue with sign in. Please try again later.</string>
-    <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
+    <string translatable="false" name="status_exception_error">%1$s (status %2$d). %3$s.</string>
     <string name="status_multiplayer_error_not_trusted_tester">Anyone you invite must be a trusted tester</string>
     <string name="match_error_already_rematched">This rematch has already been started!</string>
     <string name="client_reconnect_required">Games client reconnect required</string>
     <string name="network_error_operation_failed">Network error: Operation failed</string>
     <string name="internal_error">Internal error</string>
-    <string name="unexpected_status">Unexpected status: %1$s</string>
+    <string name="unexpected_status">Unexpected status: </string>
     <string name="match_error_inactive_match">This match is inactive.</string>
     <string name='match_error_locally_modified'>This match has locally-modified data.  This operation cannot be performed until the match is sent to the server.</string>
 

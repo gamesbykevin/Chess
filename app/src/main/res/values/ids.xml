@@ -2,8 +2,10 @@
 <resources>
 
     <!-- used by view pager -->
+    <!--
     <item type="id" name="action_next" />
     <item type="id" name="action_previous" />
+    -->
 
     <!-- package_name -->
     <string name="package_name" translatable="false">com.gamesbykevin.chess</string>
@@ -11,5 +13,42 @@
     <!-- application id -->
     <string name="app_id" translatable="false">883343446197</string>
 
+    <!-- beat the ai -->
+    <string name="achievement_beat_the_ai_easy" translatable="false">CgkItaH92toZEAIQAQ</string>
+    <string name="achievement_beat_the_ai_medium" translatable="false">CgkItaH92toZEAIQAg</string>
+    <string name="achievement_beat_the_ai_hard" translatable="false">CgkItaH92toZEAIQAw</string>
+    <string name="achievement_beat_the_ai_harder" translatable="false">CgkItaH92toZEAIQBA</string>
+
+    <!-- played games -->
+    <string name="achievement_play_1_game_vs_ai" translatable="false">CgkItaH92toZEAIQBQ</string>
+    <string name="achievement_play_10_games_vs_ai" translatable="false">CgkItaH92toZEAIQBg</string>
+    <string name="achievement_play_50_games_vs_ai" translatable="false">CgkItaH92toZEAIQBw</string>
+    <string name="achievement_play_100_games_vs_ai" translatable="false">CgkItaH92toZEAIQCA</string>
+    <string name="achievement_play_1_game_online" translatable="false">CgkItaH92toZEAIQCQ</string>
+    <string name="achievement_play_10_games_online" translatable="false">CgkItaH92toZEAIQCg</string>
+    <string name="achievement_play_50_games_online" translatable="false">CgkItaH92toZEAIQCw</string>
+    <string name="achievement_play_100_games_online" translatable="false">CgkItaH92toZEAIQDA</string>
+
+    <!-- games won -->
+    <string name="achievement_win_1_game_vs_ai" translatable="false">CgkItaH92toZEAIQDQ</string>
+    <string name="achievement_win_10_games_vs_ai" translatable="false">CgkItaH92toZEAIQDg</string>
+    <string name="achievement_win_50_games_vs_ai" translatable="false">CgkItaH92toZEAIQDw</string>
+    <string name="achievement_win_100_games_vs_ai" translatable="false">CgkItaH92toZEAIQEA</string>
+    <string name="achievement_win_1_game_online" translatable="false">CgkItaH92toZEAIQEQ</string>
+    <string name="achievement_win_10_games_online" translatable="false">CgkItaH92toZEAIQEg</string>
+    <string name="achievement_win_50_games_online" translatable="false">CgkItaH92toZEAIQEw</string>
+    <string name="achievement_win_100_games_online" translatable="false">CgkItaH92toZEAIQFA</string>
+
+    <!-- replays -->
+    <string name="achievement_save_a_replay" translatable="false">CgkItaH92toZEAIQFQ</string>
+    <string name="achievement_watch_a_replay" translatable="false">CgkItaH92toZEAIQFg</string>
+
+    <!-- keep track of global stats -->
+    <string name="event_global_games_played_normal_vs_ai" translatable="false">CgkItaH92toZEAIQFw</string>
+    <string name="event_global_games_played_speed_vs_ai" translatable="false">CgkItaH92toZEAIQGA</string>
+    <string name="event_global_games_played_online" translatable="false">CgkItaH92toZEAIQGQ</string>
+    <string name="event_global_saved_replays" translatable="false">CgkItaH92toZEAIQGg</string>
+    <string name="event_global_watched_replays" translatable="false">CgkItaH92toZEAIQGw</string>
+    <string name="event_global_games_played_total" translatable="false">CgkItaH92toZEAIQHA</string>
 
 </resources>

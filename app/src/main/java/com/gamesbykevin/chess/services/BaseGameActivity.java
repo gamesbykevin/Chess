@@ -2,14 +2,25 @@ package com.gamesbykevin.chess.services;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
 import com.gamesbykevin.chess.activity.BaseActivity;
 import com.gamesbykevin.chess.util.UtilityHelper;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.games.AchievementsClient;
+import com.google.android.gms.games.EventsClient;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.LeaderboardsClient;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import static com.gamesbykevin.chess.util.UtilityHelper.DEBUG;
 
@@ -51,6 +62,10 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
      * Do we skip future login? (this is in case the player does not want to sign in)
      */
     public static boolean BYPASS_LOGIN = false;
+
+    private static final int RC_LEADERBOARD_UI = 9004;
+    private static final int RC_ACHIEVEMENT_UI = 9003;
+    private static final int RC_EVENT_UI = 9002;
 
     /**
      * Constructs a BaseGameActivity with default client (GamesClient)
@@ -94,9 +109,9 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        if (mHelper == null) {
+        if (mHelper == null)
             getGameHelper();
-        }
+
         mHelper.setup(this);
     }
 
@@ -249,7 +264,9 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
 
         //if we are connected, display default achievements ui
         if (getApiClient().isConnected()) {
+
             displayAchievementUI();
+
         } else {
 
             if (DEBUG)
@@ -273,7 +290,7 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
             if (DEBUG)
                 UtilityHelper.logEvent("Displaying achievement ui");
 
-            startActivityForResult(Games.Achievements.getAchievementsIntent(getApiClient()), 1);
+            startActivityForResult(Games.Achievements.getAchievementsIntent(getApiClient()), RC_ACHIEVEMENT_UI);
 
         } else {
 
@@ -297,20 +314,21 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
 
             if (leaderboardId == null || leaderboardId.length() < 1) {
 
-                //start all leader board activity
-                startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(getApiClient()), 1);
+                startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(getApiClient()), RC_LEADERBOARD_UI);
 
             } else {
 
-                Intent intent = Games.Leaderboards.getLeaderboardIntent(
-                    getApiClient(),
-                    leaderboardId,
-                    LeaderboardVariant.TIME_SPAN_ALL_TIME,
-                    LeaderboardVariant.COLLECTION_PUBLIC
-                );
+                startActivityForResult(
 
-                // REQUEST_LEADERBOARD is an arbitrary constant to check for in onActivityResult
-                startActivityForResult(intent, 1);
+                    Games.Leaderboards.getLeaderboardIntent(
+                        getApiClient(),
+                        leaderboardId,
+                        LeaderboardVariant.TIME_SPAN_ALL_TIME,
+                        LeaderboardVariant.COLLECTION_PUBLIC
+                    ),
+
+                    RC_LEADERBOARD_UI
+                );
             }
 
 
@@ -341,14 +359,15 @@ public abstract class BaseGameActivity extends BaseActivity implements GameHelpe
             //if we just came from achievements button and are now signed in, display ui
             displayAchievementUI();
 
-            //flag back false
+            //set flag back to false
             ACCESS_ACHIEVEMENT = false;
 
         } else if (ACCESS_LEADERBOARD) {
 
-            //if we just logged in trying to access leader board display it
+            //if we just logged in trying to access
             displayLeaderboardUI(LEADERBOARD_ID);
 
+            //set flag back to false
             ACCESS_LEADERBOARD = false;
         }
 
