@@ -548,6 +548,11 @@ public class GameActivity extends MultiplayerActivity implements Disposable {
                 //display loading screen
                 setScreen(R.id.layoutLoadingScreen, true);
 
+                //pick random number which will tell us who goes first
+                this.random1 = UtilityHelper.getRandom().nextInt(128);
+                this.random2 = UtilityHelper.getRandom().nextInt(128);
+                this.random3 = UtilityHelper.getRandom().nextInt(128);
+
                 //determine who is going first
                 selectFirstTurn();
 

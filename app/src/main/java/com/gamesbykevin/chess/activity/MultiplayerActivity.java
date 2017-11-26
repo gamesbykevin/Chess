@@ -106,8 +106,8 @@ public class MultiplayerActivity extends BaseGameActivity {
 
     int mCurScreen = -1;
 
-    //random generated number to determine who goes first
-    private int random;
+    //random generated number(s) to determine who goes first
+    protected int random1, random2, random3;
 
     /**
      * Are we playing a multi player game?
@@ -133,9 +133,6 @@ public class MultiplayerActivity extends BaseGameActivity {
 
         // Create the client used to sign in.
         mGoogleSignInClient = GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
-
-        //pick random number which will tell us who goes first
-        this.random = UtilityHelper.getRandom().nextInt(128);
 
         //display main screen
         switchToScreen(R.id.screen_main);
@@ -737,13 +734,34 @@ public class MultiplayerActivity extends BaseGameActivity {
             //parse what we are trying to do
             if (buf[0] == 'S') {
 
-                Log.d(TAG, "Message received: " + (char)buf[0] + "/" + (int)buf[1]);
+                Log.d(TAG, "Message received: " + (char)buf[0] + " - " + (int)buf[1] + "/" + (int)buf[2] + "/" + (int)buf[3]);
 
                 //if we are starting, determine who goes first
-                int tmpRandom = (int)buf[1];
+                int tmpRandom1 = (int)buf[1];
+                int tmpRandom2 = (int)buf[2];
+                int tmpRandom3 = (int)buf[3];
 
-                //if our number is greater than the received number
-                PLAYER_1 = (random > tmpRandom);
+                //if our number is greater than the received number we go first
+                if (random1 > tmpRandom1) {
+                    PLAYER_1 = true;
+                } else if (random1 < tmpRandom1) {
+                    PLAYER_1 = false;
+                } else {
+
+                    if (random2 > tmpRandom2) {
+                        PLAYER_1 = true;
+                    } else if (random2 < tmpRandom2) {
+                        PLAYER_1 = false;
+                    } else {
+
+                        if (random3 > tmpRandom3) {
+                            PLAYER_1 = true;
+                        } else if (random3 < tmpRandom3) {
+                            PLAYER_1 = false;
+                        }
+
+                    }
+                }
 
                 //flag that we have now started
                 STARTED = true;
@@ -923,8 +941,10 @@ public class MultiplayerActivity extends BaseGameActivity {
             //pass 'S' so we know we are starting the game
             mMsgBuf[0] = (byte)'S';
 
-            //pick random number to determine who goes first
-            mMsgBuf[1] = (byte)this.random;
+            //send the random number(s) to determine who goes first
+            mMsgBuf[1] = (byte)this.random1;
+            mMsgBuf[2] = (byte)this.random2;
+            mMsgBuf[3] = (byte)this.random3;
 
             //send message to opponent
             sendReliableMessage(p.getParticipantId());
